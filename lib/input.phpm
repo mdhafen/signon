@@ -1,0 +1,203 @@
+<?php
+define( 'INPUT_NUM', '1' );
+define( 'INPUT_INT', '2' );
+define( 'INPUT_PINT', '3' );
+define( 'INPUT_STR', '4' );
+define( 'INPUT_HTML_NONE', '5' );
+define( 'INPUT_HTML_SOME', '6' );
+define( 'INPUT_HTML_ALL', '7' );
+define( 'INPUT_EMAIL', '8' );
+
+require_once( 'PEAR.php' );  // to check for error
+require_once( 'Mail/RFC822.php' );  // to validate the email address
+
+require_once( 'config.phpm' );
+require_once( 'data.phpm' );
+
+//  Load session data from the database.
+function load_session() {
+    // load $str from db
+    global $config;
+    if ( isset( $config[ 'session_store_db' ] ) && $config[ 'session_store_db' ] == 1 ) {
+        $dbh = db_connect();
+	$query = "SELECT session_data FROM sessions WHERE session_id = :sid";
+	$sth = $dbh->prepare( $query );
+	$sth->bindParam( ':sid', session_id() );
+	$sth->execute();
+
+	$row = $sth->fetch();
+	$str = $row['session_data'];
+
+	$_SESSION = unserialize( base64_decode( $str ) );
+    }
+}
+
+function save_session() {
+    // save $str in db
+    global $config;
+    if ( isset( $config[ 'session_store_db' ] ) && $config[ 'session_store_db' ] == 1 ) {
+        $dbh = db_connect();
+	$query = '';
+	if ( isset( $_SESSION[ 'new_session' ] ) ) {
+	    $query = "INSERT INTO sessions ( session_data, session_id ) VALUES ( :data, :sid )";
+	} else {
+	    $query = "UPDATE session SET session_data = :data WHERE session_id = :sid";
+	}
+
+	$str = $_SESSION;
+	$str = base64_encode( serialize( $str ) );
+
+	$sth = $dbh->prepare( $query );
+	$sth->bindParam( ':data', $str );
+	$sth->bindParam( ':sid', session_id() );
+	$sth->execute();
+    }
+    unset( $_SESSION[ 'new_session' ] );
+}
+
+function destroy_session() {
+    if ( ! session_id() ) { return; }
+
+    global $config;
+    if ( isset( $config[ 'session_store_db' ] ) && $config[ 'session_store_db' ] == 1 ) {
+        $dbh = db_connect();
+	$sth = $dbh->prepare( "DELETE FROM sessions WHERE session_id = :sid" );
+	$sth->bindParam( ':sid', session_id() );
+	$sth->execute();
+    }
+
+    $_SESSION = array();
+    if ( isset( $_COOKIE[ session_name() ] ) ) {
+        setcookie( session_name(), '', time()-3600, '/' );
+    }
+    session_destroy();
+}
+
+// Default input type set here
+function input( $name, $type=INPUT_STR ) {
+	$output = NULL;
+	if ( isset( $_REQUEST[ $name ] ) ) {
+		$output = $_REQUEST[ $name ];
+	}
+
+	if ( isset($output) ) {
+		$output = input_validation( $output, $type );
+	}
+
+	return $output;
+}
+
+function input_validation( $output, $type ) {
+	if ( is_array( $output ) ) {
+		$count = count( $output );
+		$return = array();
+	} else {
+		$count = 1;
+	}
+
+	for ( $i = 0; $i < $count; $i++ ) {
+		$error = 0;
+		if ( is_array( $output ) ) {
+	  		$value = &$output[$i];
+		} else {
+			$value = &$output;
+		}
+
+		if ( $type == INPUT_NUM ) {
+			if ( ! is_numeric( $value ) ) { $error++; }
+		}
+		if ( $type == INPUT_INT ) {
+			if ( ! is_numeric( $value ) ) { $error++; }
+			if ( ! is_int( $value +0 ) ) { $error++; }
+		}
+		if ( $type == INPUT_PINT ) {
+			if ( ! ctype_digit( $value ) ) { $error++; }
+		}
+		if ( $type == INPUT_STR ) {
+			if ( ! is_string( $value ) ) { $error++; }
+		}
+		if ( $type == INPUT_HTML_NONE ) {
+			if ( ! $error ) {
+			if ( ! is_string( $value ) ) { $error++; }
+				$value = strip_tags( clean_string( $value ) );	
+				$value = htmlspecialchars( $value );
+			}
+		}
+		if ( $type == INPUT_HTML_SOME ) {
+			if ( ! is_string( $value ) ) { $error++; }
+			if ( ! $error ) {
+				$parser =& new HTML_Safe();
+				$value = clean_string( $value );
+				$value = $parser->parse( $value );
+				$value = htmlspecialchars( $value );
+			}
+		}
+		if ( $type == INPUT_HTML_ALL ) {
+			if ( ! $error ) {
+			if ( ! is_string( $value ) ) { $error++; }
+				$value = clean_string( $value );
+				$value = htmlspecialchars( $value );
+			}
+		}
+		if ( $type == INPUT_EMAIL ) {
+			$valid = 0;
+			$str = Mail_RFC822::parseAddressList( $value, '', FALSE, TRUE );
+			if ( PEAR::isError( $str ) ) {
+				$error++;
+			}
+		}
+		if ( $error ) {
+			$value = '';
+		}
+
+		if ( is_array( $output ) ) {
+			$return[] = $value;
+		}
+		else {
+			$return = $value;
+		}
+	}
+	return $return;
+}
+
+function clean_string( $string = '' ) {
+	// First fix funky 'Microsoft Quotes', etc from Windows CP-1252
+	// copied from http://stackoverflow.com/questions/20025030/convert-all-types-of-smart-quotes-with-php
+	$normalization_map = array(
+		"\xC2\x80" => "\xE2\x82\xAC", // U+20AC Euro sign
+		"\xC2\x82" => "\xE2\x80\x9A", // U+201A single low-9 quotation mark
+		"\xC2\x83" => "\xC6\x92",     // U+0192 latin small letter f with hook
+		"\xC2\x84" => "\xE2\x80\x9E", // U+201E double low-9 quotation mark
+		"\xC2\x85" => "\xE2\x80\xA6", // U+2026 horizontal ellipsis
+		"\xC2\x86" => "\xE2\x80\xA0", // U+2020 dagger
+		"\xC2\x87" => "\xE2\x80\xA1", // U+2021 double dagger
+		"\xC2\x88" => "\xCB\x86",     // U+02C6 modifier letter circumflex accent
+		"\xC2\x89" => "\xE2\x80\xB0", // U+2030 per mille sign
+		"\xC2\x8A" => "\xC5\xA0",     // U+0160 latin capital letter s with caron
+		"\xC2\x8B" => "\xE2\x80\xB9", // U+2039 single left-pointing angle quotation mark
+		"\xC2\x8C" => "\xC5\x92",     // U+0152 latin capital ligature oe
+		"\xC2\x8E" => "\xC5\xBD",     // U+017D latin capital letter z with caron
+		"\xC2\x91" => "\xE2\x80\x98", // U+2018 left single quotation mark
+		"\xC2\x92" => "\xE2\x80\x99", // U+2019 right single quotation mark
+		"\xC2\x93" => "\xE2\x80\x9C", // U+201C left double quotation mark
+		"\xC2\x94" => "\xE2\x80\x9D", // U+201D right double quotation mark
+		"\xC2\x95" => "\xE2\x80\xA2", // U+2022 bullet
+		"\xC2\x96" => "\xE2\x80\x93", // U+2013 en dash
+		"\xC2\x97" => "\xE2\x80\x94", // U+2014 em dash
+		"\xC2\x98" => "\xCB\x9C",     // U+02DC small tilde
+		"\xC2\x99" => "\xE2\x84\xA2", // U+2122 trade mark sign
+		"\xC2\x9A" => "\xC5\xA1",     // U+0161 latin small letter s with caron
+		"\xC2\x9B" => "\xE2\x80\xBA", // U+203A single right-pointing angle quotation mark
+		"\xC2\x9C" => "\xC5\x93",     // U+0153 latin small ligature oe
+		"\xC2\x9E" => "\xC5\xBE",     // U+017E latin small letter z with caron
+		"\xC2\x9F" => "\xC5\xB8",     // U+0178 latin capital letter y with diaeresis
+	);
+	$chr = array_keys  ($normalization_map);
+	$rpl = array_values($normalization_map);
+	$string = str_replace($chr, $rpl, $string);
+
+	$string = mb_convert_encoding($string, 'UTF-8', 'UTF-8,Windows-1252,ISO-8859-15');
+	$string = html_entity_decode( $string, ENT_QUOTES, 'UTF-8' );
+	return $string;
+}
+?>

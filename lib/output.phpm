@@ -1,0 +1,90 @@
+<?php
+require_once( 'config.phpm' );
+require_once( 'input.phpm' );
+require_once( 'security.phpm' );
+
+function redirect( $target = "" ) {
+	global $config;
+	if ( $target ) {
+		if ( ! preg_match( '/^http/', $target ) ) {
+			$target = $config['base_url'] . $target;
+		}
+		header( "Location: $target" );
+	}
+}
+
+function output( $data, $filename, $xml = 0 ) {
+	$output = '';
+
+	$output = output_build( $data, $filename );
+	output_transmit( $output, $xml );
+}
+
+function output_build( $data, $filename ) {
+	global $config;
+	$output = '';
+
+	$data['_config'] = $config;
+	if ( ! empty( $_SESSION[ 'loggedin_user' ] ) ) {
+		$data['_session']['username'] = $_SESSION[ 'loggedin_user' ][ 'username' ];
+	}
+	else {
+		$data['_session']['username'] = '';
+	}
+
+	foreach ( (array) get_authorizations() as $perm ) {
+		$data['_session']["CAN_$perm"] = $perm;
+	}
+
+	if ( $filename ) {
+		$filename = $config['base_dir'] .'/htdocs/'. $filename;
+
+		if ( ! file_exists( $filename ) ) {
+			foreach ( array( 'php', 'tmpl', 'html', 'htm' ) as $ext ) {
+				if ( file_exists( "$filename.$ext" ) ) {
+					$filename .= ".". $ext;
+					break;
+				}
+			}
+		}
+
+		if ( ! is_readable( $filename ) ) {
+			print "Couldn't read template file for output: $filename";
+			return;
+		}
+
+	}
+
+	return array( $data, $filename );
+}
+
+function output_transmit( $output, $xml ) {
+	if ( ! $output ) { return; }
+
+	global $data;
+	$data = $output[0];
+	$filename = $output[1];
+
+	if ( $xml ) {
+		$type = 'application/xml';
+	} else {
+		$type = 'text/html';
+	}
+	header( "Content-type: $type" );
+
+	if ( $filename ) {
+		include_once( $filename );
+	}
+	else if ( isset( $data ) && ! is_array( $data ) ) {
+		// read first couple lines ( up to <html>? ) to guess type?
+		if ( preg_match( '/^[\s\v]*<\?xml.*?>[\s\v]*(?:<!doctype.*?>[\s\v]*)?(?!<html.*?>/is', $data ) ) {
+			header( "Content-type: application/xml" );
+		}
+		print $data;
+	}
+	else {
+		header( "HTTP/1.1 500 Internal Server Error" );
+		print "<html><body>Page could not be generated.  Sorry.</body></html>";
+	}
+}
+?>

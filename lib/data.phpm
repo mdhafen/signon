@@ -1,0 +1,116 @@
+<?php
+include_once( 'config.phpm' );
+//require PDO;
+
+$dbh = '';
+$ldap = '';
+
+function db_connect() {
+	global $dbh, $config;
+
+	if ( ! $dbh ) {
+		$settings = $config['database'];
+		$engine = $settings['engine'];
+		$host = $settings['host'];
+		$schema = $settings['schema'];
+		$port = ( $settings['port'] ) ? ";port=$settings[port]" : "";
+		$dsn = "$engine:host=$host$port;dbname=$schema";
+		try {
+			$dbh = new PDO( $dsn, $settings['user'], $settings['passwd'] );
+		} catch ( PDOException $e ) {
+			print "Couldn't connect to database: ". $e->getMessage();
+			die();
+		}
+		$dbh->setAttribute( PDO::ATTR_CASE, PDO::CASE_NATURAL );
+	}
+	return $dbh;
+}
+
+function do_ldap_connect( $userdn = '', $passwd = '' ) {
+	global $ldap, $config;
+
+	if ( empty( $userdn ) ) {
+		$userdn = $config['ldap']['userdn'];
+		$passwd = $config['ldap']['passwd'];
+
+		if ( ! empty( $ldap ) ) {
+			$set = ldap_quick_search( $ldap, $config['ldap']['base'], "($config[ldap][userdn])" );
+			if ( $set ) {
+				return $ldap;
+			}
+		}
+
+		$ldap = ldap_connect( $config['ldap']['server'] );
+		ldap_set_option( $ldap, LDAP_OPT_PROTOCOL_VERSION, 3 );
+		ldap_set_option( $ldap, LDAP_OPT_REFERRALS, false );
+		ldap_set_option( $ldap, LDAP_OPT_RESTART, true );
+		ldap_set_option( $ldap, LDAP_OPT_NETWORK_TIMEOUT, 30 );
+	}
+
+	ldap_bind( $ldap, $userdn, $passwd );
+
+	return $ldap;
+}
+
+function ldap_quick_search( $filter = array('objectclass' => '*'), $attrs = array(), $scope = 2 ) {
+	global $config, $ldap;
+	$results = array();
+
+	$filter_str = "";
+	foreach ( $filter as $attr => $value ) {
+		$filter_str .= "($attr=$value)";
+	}
+	if ( count($filter) > 1 ) {
+		$filter_str = "(&$filter_str)";
+	}
+
+	$base = $config['ldap']['base'];
+
+	$paged_cookie = '';
+	do {
+		ldap_control_paged_result( $ldap, 100, false, $paged_cookie );
+		if ( $scope = 0 ) {
+			$search = ldap_read( $ldap, $base, $filter_str, $attrs );
+		}
+		else if ( $scope = 1 ) {
+			$search = ldap_list( $ldap, $base, $filter_str, $attrs );
+		}
+		else {
+			$search = ldap_search( $ldap, $base, $filter_str, $attrs );
+		}
+		if ( empty($search) ) {
+			return $results;
+		}
+
+		$entry = ldap_first_entry( $ldap, $search );
+		if ( $entry ) {
+			do {
+				$result = array( 'dn' => ldap_get_dn( $ldap, $entry ) );
+				$attribs = ldap_get_attributes( $ldap, $entry );
+				for ( $i = 0; $i < $attributes['count']; $i++) {
+					$attr_name = $attribs[$i];
+					$values = array();
+					for( $j = 0; $j < $attribs[$attr_name]['count']; $j++ ) {
+						$values[] = $attribs[$attr_name][$j];
+					}
+					$result[ $attr_name ] = $values;
+				}
+				$results[] = $result;
+			} while ( $entry = ldap_next_entry( $ldap, $entry ) );
+		}
+		ldap_control_paged_result_response( $ldap, $search, $paged_cookie );
+	} while ( $paged_cookie !== null && $paged_cookie != '' );
+
+	return $results;
+}
+
+function stripslashes_array( $array ) {
+  if ( ! is_array( $array ) ) { return $array; }
+
+  foreach ( $array as &$value ) {
+    $value = stripslashes( $value );
+  }
+  return $array;
+}
+
+?>

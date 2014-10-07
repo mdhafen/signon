@@ -1,0 +1,45 @@
+<?php
+
+require_once( 'data.phpm' );
+
+function user_by_userid( $userid ) {
+  $dbh = db_connect();
+  $query = "SELECT * FROM user WHERE userid = :uid";
+  $sth = $dbh->prepare( $query );
+  $sth->bindParam( ':uid', $userid );
+  $sth->execute();
+
+  $row = $sth->fetch();
+  $row = stripslashes_array( $row );
+
+  return array(
+	       'userid' => $row['userid'],
+	       'username' => $row['username'],
+	       'role' => $row['role'],
+	       'salt' => $row['salt'],
+	       'password' => $row['password'],
+	       'locationid' => $row['locationid'],
+	       );
+}
+
+function user_by_username( $username ) {
+  $dbh = db_connect();
+  $query = "SELECT * FROM user WHERE username = :username";
+  $sth = $dbh->prepare( $query );
+  $sth->bindParam( ':username', $username );
+  $sth->execute();
+
+  $row = $sth->fetch();
+  $row = stripslashes_array( $row );
+
+  return array(
+	       'userid' => $row['userid'],
+	       'username' => $row['username'],
+	       'role' => $row['role'],
+	       'salt' => $row['salt'],
+	       'password' => $row['password'],
+	       'locationid' => $row['locationid'],
+	       );
+}
+
+?>
