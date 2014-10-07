@@ -34,10 +34,8 @@ function do_ldap_connect( $userdn = '', $passwd = '' ) {
 		$passwd = $config['ldap']['passwd'];
 
 		if ( ! empty( $ldap ) ) {
-			$parts = explode( ',', $config['ldap']['userdn'] );
-			$parts = explode( '=', $parts[0] );
-			$set = ldap_quick_search( array( $parts[0] => $parts[1] ) );
-			if ( $set ) {
+			$search = @ldap_read( $ldap, $config['ldap']['userdn'], '(objectClass=*)' );
+			if ( $search ) {
 				return $ldap;
 			}
 		}
