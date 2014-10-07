@@ -34,7 +34,9 @@ function do_ldap_connect( $userdn = '', $passwd = '' ) {
 		$passwd = $config['ldap']['passwd'];
 
 		if ( ! empty( $ldap ) ) {
-			$set = ldap_quick_search( $ldap, $config['ldap']['base'], "($config[ldap][userdn])" );
+			$parts = explode( ',', $config['ldap']['userdn'] );
+			$parts = explode( '=', $parts[0] );
+			$set = ldap_quick_search( array( $parts[0] => $parts[1] ) );
 			if ( $set ) {
 				return $ldap;
 			}
@@ -52,7 +54,7 @@ function do_ldap_connect( $userdn = '', $passwd = '' ) {
 	return $ldap;
 }
 
-function ldap_quick_search( $filter = array('objectclass' => '*'), $attrs = array(), $scope = 2 ) {
+function ldap_quick_search( $filter = array('objectclass' => '*'), $attrs = array('uid','cn'), $scope = 2, $base = '' ) {
 	global $config, $ldap;
 	$results = array();
 
@@ -64,15 +66,17 @@ function ldap_quick_search( $filter = array('objectclass' => '*'), $attrs = arra
 		$filter_str = "(&$filter_str)";
 	}
 
-	$base = $config['ldap']['base'];
+	if ( empty($base) ) {
+		$base = $config['ldap']['base'];
+	}
 
 	$paged_cookie = '';
 	do {
 		ldap_control_paged_result( $ldap, 100, false, $paged_cookie );
-		if ( $scope = 0 ) {
+		if ( $scope == 0 ) {
 			$search = ldap_read( $ldap, $base, $filter_str, $attrs );
 		}
-		else if ( $scope = 1 ) {
+		else if ( $scope == 1 ) {
 			$search = ldap_list( $ldap, $base, $filter_str, $attrs );
 		}
 		else {
@@ -87,7 +91,7 @@ function ldap_quick_search( $filter = array('objectclass' => '*'), $attrs = arra
 			do {
 				$result = array( 'dn' => ldap_get_dn( $ldap, $entry ) );
 				$attribs = ldap_get_attributes( $ldap, $entry );
-				for ( $i = 0; $i < $attributes['count']; $i++) {
+				for ( $i = 0; $i < $attribs['count']; $i++) {
 					$attr_name = $attribs[$i];
 					$values = array();
 					for( $j = 0; $j < $attribs[$attr_name]['count']; $j++ ) {
@@ -102,6 +106,26 @@ function ldap_quick_search( $filter = array('objectclass' => '*'), $attrs = arra
 	} while ( $paged_cookie !== null && $paged_cookie != '' );
 
 	return $results;
+}
+
+function ldap_get_next_SID() {
+	$sid = 0;
+	$prefix = '';
+	$set = ldap_quick_search( array('objectClass'=>'sambaSamAccount'), array('sambaSID') );
+	foreach ( $set as $user ) {
+		$attr = $user['sambaSID'][0];
+		$pos = strrpos( $attr, '-' );
+		$this_sid = substr( $attr, $pos + 1 );
+		$prefix = substr( $attr, 0, $pos );
+		if ( $this_sid > $sid ) {
+			$sid = $this_sid;
+		}
+	}
+
+	if ( $sid > 0 && $prefix ) {
+		$sid++;
+		return $prefix .'-'. $sid;
+	}
 }
 
 function stripslashes_array( $array ) {

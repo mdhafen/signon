@@ -14,8 +14,9 @@ Still under construction, nothing to see here.
 
 <h2>For debugging...</h2>
 <p class="prewrap">
-<?= !empty($data['user']['dn']) ? $data['user']['dn'] : "" ?>
-<?php phpinfo() ?>
+<?= !empty($data['user']['dn']) ? $data['user']['dn'] : "" ?><br>
+<?= !empty($data['next']) ? $data['next'] : "" ?><br>
+<?= var_dump($data['user']) ?><br>
 </p>
 
 <?php include( 'doc-close.php' ); ?>
