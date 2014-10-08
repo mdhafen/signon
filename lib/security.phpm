@@ -100,39 +100,31 @@ function authenticate() {
 			$_SESSION[ 'username' ] = $username;
 			$_SESSION[ 'token' ] = '';
 		} else {
-			$user = user_by_username( $username );
-			if ( $user && $user['username'] && $user['password'] ) {
-				$cipher = mcrypt_module_open( 'blowfish', '', 'ecb', '' );
-				$iv = mcrypt_create_iv( mcrypt_enc_get_iv_size( $cipher ), MCRYPT_RAND );
-				$key = substr( base64_decode( $user[ 'salt' ] ) . $config[ 'secure_phrase' ], 0, mcrypt_enc_get_key_size( $cipher ) );
-				mcrypt_generic_init( $cipher, $key, $iv );
-
-				$user_password = mdecrypt_generic( $cipher, base64_decode( $user[ 'password' ] ) );
-				mcrypt_generic_deinit( $cipher );
-				mcrypt_module_close( $cipher );
-
-				$user_password = rtrim($user_password, "\0" );
-				if ( strcmp( $user_password, $password ) == 0 ) {
-					unset( $_SESSION[ 'BADLOGIN' ] );
-					unset( $_SESSION[ 'NOSESSION' ] );
-					$token = hash(
-						'sha512',
-						session_id() .','.
-						$_SERVER[ 'REMOTE_ADDR' ] .','.
-						$config[ 'secure_phrase' ]
-						);
-					// dont need these anymore
-					unset( $user['salt'], $user['password'] );
-					$_SESSION[ 'token' ] = $token;
-					$_SESSION[ 'userid' ] = $user[ 'userid' ];
-					$_SESSION[ 'username' ] = $user[ 'username' ];
-					$_SESSION[ 'loggedin_user' ] = $user;
-					$_SESSION[ 'new_session' ] = 1;
-				} else {
-					$_SESSION[ 'BADLOGIN' ] = 1;
-					$_SESSION[ 'token' ] = '';
-					$_SESSION[ 'username' ] = $user[ 'username' ];
+			$user = 0;
+			if ( !empty $config['authen_modules'] ) {
+				if ( $config['authen_modules']['ldap'] ) {
+					$user = authen_ldap( $username, $password );
 				}
+				if ( ! $user && $config['authen_modules']['external'] ) {
+				}
+				if ( ! $user && $config['authen_modules']['db'] ) {
+					$user = authen_db( $username, $password );
+				}
+			}
+			if ( $user && $user['username'] ) {
+				unset( $_SESSION[ 'BADLOGIN' ] );
+				unset( $_SESSION[ 'NOSESSION' ] );
+				$token = hash(
+					'sha512',
+					session_id() .','.
+					$_SERVER[ 'REMOTE_ADDR' ] .','.
+					$config[ 'secure_phrase' ]
+					);
+				$_SESSION[ 'token' ] = $token;
+				$_SESSION[ 'userid' ] = $user[ 'userid' ];
+				$_SESSION[ 'username' ] = $user[ 'username' ];
+				$_SESSION[ 'loggedin_user' ] = $user;
+				$_SESSION[ 'new_session' ] = 1;
 			} else {
 				$_SESSION[ 'BADLOGIN' ] = 1;
 				$_SESSION[ 'token' ] = '';
@@ -155,6 +147,54 @@ function authenticate() {
 		$_SERVER['REQUEST_URI'] = substr( $_SERVER['REQUEST_URI'], 0, strrpos( $_SERVER['REQUEST_URI'], '/' ) + 1 );
 		return 0;
 	}
+}
+
+function authen_db( $username, $password ) {
+	global $config;
+	$user = user_by_username( $username );
+	if ( $user && $user['username'] && $user['password'] ) {
+		$cipher = mcrypt_module_open( 'blowfish', '', 'ecb', '' );
+		$iv = mcrypt_create_iv( mcrypt_enc_get_iv_size( $cipher ), MCRYPT_RAND );
+		$key = substr( base64_decode( $user[ 'salt' ] ) . $config[ 'secure_phrase' ], 0, mcrypt_enc_get_key_size( $cipher ) );
+		mcrypt_generic_init( $cipher, $key, $iv );
+
+		$user_password = mdecrypt_generic( $cipher, base64_decode( $user[ 'password' ] ) );
+		mcrypt_generic_deinit( $cipher );
+		mcrypt_module_close( $cipher );
+
+		$user_password = rtrim($user_password, "\0" );
+		if ( strcmp( $user_password, $password ) == 0 ) {
+			// dont need these anymore
+			unset( $user['salt'], $user['password'] );
+			return $user;
+		}
+	}
+	return 0;
+}
+
+function authen_ldap( $username, $password ) {
+	global $ldap,$config;
+	$user = 0;
+
+	$set = ldap_quick_search( array( 'uid' => $username ) );
+	if ( count($set) == 1 ) {
+		$userdn = $set[0]['dn'];
+		if ( ldap_bind( $ldap, $userdn, $password ) ) {
+			$user = array(
+				'userid' => $username,
+				'username' => $username,
+				'fullname' => $set[0]['cn'],
+			);
+		}
+		else {
+			// re-bind as root
+			$userdn = $config['ldap']['userdn'];
+			$password = $config['ldap']['passwd'];
+			do_ldap_connect( $userdn, $password );
+		}
+	}
+
+	return $user;
 }
 
 function roles() {

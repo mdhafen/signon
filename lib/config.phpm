@@ -7,6 +7,11 @@ $config = array(
 	'base_url'	    => '/', // these are set below
 	'secure_phrase'     => 'Time4RedPill',
 	'cookie_token_name' => 'SAMSESS',
+	'authen_modules'      => array(
+		'db'       => 0,
+		'external' => 0,
+		'ldap'     => 1,
+	),
 	'trusted_proxies'   => array(),
 	'database'          => array(
 		'engine' => 'mysqli',
