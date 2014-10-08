@@ -101,7 +101,7 @@ function authenticate() {
 			$_SESSION[ 'token' ] = '';
 		} else {
 			$user = 0;
-			if ( !empty $config['authen_modules'] ) {
+			if ( !empty( $config['authen_modules'] ) ) {
 				if ( $config['authen_modules']['ldap'] ) {
 					$user = authen_ldap( $username, $password );
 				}
@@ -175,15 +175,31 @@ function authen_db( $username, $password ) {
 function authen_ldap( $username, $password ) {
 	global $ldap,$config;
 	$user = 0;
+	$userdn = 0;
+	$name = '';
+	$email = '';
 
-	$set = ldap_quick_search( array( 'uid' => $username ) );
+	if ( strripos( $username, $config['ldap']['base'] ) > 0 ) {
+		$set = ldap_quick_search( array('objectClass'=>'*'), array(), 0, $username );
+	}
+	else {
+		$set = ldap_quick_search( array( 'uid' => $username ), array() );
+	}
+
 	if ( count($set) == 1 ) {
 		$userdn = $set[0]['dn'];
+		$name = $set[0]['cn'][0];
+		$email = $set[0]['mail'][0];
+	}
+
+	if ( $userdn ) {
 		if ( ldap_bind( $ldap, $userdn, $password ) ) {
 			$user = array(
 				'userid' => $username,
 				'username' => $username,
-				'fullname' => $set[0]['cn'],
+				'fullname' => $name,
+				'email' => $email,
+				'role' => 1,
 			);
 		}
 		else {

@@ -5,11 +5,18 @@ include_once( '../lib/data.phpm' );
 include_once( '../lib/output.phpm' );
 
 do_ldap_connect();
-$user = ldap_quick_search( array( 'uid' => 'michael.hafen' ), array() );
+if ( ! authenticate() ) {
+	output( array(), 'login' );
+	exit;
+}
+
+$user = empty($_SESSION['loggedin_user']) ? array() : $_SESSION['loggedin_user'];
+//$user = ldap_quick_search( array( 'uid' => 'michael.hafen' ), array() );
 
 $output = array(
-	'user' => $user[0],
-	'next' => ldap_get_next_SID(),
+	'user' => ( count($user) || ! count($user) ) ? array() : $user[0],
+	//'dump' => print_r( $user, true ),
+	'dump' => print_r( $_SESSION, true ),
 );
 
 output( $output, 'index.tmpl' );

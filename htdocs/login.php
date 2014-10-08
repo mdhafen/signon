@@ -1,9 +1,8 @@
 <?php include( 'doc-open.php' ); ?>
-<title>Staff Login Management</title>
+<title>Staff Management Login</title>
 <?php
 include( 'doc-head-close.php' );
-include( 'doc-header-open.php' );
-include( 'doc-header-close.php' );
+include( 'doc-header.php' );
 ?>
 
 <div class="for_login">

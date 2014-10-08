@@ -52,7 +52,7 @@ function do_ldap_connect( $userdn = '', $passwd = '' ) {
 	return $ldap;
 }
 
-function ldap_quick_search( $filter = array('objectclass' => '*'), $attrs = array('uid','cn'), $scope = 2, $base = '' ) {
+function ldap_quick_search( $filter = array('objectclass' => '*'), $attrs = array('cn'), $scope = 2, $base = '' ) {
 	global $config, $ldap;
 	$results = array();
 
@@ -72,13 +72,13 @@ function ldap_quick_search( $filter = array('objectclass' => '*'), $attrs = arra
 	do {
 		ldap_control_paged_result( $ldap, 100, false, $paged_cookie );
 		if ( $scope == 0 ) {
-			$search = ldap_read( $ldap, $base, $filter_str, $attrs );
+			$search = @ldap_read( $ldap, $base, $filter_str, $attrs );
 		}
 		else if ( $scope == 1 ) {
-			$search = ldap_list( $ldap, $base, $filter_str, $attrs );
+			$search = @ldap_list( $ldap, $base, $filter_str, $attrs );
 		}
 		else {
-			$search = ldap_search( $ldap, $base, $filter_str, $attrs );
+			$search = @ldap_search( $ldap, $base, $filter_str, $attrs );
 		}
 		if ( empty($search) ) {
 			return $results;
