@@ -200,8 +200,8 @@ function authen_ldap( $username, $password ) {
 				foreach ( $config['ldap']['roles'] as $role_id => $group_dn ) {
 					$group = ldap_quick_search( array('objectClass'=>'groupOfNames'), array(), 0, $group_dn );
 					if ( ! empty($group[0]) && ! empty($group[0]['member']) ) {
-						foreach ( $group['member'] as $member_dn ) {
-							if ( $member_dn == $userdn ) {
+						foreach ( $group[0]['member'] as $member_dn ) {
+							if ( strcasecmp($member_dn,$userdn) == 0 ) {
 								$role = $role_id;
 								break 2;
 							}

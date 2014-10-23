@@ -35,7 +35,7 @@ $config = array(
 		2   => "add_user",
 		4   => "reset_password",
 		8   => "add_to_group",
-		16  => "add_other_objects",
+		16  => "manage_objects",
 	),
 	'role' => array(
 		1 => array(

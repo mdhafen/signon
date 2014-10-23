@@ -3,6 +3,7 @@ include_once( '../lib/input.phpm' );
 include_once( '../lib/security.phpm' );
 include_once( '../lib/data.phpm' );
 include_once( '../lib/output.phpm' );
+include_once( '../inc/person.phpm' );
 
 global $config;
 
@@ -32,6 +33,7 @@ usort( $children, 'sorter' );
 $output = array(
 	'object_dn' => $objectdn,
 	'object' => $object,
+	'is_person' => is_person( $object ),
 	'parentdn' => $parentdn,
 	'children' => $children,
 );

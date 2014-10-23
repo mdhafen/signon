@@ -27,6 +27,18 @@ include( 'doc-menu.php' );
 </div>
 <?php } ?>
 
+<?php if ( ! empty( $data['_session']['CAN_manage_objects'] ) ) { ?>
+<div>
+Edit
+</div>
+<?php } ?>
+
+<?php if ( ! empty($data['_session']['CAN_reset_password']) && ! empty($data['is_person']) ) { ?>
+<div>
+Reset Password
+</div>
+<?php } ?>
+
 <?php if ( count( $data['children'] ) ) { ?>
 <h2>Children</h2>
 <div>
