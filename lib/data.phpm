@@ -112,6 +112,18 @@ function ldap_quick_search( $filter = array('objectclass' => '*'), $attrs = arra
 	return $results;
 }
 
+function do_ldap_modify( $userdn, $attrs ) {
+	global $ldap;
+
+	if ( empty( $userdn ) || ! is_array( $attrs ) || empty( $attrs ) ) {
+		return 0;
+	}
+
+	$result = @ldap_modify( $ldap, $userdn, $attrs );
+
+	return $result;
+}
+
 function ldap_get_next_SID() {
 	$sid = 0;
 	$prefix = '';
