@@ -47,6 +47,8 @@ form.for_login {
     background-color: #00487d;
     text-align: center;
     white-space: nowrap;
+    color: #FFFFFF;
+    font-size: 15pt;
 }
 
 #footer {

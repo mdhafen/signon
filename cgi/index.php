@@ -10,14 +10,29 @@ if ( ! authenticate() ) {
 	exit;
 }
 
-$user = empty($_SESSION['loggedin_user']) ? array() : $_SESSION['loggedin_user'];
-//$user = ldap_quick_search( array( 'uid' => 'michael.hafen' ), array() );
+global $config;
+$set = ldap_quick_search( array( 'objectClass' => 'organizationalUnit' ), array(), 1, $config['ldap']['base'] );
+$folders = array();
+foreach ( $set as $ou ) {
+	$folders[] = array( 'ou' => $ou['ou'][0], 'dn' => $ou['dn'] );
+}
+
+usort( $folders, function($a,$b){return strcasecmp($a['ou'],$b['ou']);} );
+
+$children = ldap_quick_search( array( 'objectClass' => '*' ), array(), 1, $config['ldap']['base'] );
+usort( $children, 'sorter' );
 
 $output = array(
-	'user' => ( count($user) || ! count($user) ) ? array() : $user[0],
-	//'dump' => print_r( $user, true ),
-	'dump' => print_r( $_SESSION, true ),
+	'folders' => $folders,
+	'children' => $children,
 );
 
 output( $output, 'index.tmpl' );
+
+function sorter( $a, $b ) {
+	$av = empty($a['cn']) ? $a['ou'][0] : $a['cn'][0];
+	$bv = empty($b['cn']) ? $b['ou'][0] : $b['cn'][0];
+
+	return strcasecmp( $av, $bv );
+}
 ?>
