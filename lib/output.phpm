@@ -24,16 +24,18 @@ function output_build( $data, $filename ) {
 	global $config;
 	$output = '';
 
-	$data['_config'] = $config;
-	if ( ! empty( $_SESSION[ 'loggedin_user' ] ) ) {
-		$data['_session']['username'] = $_SESSION[ 'loggedin_user' ][ 'username' ];
-	}
-	else {
-		$data['_session']['username'] = '';
-	}
+	if ( is_array( $data ) ) {
+		$data['_config'] = $config;
+		if ( ! empty( $_SESSION[ 'loggedin_user' ] ) ) {
+			$data['_session']['username'] = $_SESSION[ 'loggedin_user' ][ 'username' ];
+		}
+		else {
+			$data['_session']['username'] = '';
+		}
 
-	foreach ( (array) get_authorizations() as $perm ) {
-		$data['_session']["CAN_$perm"] = $perm;
+		foreach ( (array) get_authorizations() as $perm ) {
+			$data['_session']["CAN_$perm"] = $perm;
+		}
 	}
 
 	if ( $filename ) {
@@ -77,7 +79,7 @@ function output_transmit( $output, $xml ) {
 	}
 	else if ( isset( $data ) && ! is_array( $data ) ) {
 		// read first couple lines ( up to <html>? ) to guess type?
-		if ( preg_match( '/^[\s\v]*<\?xml.*?>[\s\v]*(?:<!doctype.*?>[\s\v]*)?(?!<html.*?>/is', $data ) ) {
+		if ( preg_match( '/^[\s\v]*<\?xml.*?>[\s\v]*(?:<!doctype.*?>[\s\v]*)?(?!<html.*?>)/is', $data ) ) {
 			header( "Content-type: application/xml" );
 		}
 		print $data;
