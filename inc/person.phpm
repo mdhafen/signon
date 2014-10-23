@@ -14,6 +14,9 @@ function is_person( $o=array() ) {
 function set_password( $userdn, $password ) {
 	$result = 0;
 	if ( ! empty($userdn) && ! empty($password) ) {
+		$set = ldap_quick_search( array( 'objectClass' => '*' ), array(), 0, $userdn );
+		$object = $set[0];
+
 		$salt = "";
 		$len = mt_rand( 40-strlen($password), 50 );
 		for ( $i = 0; $i < $len; $i++ ) {
@@ -22,12 +25,18 @@ function set_password( $userdn, $password ) {
 		$hash_pass = '{SSHA}' . base64_encode( sha1($password.$salt,TRUE) . $salt );
 		$smb_pass = strtoupper(bin2hex(mhash(MHASH_MD4, iconv("UTF-8","UTF-16LE",$password))));
 
-		$entry = array(
-			'userPassword' => $hash_pass,
-			'sambaNTPassword' => $smb_pass,
-		);
+		$entry = array();
+		if ( in_array( 'person', $object['objectClass'] ) ) {
+			$entry['userPassword'] = $hash_pass;
+		}
+		if ( in_array( 'inetOrgPerson', $object['objectClass'] ) ) {
+			$entry['userPassword'] = $hash_pass;
+			$entry['sambaNTPassword'] = $smb_pass;
+		}
 
-		$result = do_ldap_modify( $userdn, $entry );
+		if ( ! empty( $entry ) ) {
+			$result = do_ldap_modify( $userdn, $entry );
+		}
 	}
 	return $result;
 }
