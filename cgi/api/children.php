@@ -6,7 +6,7 @@ include_once( '../../lib/output.phpm' );
 
 do_ldap_connect();
 if ( ! authenticate() ) {
-	output( array(), 'login' );
+	output( '<?xml version ="1.0"?><error>ACCESS_DENIED</error>', '', $xml=1 );
 	exit;
 }
 
