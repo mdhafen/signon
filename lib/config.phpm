@@ -25,13 +25,17 @@ $config = array(
 		'base' => 'dc=wcsd',
 		'userdn' => 'cn=root,dc=wcsd',
 		'passwd' => 'r@@t1dm0n',
+		'roles' => array(
+			2 => 'cn=TechnologyStaff,dc=wcsd',
+			3 => 'cn=DistrictManagers,dc=wcsd',
+		),
 	),
 	'auth' => array(
 		1   => "set_password",
 		2   => "add_user",
-		4   => "add_to_group",
-		8   => "reset_password",
-		16  => "change_security_group",
+		4   => "reset_password",
+		8   => "add_to_group",
+		16  => "add_other_objects",
 	),
 	'role' => array(
 		1 => array(
@@ -40,6 +44,10 @@ $config = array(
 		),
 		2 => array(
 			'name' => 'staff',
+			'auth' => 7,
+		),
+		3 => array(
+			'name' => 'manager',
 			'auth' => 15,
 		),
 		3 => array(

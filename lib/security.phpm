@@ -188,18 +188,35 @@ function authen_ldap( $username, $password ) {
 
 	if ( count($set) == 1 ) {
 		$userdn = $set[0]['dn'];
+		$username = empty( $set[0]['uid'] ) ? $set[0]['dn'] : $set[0]['uid'][0];
 		$name = $set[0]['cn'][0];
-		$email = $set[0]['mail'][0];
+		$email = empty( $set[0]['mail'] ) ? "" : $set[0]['mail'][0];
 	}
 
 	if ( $userdn ) {
 		if ( ldap_bind( $ldap, $userdn, $password ) ) {
+			$role = 1;
+			if ( ! empty($config['ldap']['roles']) ) {
+				foreach ( $config['ldap']['roles'] as $role_id => $group_dn ) {
+					$group = ldap_quick_search( array('objectClass'=>'groupOfNames'), array(), 0, $group_dn );
+					if ( ! empty($group[0]) && ! empty($group[0]['member']) ) {
+						foreach ( $group['member'] as $member_dn ) {
+							if ( $member_dn == $userdn ) {
+								$role = $role_id;
+								break 2;
+							}
+						}
+					}
+				}
+			}
+
 			$user = array(
-				'userid' => $username,
+				'userid' => $userdn,
 				'username' => $username,
 				'fullname' => $name,
 				'email' => $email,
-				'role' => 1,
+				'role' => $role,
+				'password' => $password,
 			);
 		}
 		else {

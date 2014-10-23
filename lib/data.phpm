@@ -30,8 +30,14 @@ function do_ldap_connect( $userdn = '', $passwd = '' ) {
 	global $ldap, $config;
 
 	if ( empty( $userdn ) ) {
-		$userdn = $config['ldap']['userdn'];
-		$passwd = $config['ldap']['passwd'];
+		if ( ! empty($_SESSION['loggedin_user']) ) {
+			$userdn = $_SESSION['loggedin_user']['userid'];
+			$passwd = $_SESSION['loggedin_user']['password'];
+		}
+		else {
+			$userdn = $config['ldap']['userdn'];
+			$passwd = $config['ldap']['passwd'];
+		}
 
 		if ( ! empty( $ldap ) ) {
 			$search = @ldap_read( $ldap, $config['ldap']['userdn'], '(objectClass=*)' );
