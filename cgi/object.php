@@ -36,6 +36,8 @@ $output = array(
 	'is_person' => is_person( $object ),
 	'parentdn' => $parentdn,
 	'children' => $children,
+	'can_edit' => authorized('manage_objects'),
+	'can_password' => authorized('reset_password') || ($objectdn == $_SESSION['userid']),
 );
 
 output( $output, 'object.tmpl' );

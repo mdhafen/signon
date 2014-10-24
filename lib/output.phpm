@@ -28,9 +28,11 @@ function output_build( $data, $filename ) {
 		$data['_config'] = $config;
 		if ( ! empty( $_SESSION[ 'loggedin_user' ] ) ) {
 			$data['_session']['username'] = $_SESSION[ 'loggedin_user' ][ 'username' ];
+			$data['_session']['userid'] = $_SESSION[ 'loggedin_user' ][ 'userid' ];
 		}
 		else {
 			$data['_session']['username'] = '';
+			$data['_session']['userid'] = '';
 		}
 
 		foreach ( (array) get_authorizations() as $perm ) {

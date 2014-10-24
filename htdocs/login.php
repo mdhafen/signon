@@ -1,5 +1,5 @@
 <?php include( 'doc-open.php' ); ?>
-<title>Staff Management Login</title>
+<title>Staff Login Management - Login</title>
 <?php
 include( 'doc-head-close.php' );
 include( 'doc-header.php' );

@@ -118,8 +118,8 @@ function input_validation( $output, $type ) {
 		}
 		if ( $type == INPUT_HTML_NONE ) {
 			if ( ! $error ) {
-			if ( ! is_string( $value ) ) { $error++; }
-				$value = strip_tags( clean_string( $value ) );	
+				if ( ! is_string( $value ) ) { $error++; }
+				$value = strip_tags( clean_string( $value ) );
 				$value = htmlspecialchars( $value );
 			}
 		}
@@ -129,14 +129,12 @@ function input_validation( $output, $type ) {
 				$parser =& new HTML_Safe();
 				$value = clean_string( $value );
 				$value = $parser->parse( $value );
-				$value = htmlspecialchars( $value );
 			}
 		}
 		if ( $type == INPUT_HTML_ALL ) {
 			if ( ! $error ) {
 			if ( ! is_string( $value ) ) { $error++; }
 				$value = clean_string( $value );
-				$value = htmlspecialchars( $value );
 			}
 		}
 		if ( $type == INPUT_EMAIL ) {

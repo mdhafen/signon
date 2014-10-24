@@ -1,5 +1,5 @@
 <?php include( 'doc-open.php' ); ?>
-<title>Welcome to the Staff Management page</title>
+<title>Staff Login Management - Details</title>
 <?php
 include( 'doc-head-close.php' );
 include( 'doc-header.php' );
@@ -27,15 +27,15 @@ include( 'doc-menu.php' );
 </div>
 <?php } ?>
 
-<?php if ( ! empty( $data['_session']['CAN_manage_objects'] ) ) { ?>
+<?php if ( ! empty( $data['can_edit'] ) ) { ?>
 <div>
 Edit
 </div>
 <?php } ?>
 
-<?php if ( ! empty($data['_session']['CAN_reset_password']) && ! empty($data['is_person']) ) { ?>
+<?php if ( ! empty($data['can_password']) && ! empty($data['is_person']) ) { ?>
 <div>
-Reset Password
+<a href="password.php?dn=<?= urlencode($data['object_dn']) ?>">Reset Password</a>
 </div>
 <?php } ?>
 
