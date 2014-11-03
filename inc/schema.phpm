@@ -1,0 +1,4 @@
+<?php
+// ldapsearch -H ldap://ldap.mydomain.com -x -s base -b "cn=subschema" objectclasses
+// Schemas are large and mostly static.  It is recommended they be cached.
+?>
