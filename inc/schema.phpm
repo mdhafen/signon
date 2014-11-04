@@ -1,4 +1,45 @@
 <?php
 // ldapsearch -H ldap://ldap.mydomain.com -x -s base -b "cn=subschema" objectclasses
 // Schemas are large and mostly static.  It is recommended they be cached.
+require_once( $config['base_dir'] ."/lib/data.phpm" );
+
+function get_schema( $s=array() ) {
+	global $ldap;
+
+	if ( empty( $s ) ) {
+		$schema = ldap_quick_search( array('objectClass'=>'*'), array('subschemaSubentry'), 0, '' );
+		$subschema = $schema['subschemaSubentry'][0];
+		$schema = ldap_quick_search( array('objectClass'=>'*'), array('objectClasses'), 0, $subschema );
+
+		if ( ! empty( $schema ) ) {
+			$s = $schema;
+		}
+	}
+
+	return $s;
+}
+
+/*
+   objectClass info: http://www.zytrax.com/books/ldap/ch3/
+ObjectClassDescription = "(" whsp
+ numericoid whsp      ; ObjectClass identifier
+ [ "NAME" qdescrs ]
+ [ "DESC" qdstring ]
+ [ "OBSOLETE" whsp ]
+ [ "SUP" oids ]       ; Superior ObjectClasses
+ [ ( "ABSTRACT" / "STRUCTURAL" / "AUXILIARY" ) whsp ]
+                      ; default structural
+ [ "MUST" oids ]      ; AttributeTypes
+ [ "MAY" oids ]       ; AttributeTypes
+  whsp ")"
+
+   example:
+ ( 1.3.6.1.4.1.7165.2.2.16 NAME 'sambaTrustedDomain' DESC 'Samba
+  Trusted Domain Object' SUP top STRUCTURAL MUST cn MAY ( sambaTrustType $ sam
+ baTrustAttributes $ sambaTrustDirection $ sambaTrustPartner $ sambaFlatName $
+  sambaTrustAuthOutgoing $ sambaTrustAuthIncoming $ sambaSecurityIdentifier $ 
+ sambaTrustForestTrustInfo $ sambaTrustPosixOffset $ sambaSupportedEncryptionT
+ ypes ) )
+
+ */
 ?>
