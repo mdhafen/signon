@@ -90,7 +90,6 @@ function get_authorizations() {
 
 function authenticate() {
 	global $config;
-	load_session();
 
 	if ( ! isset( $_SESSION[ 'loggedin_user' ] ) ) {
 		$username = input( '_username', INPUT_HTML_NONE );

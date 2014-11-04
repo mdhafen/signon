@@ -14,6 +14,8 @@ require_once( 'Mail/RFC822.php' );  // to validate the email address
 require_once( 'config.phpm' );
 require_once( 'data.phpm' );
 
+load_session();
+
 //  Load session data from the database.
 function load_session() {
     // load $str from db

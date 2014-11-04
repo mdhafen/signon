@@ -16,6 +16,7 @@ function redirect( $target = "" ) {
 function output( $data, $filename, $xml = 0 ) {
 	$output = '';
 
+	save_session();
 	$output = output_build( $data, $filename );
 	output_transmit( $output, $xml );
 }
