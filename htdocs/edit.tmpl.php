@@ -36,8 +36,4 @@ include( 'doc-menu.php' );
 <a href="object.php?dn=<?= urlencode($data['object_dn']) ?>">Cancel</a>
 </div>
 
-<div class="prewrap">
-<?php print_r( $data['attrs'] ) ?>
-</div>
-
 <?php include( 'doc-close.php' ); ?>
