@@ -29,7 +29,7 @@ include( 'doc-menu.php' );
 
 <?php if ( ! empty( $data['can_edit'] ) ) { ?>
 <div>
-Edit
+<a href="edit.php?dn=<?= urlencode($data['object_dn']) ?>">Edit</a>
 </div>
 <?php } ?>
 

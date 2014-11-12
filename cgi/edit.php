@@ -25,14 +25,57 @@ if ( $parentdn == $config['ldap']['base'] ) {
 	$parentdn = '';
 }
 
-$schema = get_schema( $_SESSION['schema'] );
+if ( empty( $_SESSION['schema_objects'] ) ) {
+	$schema_objects = get_schema_objects();
+	$_SESSION['schema_objects'] = $schema_objects;
+}
+else {
+	$schema_objects = $_SESSION['schema_objects'];
+}
+
+if ( empty( $_SESSION['schema_attrs'] ) ) {
+	$schema_attrs = get_schema_attributes();
+	$_SESSION['schema_attrs'] = $schema_attrs;
+}
+else {
+	$schema_attrs = $_SESSION['schema_attrs'];
+}
+
+$must = array();
+$may = array();
+$classes = $object['objectClass'];
+for ( $i = 0; $i < count($classes); $i++ ) {
+	$oc = $classes[$i];
+
+	if ( ! empty($schema_objects[$oc]['SUP']) ) {
+		foreach ( $schema_objects[$oc]['SUP'] as $sup_oc ) {
+			$classes[] = $sup_oc;
+		}
+	}
+
+	if ( ! empty($schema_objects[$oc]['MUST']) ) {
+		$must = array_merge( $must, $schema_objects[$oc]['MUST'] );
+	}
+	if ( ! empty($schema_objects[$oc]['MAY']) ) {
+		$may = array_merge( $may, $schema_objects[$oc]['MAY'] );
+	}
+}
+
+$must = array_unique( $must );
+$may = array_unique( $may );
+$may = array_diff( $may, $must );
+
+sort( $must );
+sort( $may );
 
 $output = array(
 	'object_dn' => $objectdn,
 	'object' => $object,
 	'is_person' => is_person( $object ),
 	'parentdn' => $parentdn,
-	'schema' => $schema,
+	'must' => $must,
+	'may' => $may,
+	'attrs' => $schema_attrs,
 );
 
 output( $output, 'edit.tmpl' );
