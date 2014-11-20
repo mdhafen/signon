@@ -13,6 +13,11 @@ function redirect( $target = "" ) {
 	}
 }
 
+function error( array $errors ) {
+	output( array('errors'=>$errors), 'error.tmpl' );
+	exit; // Errors are fatal
+}
+
 function output( $data, $filename, $xml = 0 ) {
 	$output = '';
 
