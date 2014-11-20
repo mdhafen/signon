@@ -10,7 +10,7 @@ include( 'doc-header.php' );
 <?php
 foreach ( $data['errors'] as $error ) {
 ?>
-<div class='important'><?= $error ?>:</div>
+<div class='important'><?= $error ?></div>
 <?php
 }
 ?>

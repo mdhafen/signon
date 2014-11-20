@@ -22,7 +22,6 @@ foreach ( $data['must'] as $attr ) {
             foreach ( $data['object'][$attr] as $val ) { ?>
 <span class="object_attr_value">
 <input name="<?= $count ?>_val[]" value="<?= $val ?>">
-<input name="<?= $count ?>_orig[]" type="hidden" value="<?= $val ?>">
 </span>
 <?php       }
             if ( count($data['object'][$attr]) > 1 ) { ?>
@@ -53,7 +52,6 @@ foreach ( $data['must'] as $attr ) {
             foreach ( $data['object'][$attr] as $val ) { ?>
 <span class="object_attr_value">
 <input name="<?= $count ?>_val[]" value="<?= $val ?>">
-<input name="<?= $count ?>_orig[]" type="hidden" value="<?= $val ?>">
 </span>
 <?php       }
             if ( count($data['object'][$attr]) > 1 ) { ?>
