@@ -168,5 +168,25 @@ form li input {
     font-weight: bold;
 }
 
+.object_attribute {
+    margin-bottom: 5px;
+}
+
+.object_attr_key {
+    float: left;
+    text-align: right;
+    width: 49%;
+    padding-right: 5px;
+    min-width: 50px;
+}
+
+.object_attr_values {
+    display: inline-block;
+}
+
+.object_attr_values .object_attr_value {
+    display: block;
+}
+
 @media print { 
 }

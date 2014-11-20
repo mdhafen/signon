@@ -16,16 +16,26 @@ foreach ( $data['must'] as $attr ) {
 <div class='object_attribute'><span class="object_attr_key important"><?= $attr ?>:</span>
 <input name="<?= $count ?>_attr" type="hidden" value="<?= $attr ?>">
 <?php   if ( ! empty($data['object'][$attr]) ) {
+            if ( count($data['object'][$attr]) > 1 ) { ?>
+<div class="object_attr_values">
+<?php       }
             foreach ( $data['object'][$attr] as $val ) { ?>
+<span class="object_attr_value">
 <input name="<?= $count ?>_val[]" value="<?= $val ?>">
-<input name="<?= $count ?>_orig[]" type="hidden" value="<?= $val ?>"><br>
+<input name="<?= $count ?>_orig[]" type="hidden" value="<?= $val ?>">
+</span>
+<?php       }
+            if ( count($data['object'][$attr]) > 1 ) { ?>
+</div>
 <?php       }
         }
 	else { ?>
+<span class="object_attr_value">
 <input name="<?= $count ?>_val[]" value="">
+</span>
 <?php   }
         if ( empty($data['attrs'][$attr]['SINGLE-VALUE']) ) { ?>
-<input type="button" value="+" onclick="add_field('<?= $count ?>')"><br>
+<input type="button" value="+" onclick="add_field('<?= $count ?>')">
 <?php   } ?>
 </div>
 <?php
@@ -34,19 +44,29 @@ foreach ( $data['must'] as $attr ) {
 ?>
 
 <?php foreach ( $data['may'] as $attr ) { ?>
-<div class='object_attribute'><span class="object_attr_key"><?= $attr ?></span>
+<div class='object_attribute'><span class="object_attr_key"><?= $attr ?>:</span>
 <input name="<?= $count ?>_attr" type="hidden" value="<?= $attr ?>">
 <?php   if ( ! empty($data['object'][$attr]) ) {
+            if ( count($data['object'][$attr]) > 1 ) { ?>
+<div class="object_attr_values">
+<?php       }
             foreach ( $data['object'][$attr] as $val ) { ?>
+<span class="object_attr_value">
 <input name="<?= $count ?>_val[]" value="<?= $val ?>">
-<input name="<?= $count ?>_orig[]" type="hidden" value="<?= $val ?>"><br>
+<input name="<?= $count ?>_orig[]" type="hidden" value="<?= $val ?>">
+</span>
+<?php       }
+            if ( count($data['object'][$attr]) > 1 ) { ?>
+</div>
 <?php       }
         }
 	else { ?>
+<span class="object_attr_value">
 <input name="<?= $count ?>_val[]" value="">
+</span>
 <?php   }
         if ( empty($data['attrs'][$attr]['SINGLE-VALUE']) ) { ?>
-<input type="button" value="+" onclick="add_field('<?= $count ?>')"><br>
+<input type="button" value="+" onclick="add_field('<?= $count ?>')">
 <?php   } ?>
 </div>
 <?php

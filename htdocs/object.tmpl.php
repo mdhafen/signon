@@ -9,9 +9,15 @@ include( 'doc-menu.php' );
 <h1><?= $data['object_dn'] ?></h1>
 <div>
 <?php foreach ( $data['object'] as $key => $vals ) { ?>
-<div class='object_attribute'><span class="object_attr_key"><?= $key ?></span>
+<div class='object_attribute'><span class="object_attr_key"><?= $key ?>:</span>
+<?php   if ( count($vals) > 1 ) { ?>
+<div class="object_attr_values">
+<?php   } ?>
 <?php   foreach ( $vals as $val ) { ?>
-<div class="object_attr_value"><?= $val ?></div>
+<span class="object_attr_value"><?= $val ?></span>
+<?php   } ?>
+<?php   if ( count($vals) > 1 ) { ?>
+</div>
 <?php   } ?>
 </div>
 <?php } ?>
