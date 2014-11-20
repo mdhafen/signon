@@ -17,6 +17,7 @@ $set = ldap_quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
 $object = $set[0];
 $objectdn = $object['dn'];
 unset( $object['dn'] );
+$rdn_attr = substr( $objectdn, 0, strpos( $objectdn, '=' ) );
 
 ksort( $object, SORT_STRING | SORT_FLAG_CASE );
 
