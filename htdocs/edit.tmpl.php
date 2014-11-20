@@ -7,7 +7,7 @@ include( 'doc-menu.php' );
 ?>
 
 <h1><?= $data['object_dn'] ?></h1>
-<form method="post" action="edit.php">
+<form method="post" action="save.php">
 <div>
 <?php
 $count = 1;
@@ -58,6 +58,7 @@ foreach ( $data['must'] as $attr ) {
 <div>
 <input type="submit" name="action" value="Update">
 <input type="hidden" name="count" value="<?= $count ?>">
+<input type="hidden" name="dn" value="<?= $data['object_dn'] ?>">
 <a href="object.php?dn=<?= urlencode($data['object_dn']) ?>">Cancel</a>
 </div>
 </form>
