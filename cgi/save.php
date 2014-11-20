@@ -70,6 +70,6 @@ if ( ! empty($errors) ) {
 	error( $errors );
 }
 else {
-	redirect( 'object.php?dn='. urlencode($objectdn );
+	redirect( 'object.php?dn='. urlencode($objectdn ) );
 }
 ?>
