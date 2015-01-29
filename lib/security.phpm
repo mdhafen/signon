@@ -101,12 +101,12 @@ function authenticate() {
 		} else {
 			$user = 0;
 			if ( !empty( $config['authen_modules'] ) ) {
-				if ( $config['authen_modules']['ldap'] ) {
+				if ( !empty($config['authen_modules']['ldap']) ) {
 					$user = authen_ldap( $username, $password );
 				}
-				if ( ! $user && $config['authen_modules']['external'] ) {
+				if ( ! $user && !empty($config['authen_modules']['external']) ) {
 				}
-				if ( ! $user && $config['authen_modules']['db'] ) {
+				if ( ! $user && !empty($config['authen_modules']['db']) ) {
 					$user = authen_db( $username, $password );
 				}
 			}
@@ -178,7 +178,11 @@ function authen_ldap( $username, $password ) {
 	$name = '';
 	$email = '';
 
-	if ( strripos( $username, $config['ldap']['base'] ) > 0 ) {
+	 if ( strcasecmp( $username, $config['ldap']['userdn'] ) == 0 ) {
+		$set = array();
+		$set[] = array( 'dn' => $username, 'cn' => array($username) );
+	}
+	else if ( strripos( $username, $config['ldap']['base'] ) > 0 ) {
 		$set = ldap_quick_search( array('objectClass'=>'*'), array(), 0, $username );
 	}
 	else {
