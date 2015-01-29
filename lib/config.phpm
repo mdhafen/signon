@@ -60,7 +60,7 @@ $config = array(
 $config['base_dir'] = realpath( dirname( __FILE__ ) . '/..' );
 $config['this_url'] = $_SERVER['REQUEST_URI'];
 
-$dir = $config['base_dir'] . '/cgi/';
+$dir = $config['base_dir'] . '/webroot/';
 $count = 1;
 $lcs = '/';
 while ( strripos( $dir, substr( $config['this_url'], 0, $count ) ) > 0 ) {
