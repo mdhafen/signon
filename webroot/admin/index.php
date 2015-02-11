@@ -27,7 +27,7 @@ $output = array(
 	'children' => $children,
 );
 
-output( $output, 'index.tmpl' );
+output( $output, 'admin/index.tmpl' );
 
 function sorter( $a, $b ) {
 	$av = empty($a['cn']) ? $a['ou'][0] : $a['cn'][0];
