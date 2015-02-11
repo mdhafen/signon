@@ -78,5 +78,5 @@ $output = array(
 	'attrs' => $schema_attrs,
 );
 
-output( $output, 'edit.tmpl' );
+output( $output, 'admin/edit.tmpl' );
 ?>

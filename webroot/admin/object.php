@@ -40,7 +40,7 @@ $output = array(
 	'can_password' => authorized('reset_password') || ($objectdn == $_SESSION['userid']),
 );
 
-output( $output, 'object.tmpl' );
+output( $output, 'admin/object.tmpl' );
 
 function sorter( $a, $b ) {
 	$av = empty($a['cn']) ? $a['ou'][0] : $a['cn'][0];
