@@ -3,7 +3,6 @@
 <?php
 include( 'doc-head-close.php' );
 include( 'doc-header.php' );
-include( 'doc-menu.php' );
 ?>
 
 <p>
