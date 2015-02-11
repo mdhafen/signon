@@ -1,9 +1,9 @@
-<?php include( 'doc-open.php' ); ?>
+<?php include( $data['_config']['base_dir'] .'/htdocs/doc-open.php' ); ?>
 <title>Welcome to Staff Login Management</title>
 <?php
-include( 'doc-head-close.php' );
-include( 'doc-header.php' );
-include( 'doc-menu.php' );
+include( $data['_config']['base_dir'] .'/htdocs/doc-head-close.php' );
+include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
+include( $data['_config']['base_dir'] .'/htdocs/doc-menu.php' );
 ?>
 
 <div>
@@ -32,4 +32,4 @@ include( 'doc-menu.php' );
 </div>
 <?php } ?>
 
-<?php include( 'doc-close.php' ); ?>
+<?php include( $data['_config']['base_dir'] .'/htdocs/doc-close.php' ); ?>
