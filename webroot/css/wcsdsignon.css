@@ -1,0 +1,16 @@
+body {
+  padding-top: 50px;
+}
+.mainpage {
+  padding: 40px 15px;
+  text-align: center;
+}
+.jumbotron {
+    margin-bottom: 0px;
+    background-image: url(../img/IMG_2057.JPG);
+    background-position: 0% 25%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    color: white;
+    text-shadow: black 0.3em 0.3em 0.3em;
+}
