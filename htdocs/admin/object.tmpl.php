@@ -1,9 +1,8 @@
 <?php include( $data['_config']['base_dir'] .'/htdocs/doc-open.php' ); ?>
-<title>Staff Login Management - Details</title>
+<title><?= $data['_config']['site_title'] ?> - Details</title>
 <?php
 include( $data['_config']['base_dir'] .'/htdocs/doc-head-close.php' );
 include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
-include( $data['_config']['base_dir'] .'/htdocs/doc-menu.php' );
 ?>
 
 <h1><?= $data['object_dn'] ?></h1>

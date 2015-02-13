@@ -13,6 +13,7 @@ if ( ! authenticate() ) {
  */
 
 global $config;
+$output = array();
 
 output( $output, 'index.tmpl' );
 
