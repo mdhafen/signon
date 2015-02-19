@@ -22,7 +22,7 @@ $config = array(
 		'passwd' => '',
 	),
 	'ldap' => array(
-		'server' => 'ldaps://ldap.washk12.org/',
+		'server' => 'ldaps://ldap.washk12.org/ ldaps://ldap2.washk12.org/',
 		'base' => 'dc=wcsd',
 		'userdn' => 'cn=root,dc=wcsd',
 		'passwd' => 'r@@t1dm0n',
