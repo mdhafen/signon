@@ -10,10 +10,14 @@ function db_connect() {
 
 	if ( ! $dbh ) {
 		$settings = $config['database'];
+		if ( empty($settings) ) {
+			print "No database connection configured";
+			die();
+		}
 		$engine = $settings['engine'];
 		$host = $settings['host'];
 		$schema = $settings['schema'];
-		$port = ( $settings['port'] ) ? ";port=$settings[port]" : "";
+		$port = ( ! empty($settings['port']) ) ? ";port=$settings[port]" : "";
 		$dsn = "$engine:host=$host$port;dbname=$schema";
 		try {
 			$dbh = new PDO( $dsn, $settings['user'], $settings['passwd'] );
@@ -28,6 +32,11 @@ function db_connect() {
 
 function do_ldap_connect( $userdn = '', $passwd = '' ) {
 	global $ldap, $config;
+
+	if ( empty($config['ldap']['server']) ) {
+		print "No ldap connection configured";
+		die();
+	}
 
 	if ( empty( $userdn ) ) {
 		if ( ! empty($_SESSION['loggedin_user']) ) {
