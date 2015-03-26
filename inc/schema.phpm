@@ -160,4 +160,42 @@ function parse_asn_schema( $asn_str ) {
 	return $object;
 }
 
+function schema_get_object_requirements( $objectClasses ) {
+	if ( empty( $_SESSION['schema_objects'] ) ) {
+		$schema_objects = get_schema_objects();
+		$_SESSION['schema_objects'] = $schema_objects;
+	}
+	else {
+		$schema_objects = $_SESSION['schema_objects'];
+	}
+
+	$must = array();
+	$may = array();
+	for ( $i = 0; $i < count($objectClasses); $i++ ) {
+		$oc = $objectClasses[$i];
+
+		if ( ! empty($schema_objects[$oc]['SUP']) ) {
+			foreach ( $schema_objects[$oc]['SUP'] as $sup_oc ) {
+				$objectClasses[] = $sup_oc;
+			}
+		}
+
+		if ( ! empty($schema_objects[$oc]['MUST']) ) {
+			$must = array_merge( $must, $schema_objects[$oc]['MUST'] );
+		}
+		if ( ! empty($schema_objects[$oc]['MAY']) ) {
+			$may = array_merge( $may, $schema_objects[$oc]['MAY'] );
+		}
+	}
+
+	$must = array_unique( $must );
+	$may = array_unique( $may );
+	$may = array_diff( $may, $must );
+
+	sort( $must );
+	sort( $may );
+
+	return array( $must, $may );
+}
+
 ?>

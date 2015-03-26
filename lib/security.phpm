@@ -6,6 +6,7 @@ require_once( 'config.phpm' );
 require_once( 'input.phpm' );
 require_once( 'user.phpm' );
 require_once( 'output.phpm' );
+require_once( 'data.phpm' );
 
 $logout = input( '_logout', INPUT_STR );
 if ( $logout ) {
@@ -176,7 +177,8 @@ function authen_ldap( $username, $password ) {
 	$name = '';
 	$email = '';
 
-	 if ( strcasecmp( $username, $config['ldap']['userdn'] ) == 0 ) {
+	do_ldap_connect();
+	if ( strcasecmp( $username, $config['ldap']['userdn'] ) == 0 ) {
 		$set = array();
 		$set[] = array( 'dn' => $username, 'cn' => array($username) );
 	}

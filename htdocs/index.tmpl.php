@@ -15,7 +15,7 @@ include( 'doc-header.php' );
 <div class="container">
 <div class="mainpage">
 <h2>Already have an WCSDsignon Account?</h2>
-<button type="button" class="btn btn-success btn-lg btn-block"><small>Click Here to</small><br>Sign In</button>
+<a href="profile.php" class="btn btn-success btn-lg btn-block"><small>Click Here to</small><br>Sign In</a>
 
 <h2>Need an WCSDsignon account?</h2>
 <div class="row">
@@ -26,7 +26,7 @@ include( 'doc-header.php' );
 <button type="button" class="btn btn-primary btn-lg btn-block"><small>I am a</small><br>WCSD Employee</button>
 </div>
 <div class="col-md-4">
-<button type="button" class="btn btn-primary btn-lg btn-block"><small>I am a</small><br>Public User</button>
+<button type="button" class="btn btn-primary btn-lg btn-block"><small>I am a</small><br>Visitor</button>
 </div>
 </div>
 <br>
@@ -34,7 +34,6 @@ include( 'doc-header.php' );
 
 
 
-
-<?php include( 'doc-close.php' ); ?>
 </div>
 </div><!-- /container -->
+<?php include( 'doc-close.php' ); ?>

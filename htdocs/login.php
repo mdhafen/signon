@@ -6,7 +6,7 @@ include( 'doc-header.php' );
 ?>
 
 <div class="container">
-<form class="form-signin" method="post" action="https://development.washk12.org<?= $_SERVER['REQUEST_URI'] ?>">
+<form class="form-signin" method="post" action="<?= substr($data['_config']['base_url'],0,strpos($data['_config']['base_url'],'/',8)) ?><?= $_SERVER['PHP_SELF'] ?>">
   <h2 class='form-signin-heading'>WCSDsignon</h2>
   <label for="_username" class="sr-only">Username</label>
   <input type="username" id="_username" name="_username" class="form-control" placeholder="Username" value="<?= isset( $_SESSION['username'] )? $_SESSION[ 'username' ] : "" ?>" required autofocus>

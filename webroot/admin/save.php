@@ -21,45 +21,7 @@ $rdn_attr = substr( $objectdn, 0, strpos( $objectdn, '=' ) );
 
 ksort( $object, SORT_STRING | SORT_FLAG_CASE );
 
-if ( empty( $_SESSION['schema_objects'] ) ) {
-	$schema_objects = get_schema_objects();
-	$_SESSION['schema_objects'] = $schema_objects;
-}
-else {
-	$schema_objects = $_SESSION['schema_objects'];
-}
-
-if ( empty( $_SESSION['schema_attrs'] ) ) {
-	$schema_attrs = get_schema_attributes();
-	$_SESSION['schema_attrs'] = $schema_attrs;
-}
-else {
-	$schema_attrs = $_SESSION['schema_attrs'];
-}
-
-$must = array();
-$may = array();
-$classes = $object['objectClass'];
-for ( $i = 0; $i < count($classes); $i++ ) {
-	$oc = $classes[$i];
-
-	if ( ! empty($schema_objects[$oc]['SUP']) ) {
-		foreach ( $schema_objects[$oc]['SUP'] as $sup_oc ) {
-			$classes[] = $sup_oc;
-		}
-	}
-
-	if ( ! empty($schema_objects[$oc]['MUST']) ) {
-		$must = array_merge( $must, $schema_objects[$oc]['MUST'] );
-	}
-	if ( ! empty($schema_objects[$oc]['MAY']) ) {
-		$may = array_merge( $may, $schema_objects[$oc]['MAY'] );
-	}
-}
-
-$must = array_unique( $must );
-$may = array_unique( $may );
-$may = array_diff( $may, $must );
+list( $must, $may ) = schema_get_object_requirements($object['objectClass']);
 
 $errors = array();
 
@@ -132,6 +94,6 @@ if ( ! empty($errors) ) {
 	error( $errors );
 }
 else {
-	redirect( 'object.php?dn='. urlencode($objectdn ) );
+	redirect( 'admin/object.php?dn='. urlencode($objectdn ) );
 }
 ?>

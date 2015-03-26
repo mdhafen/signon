@@ -10,7 +10,7 @@
           </button>
           <a class="navbar-brand" href="#">WCSDsignon Authentication System</a>
         </div>
-        <div class="btn-group pull-right">
+        <div class="btn-group navbar-right">
 <?php if ( ! empty($data['_session']['username']) ) { ?>
           <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
           <span class="glyphicon glyphicon-user" aria-hidden="true"></span>&nbsp&nbsp<?= $data['_session']['username'] ?>
