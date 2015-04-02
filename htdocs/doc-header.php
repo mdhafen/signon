@@ -10,18 +10,19 @@
           </button>
           <a class="navbar-brand" href="#">WCSDsignon Authentication System</a>
         </div>
-        <div class="btn-group navbar-right">
 <?php if ( ! empty($data['_session']['username']) ) { ?>
-          <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-          <span class="glyphicon glyphicon-user" aria-hidden="true"></span>&nbsp&nbsp<?= $data['_session']['username'] ?>
+        <div class="nav navbar-right dropdown">
+          <a class="navbar-btn btn dropdown-toggle" data-toggle="dropdown" href="#">
+          <span class="glyphicon glyphicon-user"> <?= $data['_session']['username'] ?></span>
           </a>
-            <ul class="dropdown-menu">
-              <li><a href="#">Profile</a></li>
-              <li class="divider"></li>
-              <li><a href="<?= $data['_config']['base_url'] ?>?_logout=1">Sign Out</a></li>
-            </ul>
+          <ul class="dropdown-menu">
+            <li><a href="<?= $data['_config']['base_url'] ?>profile.php">Profile</a></li>
+            <li class="divider"></li>
+            <li><a href="<?= $data['_config']['base_url'] ?>?_logout=1">Sign Out</a></li>
+          </ul>
 <?php } else { ?>
-          <a class="btn" href="<?= $data['_config']['base_url'] ?>admin/">Sign In</a><!-- later link to profile -->
+	<div class="nav navbar-right">
+          <a class="navbar-btn btn" href="<?= $data['_config']['base_url'] ?>profile.php">Sign In</a>
 <?php } ?>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
