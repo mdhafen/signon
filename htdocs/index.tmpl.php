@@ -20,13 +20,13 @@ include( 'doc-header.php' );
 <h2>Need an WCSDsignon account?</h2>
 <div class="row">
 <div class="col-md-4">
-<button type="button" class="btn btn-primary btn-lg btn-block"><small>I am a</small><br>Student</button>
+<a href="create.php?op=Student" class="btn btn-primary btn-lg btn-block"><small>I am a</small><br>Student</a>
 </div>
 <div class="col-md-4">
-<button type="button" class="btn btn-primary btn-lg btn-block"><small>I am a</small><br>WCSD Employee</button>
+<a href="create.php?op=Employee" class="btn btn-primary btn-lg btn-block"><small>I am a</small><br>WCSD Employee</a>
 </div>
 <div class="col-md-4">
-<button type="button" class="btn btn-primary btn-lg btn-block"><small>I am a</small><br>Visitor</button>
+<a href="create.php?op=Guest" class="btn btn-primary btn-lg btn-block"><small>I am a</small><br>Visitor</a>
 </div>
 </div>
 <br>

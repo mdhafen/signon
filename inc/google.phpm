@@ -1,0 +1,134 @@
+<?php
+global $GOOGLE_DOMAIN;
+global $GOOGLE_CLIENT;
+$GOOGLE_DOMAIN = 'washk12.org';
+$GOOGLE_CLIENT = '';
+
+$SERVICE_ACCOUNT_EMAIL = '785115890023@developer.gserviceaccount.com';
+$SERVICE_ACCOUNT_PKCS12_FILE_PATH = '/var/www/signon/inc/WCSD_Drive_API-privatekey.p12';
+$SERVICE_EMAIL = 'apiaccess@washk12.org';
+$SERVICE_SCOPE = 'https://www.googleapis.com/auth/admin.directory.user https://www.googleapis.com/auth/admin.directory.group';
+
+require_once "/usr/share/php/google-api-php-client/src/Google_Client.php";
+require_once 'XML/Unserializer.php';
+include_once 'google_functions_directory.php';
+
+$GOOGLE_CLIENT = buildService( $SERVICE_EMAIL, $SERVICE_SCOPE );
+
+$LDAP_BASE = 'dc=wcsd';
+global $LOCATIONS;
+$LOCATIONS = array(
+  'AES' => 'ou=Arrowhead Elementary,ou=Elementaries,ou=Snow Cone,'.$LDAP_BASE,
+  'BES' => 'ou=Bloomington Elementary,ou=Elementaries,ou=Dixie Cone,'.$LDAP_BASE,
+  'BHES' => 'ou=Bloomington Hills Elementary,ou=Elementaries,ou=Desert Hills Cone,'.$LDAP_BASE,
+  'CLF' => 'ou=Coral Cliffs Elementary,ou=Elementaries,ou=Snow Cone,'.$LDAP_BASE,
+  'CVES' => 'ou=Crimson View Elementary,ou=Elementaries,ou=Desert Hills Cone,'.$LDAP_BASE,
+  'CYN' => 'ou=Coral Canyon Elementary,ou=Elementaries,ou=Hurricane Cone,'.$LDAP_BASE,
+  'DHHS' => 'ou=Desert Hills High,ou=Desert Hills Cone,'.$LDAP_BASE,
+  'DHMS' => 'ou=Desert Hills Middle,ou=Desert Hills Cone,'.$LDAP_BASE,
+  'DSES' => 'ou=Dixie Sun Elementary,ou=Elementaries,ou=Snow Cone,'.$LDAP_BASE,
+  'DVES' => 'ou=Diamond Valley Elementary,ou=Elementaries,ou=Dixie Cone,'.$LDAP_BASE,
+  'DHS' => 'ou=Dixie High,ou=Dixie Cone,'.$LDAP_BASE,
+  'DMS' => 'ou=Dixie Middle,ou=Dixie Cone,'.$LDAP_BASE,
+  'EAST' => 'ou=East Elementary,ou=Elementaries,ou=Dixie Cone,'.$LDAP_BASE,
+  'EES' => 'ou=Enterprise Elementary,ou=Enterprise Cone,'.$LDAP_BASE,
+  'EHS' => 'ou=Enterprise High,ou=Enterprise Cone,'.$LDAP_BASE,
+  'FRIS' => 'ou=Fossil Ridge Intermediate,ou=Pine Cone,'.$LDAP_BASE,
+  'HES' => 'ou=Hurricane Elementary,ou=Elementaries,ou=Hurricane Cone,'.$LDAP_BASE,
+  'HRZ' => 'ou=Horizon Elementary,ou=Elementaries,ou=Pine Cone,'.$LDAP_BASE,
+  'HTES' => 'ou=Heritage Elementary,ou=Elementaries,ou=Dixie Cone,'.$LDAP_BASE,
+  'HHS' => 'ou=Hurricane High,ou=Hurricane Cone,'.$LDAP_BASE,
+  'HIS' => 'ou=Hurricane Intermediate,ou=Hurricane Cone,'.$LDAP_BASE,
+  'HMS' => 'ou=Hurricane Middle,ou=Hurricane Cone,'.$LDAP_BASE,
+  'LRIS' => 'ou=Lava Ridge Intermediate,ou=Snow Cone,'.$LDAP_BASE,
+  'LTV' => 'ou=Little Valley Elementary,ou=Elementaries,ou=Desert Hills Cone,'.$LDAP_BASE,
+  'LVK' => 'ou=La Verkin Elementary,ou=Elementaries,ou=Hurricane Cone,'.$LDAP_BASE,
+  'MHS' => 'ou=Millcreek High,ou=Pine Cone,'.$LDAP_BASE,
+  'PES' => 'ou=Panorama Elementary,ou=Elementaries,ou=Pine Cone,'.$LDAP_BASE,
+  'POST' => 'ou=Post High,'.$LDAP_BASE,
+  'PVHS' => 'ou=Pine View High,ou=Pine Cone,'.$LDAP_BASE,
+  'PVMS' => 'ou=Pine View Middle,ou=Pine Cone,'.$LDAP_BASE,
+  'RES' => 'ou=Riverside Elementary,ou=Elementaries,ou=Desert Hills Cone,'.$LDAP_BASE,
+  'RMES' => 'ou=Red Mountain Elementary,ou=Elementaries,ou=Snow Cone,'.$LDAP_BASE,
+  'SCES' => 'ou=Santa Clara Elementary,ou=Elementaries,ou=Snow Cone,'.$LDAP_BASE,
+  'SES' => 'ou=Springdale Elementary,ou=Elementaries,ou=Hurricane Cone,'.$LDAP_BASE,
+  'SCHS' => 'ou=Snow Canyon High,ou=Snow Cone,'.$LDAP_BASE,
+  'SCMS' => 'ou=Snow Canyon Middle,ou=Snow Cone,'.$LDAP_BASE,
+  'SHS' => 'ou=SouthWest,ou=Dixie Cone,'.$LDAP_BASE,
+  'SNDS' => 'ou=Sandstone Elementary,ou=Elementaries,ou=Pine Cone,'.$LDAP_BASE,
+  'SRIS' => 'ou=Sunrise Ridge Intermediate,ou=Desert Hills Cone,'.$LDAP_BASE,
+  'SSES' => 'ou=Sunset Elementary,ou=Elementaries,ou=Snow Cone,'.$LDAP_BASE,
+  'TECH' => 'ou=Technology,'.$LDAP_BASE,
+  'TFES' => 'ou=Three Falls Elementary,ou=Elementaries,ou=Hurricane Cone,'.$LDAP_BASE,
+  'TIS' => 'ou=Tonaquint Intermediate,ou=Dixie Cone,'.$LDAP_BASE,
+  'WES' => 'ou=Washington Elementary,ou=Elementaries,ou=Pine Cone,'.$LDAP_BASE,
+  'WCS' => 'ou=Water Canyon School,ou=Hurricane Cone,'.$LDAP_BASE,
+  'washk12' => 'ou=District Departments,'.$LDAP_BASE,
+		   );
+
+function auth_to_google( $email, $password ) {
+  /* no workie
+     global $GOOGLE_CLIENT;
+     $request = $GOOGLE_CLIENT->getIo()->authenticatedRequest(
+        new Google_HttpRequest(
+        // Google_OAuth2::OAUTH2_TOKEN_URI, 'POST', array(), array(
+        Google_OAuth2::OAUTH2_AUTH_URL, 'POST', array(), array(
+                'grant_type' => 'password',
+                'username' => $email,
+                'password' => $password,
+                // 'scope' => 'openid email',
+        )));
+
+  */
+  $hostname = '{imap.gmail.com:993/imap/ssl/novalidate-cert}[Gmail]/All Mail';
+
+  // imap_open(host,user,pass,options,n_retries)
+  $inbox = @imap_open( $hostname, $email, $password, 0, 1 );
+
+  if ( $inbox ) {
+    imap_close( $inbox );
+  }
+
+  return $inbox;
+}
+
+function get_user_google( $email ) {
+  global $GOOGLE_CLIENT;
+
+  $user = getUser( $GOOGLE_CLIENT, $email );
+
+  return $user;
+}
+
+function google_org_to_loc( $path ) {
+  global $LOCATIONS;
+
+  $ous = explode( '/', $path );
+  $ous = array_reverse($ous);
+  $ou = array_shift($ous);
+  if ( strpos($ou,'Cone') !== FALSE ) {  // drop cone level
+    $ou = array_shift($ous);
+  }
+  if ( $ou == 'Elementaries' ) {  // drop elementaries level
+    $ou = array_shift($ous);
+  }
+
+  foreach ( $LOCATIONS as $loc => $location ) {
+    if ( strpos($location,$ou) !== FALSE ) {
+      return $loc;
+    }
+  }
+
+  return 'washk12';  // FIXME hard coded default value
+}
+
+function loc_to_ou( $loc ) {
+  global $LOCATIONS;
+
+  if ( !empty( $LOCATIONS[$loc] ) ) {
+    return $LOCATIONS[$loc];
+  }
+  return '';
+}
+
+?>
