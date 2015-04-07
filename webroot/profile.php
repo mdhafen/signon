@@ -25,8 +25,6 @@ if ( ! empty($errors) ) {
 else {
 	$output = array(
 		'object' => $object,
-		'must' => $must,
-		'may' => $may,
 	);
 	output( $output, 'profile' );
 }
