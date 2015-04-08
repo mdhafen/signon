@@ -123,6 +123,40 @@ function google_org_to_loc( $path ) {
   return 'washk12';  // FIXME hard coded default value
 }
 
+function google_org_to_ou( $path, $location ) {
+  global $LOCATIONS;
+
+  $dn = $base = '';
+  $paths = explode( '/', $path );
+  $paths = array_filter( $paths );
+  $location = loc_to_ou( $location );
+  $ous = preg_split( '/(?<!\\\\),/', $location );
+  $ous = array_reverse($ous);
+  // FIXME finish filling this in
+  foreach ( $ous as $ou ) {
+    if ( stripos($ou,'dc=') !== FALSE ) {
+      continue;
+    }
+    else {
+      $p = array_shift( $paths );
+      if ( stripos($ou,$p) !== FALSE ) {
+        continue;
+      }
+      else {               //  a fall back,
+        return $location;  //  ous should never be shorter than paths
+      }
+    }
+  }
+  if ( !empty($paths) ) {
+    $paths = array_reverse($paths);
+    foreach ( $paths as $ou ) {
+      $dn .= 'ou='. $ou .',';
+    }
+    return $dn.$location;
+  }
+  return $location;
+}
+
 function loc_to_ou( $loc ) {
   global $LOCATIONS;
 

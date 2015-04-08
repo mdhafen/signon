@@ -31,21 +31,7 @@ if ( !empty($submitted) ) {
     'mobile' => '',
   );
 
-  switch ($op) {
-    case "Employee":
-      $entry['employeeType'] = 'Staff';
-      break;
-
-    case "Student":
-      $entry['employeeType'] = 'Student';
-      break;
-
-    case "Guest":
-      $entry['employeeType'] = 'Guest';
-      break;
-  }
-
-  if ( $entry['employeeType'] == 'Guest' ) {
+  if ( $op == 'Guest' ) {
     $entry['uid'] = $entry['mobile'] = input( 'mobile', INPUT_HTML_NONE );
     $entry['sn'] = input( 'lastName', INPUT_HTML_NONE );
     $entry['givenName'] = input( 'firstName', INPUT_HTML_NONE );
@@ -55,23 +41,42 @@ if ( !empty($submitted) ) {
     $entry['l'] = input( 'city', INPUT_HTML_NONE );
     $entry['st'] = input( 'state', INPUT_HTML_NONE );
     $entry['postalCode'] = input( 'zip', INPUT_HTML_NONE );
+    $entry['employeeType'] = 'Guest';
+    $entry['dn'] = 'uid='. $entry['uid'] .',ou=Guest,dc=wcsd';
   }
-  else if ( !empty($entry['employeeType']) ) {
+  else if ( !empty($op) ) {
     $entry['mail'] = input( 'email', INPUT_HTML_NONE );
     if ( auth_to_google( $entry['mail'], $password ) ) {
       $user = get_user_google( $entry['mail'] );
 
       if ( !empty($user) ) {
-	$entry['uid'] = strtolower(substr($user['primaryEmail'],0,strpos($user['primaryEmail'],'@')));
-	$entry['sn'] = $user['name']['familyName'];
-	$entry['givenName'] = $user['name']['givenName'];
-	$entry['cn'] = $user['name']['fullName'];
-	$entry['mail'] = strtolower($user['primaryEmail']);
-	$entry['l'] = google_org_to_loc( $user['orgUnitPath'] );
+	if ( stripos($user['orgUnitPath'],'nonusers') !== FALSE ) {
+	  $error = 1;
+	  $result = 'Trying to register service account';
+	}
+	else if ( stripos($user['orgUnitPath'],'student') !== FALSE ) {
+	  $entry['employeeType'] = 'Student';
+	}
+	else {
+	  $entry['employeeType'] = 'Staff';
+	}
+
+	if ( !empty($entry['employeeType']) ) {
+	  $entry['uid'] = strtolower(substr($user['primaryEmail'],0,strpos($user['primaryEmail'],'@')));
+	  $entry['sn'] = $user['name']['familyName'];
+	  $entry['givenName'] = $user['name']['givenName'];
+	  $entry['cn'] = $user['name']['fullName'];
+	  $entry['mail'] = strtolower($user['primaryEmail']);
+	  $entry['l'] = google_org_to_loc( $user['orgUnitPath'] );
+	  $ou = google_org_to_ou( $user['orgUnitPath'], $entry['l'] );
+	  if ( !empty($ou) && !empty($entry['uid']) ) {
+	    $entry['dn'] = 'uid='. $entry['uid'] .','. $ou;
+	  }
+	}
       }
     }
   }
-  if ( !empty($entry['uid']) ) {
+  if ( !empty($entry['dn']) ) {
     do_ldap_connect();
     $dups = ldap_quick_search( array( 'uid' => $entry['uid'] ), array() );
 
@@ -82,24 +87,20 @@ if ( !empty($submitted) ) {
       }
     }
     else if ( count($dups) === 0 ) {
-      $dn = '';
-      if ( $entry['employeeType'] == 'Guest' ) {
-	  $dn = 'uid='. $entry['uid'] .',ou=Guest,dc=wcsd';
-      }
-      else if ( !empty($entry['l']) && !empty(loc_to_ou($entry['l'])) ) {
-	$dn = 'uid='. $entry['uid'] .','. loc_to_ou( $entry['l'] );
-      }
-      else {
-	$error = 1;
-	$result = 'No Location for DN';
-      }
-      if ( !empty($dn) ) {
+      if ( !empty($entry['dn']) ) {
+	$dn = $entry['dn'];
+	unset( $entry['dn'] );
+
 	$entry['sambaSID'] = ldap_get_next_SID();
 	do_ldap_add( $dn, $entry );
 	set_password( $dn, $password );
 	$result = 'Account created';
       }
     }
+  }
+  else {
+    $error = 1;
+    $result = 'No Location for DN';
   }
 }
 

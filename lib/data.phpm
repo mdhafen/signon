@@ -152,6 +152,7 @@ function do_ldap_add( $userdn, $attrs ) {
 
 function ldap_ensure_ous( $dn ) {
 	$work = preg_split( '/(?<!\\\\),/', $dn );
+	$result = 1;
 	$base = '';
 	$dn = '';
 
@@ -170,10 +171,11 @@ function ldap_ensure_ous( $dn ) {
 			$dn = $ou .','. $dn;
 			$set = ldap_quick_search( array('objectClass'=>'*'), array(), 0, $dn.$base );
 			if ( empty($set) ) {
-				ldap_create_ou( $dn.$base );
+				$result = ldap_create_ou( $dn.$base );
 			}
 		}
 	}
+	return $result;
 }
 
 function ldap_create_ou( $dn ) {
