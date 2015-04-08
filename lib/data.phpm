@@ -124,11 +124,73 @@ function ldap_quick_search( $filter = array('objectclass' => '*'), $attrs = arra
 function do_ldap_modify( $userdn, $attrs ) {
 	global $ldap;
 
+	$attrs = array_filter( $attrs );
 	if ( empty( $userdn ) || ! is_array( $attrs ) || empty( $attrs ) ) {
 		return 0;
 	}
 
 	$result = @ldap_modify( $ldap, $userdn, $attrs );
+
+	return $result;
+}
+
+function do_ldap_add( $userdn, $attrs ) {
+	global $ldap;
+	$result = 0;
+
+	$attrs = array_filter( $attrs );
+	if ( empty( $userdn ) || ! is_array( $attrs ) || empty( $attrs ) ) {
+		return $result;
+	}
+
+	if ( ldap_ensure_ous( substr( $userdn, strpos($userdn,',') + 1 ) ) ) {
+		$result = ldap_add( $ldap, $userdn, $attrs );
+	}
+
+	return $result;
+}
+
+function ldap_ensure_ous( $dn ) {
+	$work = preg_split( '/(?<!\\\\),/', $dn );
+	$base = '';
+	$dn = '';
+
+	$work = array_reverse($work);
+	foreach ( $work as $ou ) {
+		if ( empty($ou) ) { continue; }
+		if ( stripos($ou,'dc=') !== FALSE ) {
+			if ( empty($base) ) {
+				$base = $ou;
+			}
+			else {
+				$base = $ou .','. $base;
+			}
+		}
+		else {
+			$dn = $ou .','. $dn;
+			$set = ldap_quick_search( array('objectClass'=>'*'), array(), 0, $dn.$base );
+			if ( empty($set) ) {
+				ldap_create_ou( $dn.$base );
+			}
+		}
+	}
+}
+
+function ldap_create_ou( $dn ) {
+	global $ldap;
+	$result = 0;
+
+	$work = preg_split( '/(?<!\\\\),/', $dn );
+	$work = explode( '=', $work[0] );
+	$ou = $work[1];
+	if ( !empty($ou) ) {
+		$work = array(
+			'objectClass' => 'organizationalUnit',
+			'ou' => $ou,
+		);
+
+		$result = ldap_add( $ldap, $dn, $work );
+	}
 
 	return $result;
 }

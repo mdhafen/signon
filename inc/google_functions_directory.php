@@ -1,4 +1,44 @@
 <?php
+function errorTraps($n,$e,$ecode,$emessage){
+	//echo 'An error occurred: ' . $emessage . "\r\n";
+	if($ecode == 403 && (strpos($emessage, 'Rate Limit Exceeded')>0 || strpos($emessage,'RateLimitExceeded')>0)) {
+		//Apply exponential backoff.
+		echo 'Rate Limit Exceeded Backoff ' . $n . "\r\n";
+		usleep((1 << $n) * 1000 + rand(0, 1000));
+	}elseif($ecode == 404 && (strpos($emessage, 'Permission not found'))){
+		//Apply exponential backoff.
+		echo 'Permission Error Backoff ' . $n . "\r\n";
+		usleep((1 << $n) * 1000 + rand(0, 1000));
+	}elseif($ecode == 503 && (strpos($emessage, 'Backend Error'))){
+		//Apply exponential backoff.
+		echo 'Backend Error Backoff ' . $n . "\r\n";
+		usleep((1 << $n) * 1000 + rand(0, 1000));
+	}elseif($ecode == 503 && (strpos($emessage, 'Service unavailable'))){
+		//Apply exponential backoff.
+		echo 'Service unavailable Backoff ' . $n . "\r\n";
+		usleep((1 << $n) * 1000 + rand(0, 1000));
+	}elseif($ecode == 500 && (strpos($emessage, 'Internal Error'))){
+		//Apply exponential backoff.
+		echo 'Internal Error Backoff ' . $n . "\r\n";
+		usleep((1 << $n) * 1000 + rand(0, 1000));
+	}elseif($ecode == 403 && (strpos($emessage, 'Insufficient permissions'))){
+		//Apply exponential backoff.
+		echo 'Insufficient permissions Error Backoff ' . $n . "\r\n";
+		//usleep((1 << $n) * 1000 + rand(0, 1000));
+	}elseif($ecode == 401 && (strpos($emessage, 'Unauthorized'))){
+		//Apply exponential backoff.
+		echo 'Unauthorized Error Backoff ' . $n . "\r\n";
+		//usleep((1 << $n) * 1000 + rand(0, 1000));
+	}elseif($ecode == 400){
+		echo $emessage . "\r\n";
+		exit(222);
+	}else{
+		// Other error, re-throw.
+		throw $e;
+	}
+	return $e;
+}
+
 function buildService($userEmail,$SCOPE) {
 	global $SERVICE_ACCOUNT_EMAIL, $SERVICE_ACCOUNT_PKCS12_FILE_PATH;
 	$key = file_get_contents($SERVICE_ACCOUNT_PKCS12_FILE_PATH);
@@ -10,8 +50,8 @@ function buildService($userEmail,$SCOPE) {
 	$client = new Google_Client();
 	$client->setUseObjects(true);
 	$client->setAssertionCredentials($auth);
-	if(isset($_SESSION['token'])) {
-		$client->setAccessToken($_SESSION['token']);
+	if(isset($_SESSION['GoogleToken'])) {
+		$client->setAccessToken($_SESSION['GoogleToken']);
 	}
 	return $client;
 }
@@ -112,40 +152,94 @@ function addOrgUnit($client,$postBody){
 }
 
 function getUser($client,$email){
-		$requestBody = $email;
-		$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/users/$email");
-		$req->setRequestMethod('get');
-		$headers = array('GData-Version'=>'3.0',
-		'Content-type'=>'application/atom+xml');
-		$req->setRequestHeaders($headers);
-		$val		= $client->getIo()->authenticatedRequest($req);
-		return json_decode($val->getResponseBody(), true);
+	//echo 'Trying getUser' . "\r\n";
+	$requestBody = $email;
+	$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/users/$email");
+	$req->setRequestMethod('get');
+	$headers = array('GData-Version'=>'3.0',
+	'Content-type'=>'application/atom+xml');
+	$req->setRequestHeaders($headers);
+	$val		= $client->getIo()->authenticatedRequest($req);
+	if(@$val->error){
+		throw new Exception($val->error);
+	}
+	return $val->getResponseBody();
 }
 
 function updateUser($client,$email,$requestBody){
+	for($n = 0; $n < 10; ++$n){
+		try{	
+			$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/users/$email");
+			$req->setRequestMethod('put');
+			$headers = array('GData-Version'=>'3.0',
+			'Content-type'=>'application/json');
+			$req->setRequestHeaders($headers);
+			$req->setPostBody($requestBody);
+			$val = $client->getIo()->authenticatedRequest($req);
+			return $val->getResponseBody();
+		}catch (Exception $e){
+			print_r($e);
+		}
+	}
+}
+
+function deleteUser($client,$email){
+	try{
 		$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/users/$email");
-		$req->setRequestMethod('put');
+		$req->setRequestMethod('delete');
 		$headers = array('GData-Version'=>'3.0',
 		'Content-type'=>'application/json');
 		$req->setRequestHeaders($headers);
-		$req->setPostBody($requestBody);
-		$val		= $client->getIo()->authenticatedRequest($req);
+		$val = $client->getIo()->authenticatedRequest($req);
 		return $val->getResponseBody();
+	}catch (Exception $e){
+		print_r($e);
+	}
 }
 
 function getAllUsers($client,$email,$pageToken=null){
-	$max=500;
-	if($pageToken){
-		$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/users/?customer=my_customer&pageToken=$pageToken&maxResults=$max");
-	}else{
-		$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/users/?customer=my_customer&maxResults=$max");
+	for($n = 0; $n < 10; ++$n){
+		try{
+			$max=500;
+			if($pageToken){
+				$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/users/?customer=my_customer&pageToken=$pageToken&maxResults=$max&orderBy=email&sortOrder=descending");
+			}else{
+				$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/users/?customer=my_customer&maxResults=$max&orderBy=email&sortOrder=descending");
+			}
+			$req->setRequestMethod('get');
+			$headers	= array('GData-Version'=>'3.0',
+						'Content-type'=>'application/atom+xml');
+			$req->setRequestHeaders($headers);
+			$val		= $client->getIo()->authenticatedRequest($req);
+			return $val->getResponseBody();
+		}catch (Exception $e){
+			errorTraps($n, $e, $e->getCode(), $e->getMessage());
+		}
 	}
-	$req->setRequestMethod('get');
-	$headers	= array('GData-Version'=>'3.0',
-				'Content-type'=>'application/atom+xml');
-	$req->setRequestHeaders($headers);
-	$val		= $client->getIo()->authenticatedRequest($req);
-	return $val->getResponseBody();
+}
+
+function searchUsers($client,$email,$query=null,$pageToken=null){
+    if($query){
+        $Query='&query='.$query;
+    }
+	for($n = 0; $n < 10; ++$n){
+		try{
+			$max=500;
+			if($pageToken){
+				$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/users/?customer=my_customer&pageToken=$pageToken&maxResults=$max&orderBy=email&sortOrder=descending$Query");
+			}else{
+				$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/users/?customer=my_customer&maxResults=$max&orderBy=email&sortOrder=descending$Query");
+			}
+			$req->setRequestMethod('get');
+			$headers	= array('GData-Version'=>'3.0',
+						'Content-type'=>'application/atom+xml');
+			$req->setRequestHeaders($headers);
+			$val		= $client->getIo()->authenticatedRequest($req);
+			return $val->getResponseBody();
+		}catch (Exception $e){
+			errorTraps($n, $e, $e->getCode(), $e->getMessage());
+		}
+	}
 }
 
 function createGroup($client,$postBody){
@@ -219,5 +313,51 @@ function getUsersGroups($client, $member){
 	}catch (Exception $e){
 		print_r($e);
 	}
+}
+
+function checkStaff($data){
+    $isStaff = true;
+    $checkOrg = array('Students', 'NonUsers');
+    $checkEmail = array('apple','ipad','_','-','dosurvey','android','chromebook','coral.cliffs','dhms','dixiesunteacheraward','ecse.sec','ees.preschool','ged-pcf','hes.admin','hhsadmin','help.help','ifas@washk12.org','wifiguest','trips@washk12.org','trans.sped','testuser','temp.secretary','teacher.new','stars@washk12.org','southwest','snow.canyon','pvhs','panorama.elementary.school');
+    foreach($checkOrg as $org){
+        if(preg_match('/'.$org."/", $data['orgUnitPath'])){
+            $isStaff=false;
+        }
+    }
+    foreach($checkEmail as $org){
+        if(preg_match('/'.$org."/", $data['primaryEmail'])){
+            $isStaff=false;
+        }
+    }
+    if(is_numeric(substr($data['primaryEmail'],0,2))){
+        $isStaff=false;
+    }
+    if($data['suspended']==1){
+        $isStaff=false;
+    }
+    return $isStaff;
+}
+
+function checkStudents($data){
+    $isStaff = false;
+    $checkOrg = array('NonUsers');
+    $checkEmail = array('apple','ipad','_','android','chromebook','coral.cliffs','dhms','dixiesunteacheraward','ecse.sec','ees.preschool','ged-pcf','hes.admin','hhsadmin','help.help','ifas@washk12.org','wifiguest','trips@washk12.org','trans.sped','testuser','temp.secretary','teacher.new','stars@washk12.org','southwest','snow.canyon','pvhs','panorama.elementary.school');
+    foreach($checkOrg as $org){
+        if(preg_match('/'.$org."/", $data['orgUnitPath'])){
+            $isStaff=false;
+        }
+    }
+    foreach($checkEmail as $org){
+        if(preg_match('/'.$org."/", $data['primaryEmail'])){
+            $isStaff=false;
+        }
+    }
+    if(is_numeric(substr($data['primaryEmail'],0,2)) && preg_match('/Students/', $data['orgUnitPath'])){
+        $isStaff=true;
+    }
+    if($data['suspended']==1){
+        $isStaff=false;
+    }
+    return $isStaff;
 }
 ?>

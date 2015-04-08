@@ -15,7 +15,12 @@ function set_password( $userdn, $password ) {
 	$result = 0;
 	if ( ! empty($userdn) && ! empty($password) ) {
 		$set = ldap_quick_search( array( 'objectClass' => '*' ), array(), 0, $userdn );
-		$object = $set[0];
+		if ( !empty($set) ) {
+			$object = $set[0];
+		}
+		if ( empty($object) ) {
+			return 0;
+		}
 
 		$salt = "";
 		$len = mt_rand( 40-strlen($password), 50 );

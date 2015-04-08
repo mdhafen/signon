@@ -8,6 +8,26 @@ include( 'doc-header.php' );
 <h1>Create account</h1>
 <div class="mainpage">
 
+<?php
+if ( !empty($data['result']) ) {
+  if ( empty($data['error']) ) { ?>
+<div class="alert alert-info alert-dismissible" role="alert">
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+Your account has been created.  Please switch to the WCSDaccess network and use your phone number and password to login.
+</div>
+<?php
+  } else { /* error */ ?>
+<div class="alert alert-danger" role="alert">
+There was an error! <?= $data['error'] ?>
+</div>
+<?php
+  }
+} else { ?>
+<div class="alert alert-info alert-dismissible" role="alert">
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+  Please enter the form below to register for network access.
+</div>
+
 <div class="panel panel-default panel-body">
   <div class="container-fluid">
     <div class="row">

@@ -96,6 +96,7 @@ function get_user_google( $email ) {
   global $GOOGLE_CLIENT;
 
   $user = getUser( $GOOGLE_CLIENT, $email );
+  $user = json_decode($user, true);
 
   return $user;
 }
@@ -104,17 +105,17 @@ function google_org_to_loc( $path ) {
   global $LOCATIONS;
 
   $ous = explode( '/', $path );
-  $ous = array_reverse($ous);
+  $ous = array_filter( $ous );
   $ou = array_shift($ous);
-  if ( strpos($ou,'Cone') !== FALSE ) {  // drop cone level
+  if ( stripos($ou,'cone') !== FALSE ) {  // drop cone level
     $ou = array_shift($ous);
   }
-  if ( $ou == 'Elementaries' ) {  // drop elementaries level
+  if ( strtolower($ou) == 'elementaries' ) {  // drop elementaries level
     $ou = array_shift($ous);
   }
 
   foreach ( $LOCATIONS as $loc => $location ) {
-    if ( strpos($location,$ou) !== FALSE ) {
+    if ( stripos($location,$ou) !== FALSE ) {
       return $loc;
     }
   }
