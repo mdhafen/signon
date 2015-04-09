@@ -266,7 +266,7 @@ function new_password( $new_password ) {
   creates a variant of the XKCD style password if a dictionary is available
    as in 'correct horse battery staple'
    my variant adds a symbol or number between words that are > 4 characters
-   end result should be something like 'Portugal9ought:dress4room"'
+   end result should be something like 'Francoise's"silo's&packet1glutton's-'
   if no dictionary is available then is a typical random 8 character password
  */
 function create_password() {
@@ -277,7 +277,7 @@ function create_password() {
 	$dict_str = $symbol_set . $numeric_set . $alpha_set . $ualpha_set;
 	$dict_file = '/usr/share/dict/words';
 	$dictionary = array();
-	$interations = 0;
+	$iterations = 0;
 	$password = '';
 
 	if ( is_readable( $dict_file ) ) {
@@ -295,14 +295,16 @@ function create_password() {
 		$dict_str = $symbol_set . $numeric_set;
 	}
 
-	$dict_size = count($dictionary);
-	while ( $iterations < 3 && strlen($password) < 8 ) {
+	$dict_size = count($dictionary) - 1;
+	$dict_str_size = strlen($dict_str) - 1;
+	while ( $iterations < 4 || strlen($password) < 8 ) {
 		$iterations++;
 		if ( !empty($dictionary) ) {
-			$password .= $dictionary[ rand($dict_size) ];
+			$password .= $dictionary[ rand(0,$dict_size) ];
 		}
-		$password .= $dict_str[ rand( strlen($dict_str) ) ];
+		$password .= $dict_str[ rand(0,$dict_str_size) ];
 	}
+
 	return $password;
 }
 
