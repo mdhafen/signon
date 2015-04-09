@@ -262,4 +262,73 @@ function new_password( $new_password ) {
 	return array( base64_encode( $user_password ), base64_encode( $salt ) );
 }
 
+/*
+  creates a variant of the XKCD style password if a dictionary is available
+   as in 'correct horse battery staple'
+   my variant adds a symbol or number between words that are > 4 characters
+   end result should be something like 'Portugal9ought:dress4room"'
+  if no dictionary is available then is a typical random 8 character password
+ */
+function create_password() {
+	$symbol_set = '!@#$%&*()-_+\'";:/?., '; // reduced for mobile keyboards
+	$numeric_set = '0123456789';
+	$alpha_set = 'abcdefghijklmnopqrstuvwxyz';
+	$ualpha_set = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	$dict_str = $symbol_set . $numeric_set . $alpha_set . $ualpha_set;
+	$dict_file = '/usr/share/dict/words';
+	$dictionary = array();
+	$interations = 0;
+	$password = '';
+
+	if ( is_readable( $dict_file ) ) {
+		$dictionary = file( $dict_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
+		$changed = 0;
+		foreach ( $dictionary as $index => $word ) {
+			if ( mb_strlen($word) < 4 ) {
+				unset( $dictionary[$index] );
+				$changed++;
+			}
+		}
+		if ( $changed ) {
+			$dictionary = array_values( $dictionary );
+		}
+		$dict_str = $symbol_set . $numeric_set;
+	}
+
+	$dict_size = count($dictionary);
+	while ( $iterations < 3 && strlen($password) < 8 ) {
+		$iterations++;
+		if ( !empty($dictionary) ) {
+			$password .= $dictionary[ rand($dict_size) ];
+		}
+		$password .= $dict_str[ rand( strlen($dict_str) ) ];
+	}
+	return $password;
+}
+
+// Just in case I care that php random number generator isn't random enough
+function _rand( $min = 0, $max = 255 ) {
+	$range = $max - $min;
+
+	$num = $range;
+	$bytes = 0;
+	do {
+		$bytes++;
+		$num = $num >> 8;
+	} while ( $num > 0 );
+
+	$num = 0;
+	$iterations = 255;
+	do {
+		$iterations--;
+		$raw = mcrypt_create_iv( $bytes, MCRYPT_RAND );
+		for ( $s = 0; $s < $bytes; $s++ ) {
+			$num = ( $num << 8 ) | ( ord( $raw[$s] ) );
+		}
+		$num = $num & PHP_INT_MAX; // make sure there's no overflow
+	} while ( $num > $range && $interations );
+	if ( $num > $range ) { $num = $num % $range; } // less safe fallback
+	return $num + $min;
+}
+
 ?>

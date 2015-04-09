@@ -15,6 +15,7 @@ $template = ($op == 'Guest') ? 'create-guest' : 'create';
 
 if ( !empty($submitted) ) {
   $password = input( 'password', INPUT_STR );
+  $email = input( 'email', INPUT_HTML_NONE );
 
   $entry = array(
     'objectclass' => array('top','inetOrgPerson','sambaSamAccount'),
@@ -32,11 +33,12 @@ if ( !empty($submitted) ) {
   );
 
   if ( $op == 'Guest' ) {
+    $password = create_password();
     $entry['uid'] = $entry['mobile'] = input( 'mobile', INPUT_HTML_NONE );
     $entry['sn'] = input( 'lastName', INPUT_HTML_NONE );
     $entry['givenName'] = input( 'firstName', INPUT_HTML_NONE );
     $entry['cn'] = $entry['givenName'] .' '. $entry['sn'];
-    $entry['mail'] = input( 'email', INPUT_HTML_NONE );
+    $entry['mail'] = $email;
     $entry['street'] = input( 'street', INPUT_HTML_NONE );
     $entry['l'] = input( 'city', INPUT_HTML_NONE );
     $entry['st'] = input( 'state', INPUT_HTML_NONE );
@@ -44,10 +46,9 @@ if ( !empty($submitted) ) {
     $entry['employeeType'] = 'Guest';
     $entry['dn'] = 'uid='. $entry['uid'] .',ou=Guest,dc=wcsd';
   }
-  else if ( !empty($op) ) {
-    $entry['mail'] = input( 'email', INPUT_HTML_NONE );
-    if ( auth_to_google( $entry['mail'], $password ) ) {
-      $user = get_user_google( $entry['mail'] );
+  else if ( !empty($email) && !empty($password) ) {
+    if ( auth_to_google( $email, $password ) ) {
+      $user = get_user_google( $email );
 
       if ( !empty($user) ) {
 	if ( stripos($user['orgUnitPath'],'nonusers') !== FALSE ) {
