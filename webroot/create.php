@@ -6,6 +6,7 @@ include_once( '../lib/output.phpm' );
 include_once( '../inc/google.phpm' );
 include_once( '../inc/person.phpm' );
 
+$output = array();
 $result = '';
 $error = 0;
 $op = input( 'op', INPUT_STR );
@@ -82,10 +83,11 @@ if ( !empty($submitted) ) {
     $dups = ldap_quick_search( array( 'uid' => $entry['uid'] ), array() );
 
     if ( count($dups) == 1 ) {
-      if ( empty($dups[0]['userPassword'][0]) ) {
-	set_password( $dups[0]['dn'], $password );
-	$result = 'Account created';
+      set_password( $dups[0]['dn'], $password );
+      if ( $entry['employeeType'] == 'Guest' ) {
+	google_send_password( $entry['uid'], $password );
       }
+      $result = 'Account created';
     }
     else if ( count($dups) === 0 ) {
       if ( !empty($entry['dn']) ) {
@@ -95,6 +97,9 @@ if ( !empty($submitted) ) {
 	$entry['sambaSID'] = ldap_get_next_SID();
 	do_ldap_add( $dn, $entry );
 	set_password( $dn, $password );
+	if ( $entry['employeeType'] == 'Guest' ) {
+	  google_send_password( $entry['uid'], $password );
+	}
 	$result = 'Account created';
       }
     }
@@ -105,10 +110,9 @@ if ( !empty($submitted) ) {
   }
 }
 
-$output = array(
-		'op' => $op,
-		'result' => $result,
-		'error' => $error,
-);
+$output['op'] = $op;
+$output['result'] = $result;
+$output['error'] = $error;
+
 output( $output, $template );
 ?>

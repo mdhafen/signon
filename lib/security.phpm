@@ -284,7 +284,7 @@ function create_password() {
 		$dictionary = file( $dict_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
 		$changed = 0;
 		foreach ( $dictionary as $index => $word ) {
-			if ( mb_strlen($word) < 4 ) {
+			if ( mb_strlen($word) < 4 || mb_strlen($word) > 7 ) {
 				unset( $dictionary[$index] );
 				$changed++;
 			}
@@ -297,7 +297,7 @@ function create_password() {
 
 	$dict_size = count($dictionary) - 1;
 	$dict_str_size = strlen($dict_str) - 1;
-	while ( $iterations < 4 || strlen($password) < 8 ) {
+	while ( $iterations < 3 || strlen($password) < 8 ) {
 		$iterations++;
 		if ( !empty($dictionary) ) {
 			$password .= $dictionary[ rand(0,$dict_size) ];

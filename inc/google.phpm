@@ -166,4 +166,14 @@ function loc_to_ou( $loc ) {
   return '';
 }
 
+function google_send_password( $phone, $password ) {
+  if ( empty($phone) || empty($password) ) {
+    return 0;
+  }
+
+  // FIXME fill in google Voice SMS send stuff here
+
+  return 1;
+}
+
 ?>
