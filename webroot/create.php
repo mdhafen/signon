@@ -77,6 +77,10 @@ if ( !empty($submitted) ) {
 	}
       }
     }
+    else {
+      $error = 1;
+      $result = 'Bad email address or password!';
+    }
   }
   if ( !empty($entry['dn']) ) {
     do_ldap_connect();
