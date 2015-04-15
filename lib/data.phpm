@@ -143,11 +143,31 @@ function do_ldap_add( $userdn, $attrs ) {
 		return $result;
 	}
 
-	if ( ldap_ensure_ous( substr( $userdn, strpos($userdn,',') + 1 ) ) ) {
+	if ( ldap_ensure_ous( ldap_dn_get_parent( $userdn ) ) ) {
 		$result = ldap_add( $ldap, $userdn, $attrs );
 	}
 
 	return $result;
+}
+
+function do_ldap_attr_del( $dn, $attrs ) {
+	global $ldap;
+        result = 0;
+	if ( empty($dn) || empty($attrs) || !is_array($attrs) ) {
+		return 0;
+	}
+	$result = @ldap_mod_del( $ldap, $dn, $attrs );
+        return $result;
+}
+
+function do_ldap_rename( $dn, $attr, $new_parent ) {
+	global $ldap;
+        result = 0;
+	if ( empty($dn) || empty($attr) || empty($new_parent) ) {
+		return 0;
+	}
+	$result = @ldap_rename( $ldap, $dn, $attr, $new_parent, true );
+        return $result;
 }
 
 function ldap_ensure_ous( $dn ) {
@@ -197,6 +217,13 @@ function ldap_create_ou( $dn ) {
 	return $result;
 }
 
+function ldap_dn_get_parent( $dn ) {
+	$new_parent = preg_split('/(?<!\\\\),/',$dn);
+	array_shift($new_parent);
+	$new_parent = implode(',',$new_parent);
+	return $new_parent;
+}
+
 function ldap_get_next_SID() {
 	$sid = 0;
 	$prefix = '';
@@ -224,6 +251,81 @@ function stripslashes_array( $array ) {
     $value = stripslashes( $value );
   }
   return $array;
+}
+
+//  copied from http://stackoverflow.com/questions/8560874/
+if (!function_exists('ldap_escape')) {
+    define('LDAP_ESCAPE_FILTER', 0x01);
+    define('LDAP_ESCAPE_DN',     0x02);
+
+    /**
+     * @param string $subject The subject string
+     * @param string $ignore Set of characters to leave untouched
+     * @param int $flags Any combination of LDAP_ESCAPE_* flags to indicate the
+     *                   set(s) of characters to escape.
+     * @return string
+     */
+    function ldap_escape($subject, $ignore = '', $flags = 0)
+    {
+        static $charMaps = array(
+            LDAP_ESCAPE_FILTER => array('\\', '*', '(', ')', "\x00"),
+            LDAP_ESCAPE_DN     => array('\\', ',', '=', '+', '<', '>', ';', '"', '#'),
+        );
+
+        // Pre-process the char maps on first call
+        if (!isset($charMaps[0])) {
+            $charMaps[0] = array();
+            for ($i = 0; $i < 256; $i++) {
+                $charMaps[0][chr($i)] = sprintf('\\%02x', $i);;
+            }
+
+            for ($i = 0, $l = count($charMaps[LDAP_ESCAPE_FILTER]); $i < $l; $i++) {
+                $chr = $charMaps[LDAP_ESCAPE_FILTER][$i];
+                unset($charMaps[LDAP_ESCAPE_FILTER][$i]);
+                $charMaps[LDAP_ESCAPE_FILTER][$chr] = $charMaps[0][$chr];
+            }
+
+            for ($i = 0, $l = count($charMaps[LDAP_ESCAPE_DN]); $i < $l; $i++) {
+                $chr = $charMaps[LDAP_ESCAPE_DN][$i];
+                unset($charMaps[LDAP_ESCAPE_DN][$i]);
+                $charMaps[LDAP_ESCAPE_DN][$chr] = $charMaps[0][$chr];
+            }
+        }
+
+        // Create the base char map to escape
+        $flags = (int)$flags;
+        $charMap = array();
+        if ($flags & LDAP_ESCAPE_FILTER) {
+            $charMap += $charMaps[LDAP_ESCAPE_FILTER];
+        }
+        if ($flags & LDAP_ESCAPE_DN) {
+            $charMap += $charMaps[LDAP_ESCAPE_DN];
+        }
+        if (!$charMap) {
+            $charMap = $charMaps[0];
+        }
+
+        // Remove any chars to ignore from the list
+        $ignore = (string)$ignore;
+        for ($i = 0, $l = strlen($ignore); $i < $l; $i++) {
+            unset($charMap[$ignore[$i]]);
+        }
+
+        // Do the main replacement
+        $result = strtr($subject, $charMap);
+
+        // Encode leading/trailing spaces if LDAP_ESCAPE_DN is passed
+        if ($flags & LDAP_ESCAPE_DN) {
+            if ($result[0] === ' ') {
+                $result = '\\20' . substr($result, 1);
+            }
+            if ($result[strlen($result) - 1] === ' ') {
+                $result = substr($result, 0, -1) . '\\20';
+            }
+        }
+
+        return $result;
+    }
 }
 
 ?>

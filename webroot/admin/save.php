@@ -86,9 +86,12 @@ if ( in_array( $rdn_attr, array_keys($adds) ) || in_array( $rdn_attr, array_keys
 	unset( $dels[ $rdn_attr ] );
 }
 
-// FIXME do deletes
-// FIXME do adds
-// FIXME do ldap_rename if necessary
+do_ldap_attr_del( $objectdn, $dels );
+do_ldap_modify( $objectdn, $adds );
+if ( $new_rdn ) {
+	$new_parent = ldap_dn_get_parent( $objectdn );
+	do_ldap_rename( $objectdn, ldap_escape($new_rdn,'',LDAP_ESCAPE_DN), $new_parent );
+}
 
 if ( ! empty($errors) ) {
 	error( $errors );

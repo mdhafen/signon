@@ -20,7 +20,7 @@ unset( $object['dn'] );
 
 ksort( $object, SORT_STRING | SORT_FLAG_CASE );
 
-$parentdn = substr( $objectdn, strpos( $objectdn, ',' ) +1 );
+$parentdn = ldap_dn_get_parent( $objectdn );
 if ( $parentdn == $config['ldap']['base'] ) {
 	$parentdn = '';
 }

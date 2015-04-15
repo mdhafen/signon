@@ -45,7 +45,7 @@ if ( !empty($submitted) ) {
     $entry['st'] = input( 'state', INPUT_HTML_NONE );
     $entry['postalCode'] = input( 'zip', INPUT_HTML_NONE );
     $entry['employeeType'] = 'Guest';
-    $entry['dn'] = 'uid='. $entry['uid'] .',ou=Guest,dc=wcsd';
+    $entry['dn'] = 'uid='. ldap_escape($entry['uid'],'',LDAP_ESCAPE_DN) .',ou=Guest,dc=wcsd';
   }
   else if ( !empty($email) && !empty($password) ) {
     if ( auth_to_google( $email, $password ) ) {
@@ -72,7 +72,7 @@ if ( !empty($submitted) ) {
 	  $entry['l'] = google_org_to_loc( $user['orgUnitPath'] );
 	  $ou = google_org_to_ou( $user['orgUnitPath'], $entry['l'] );
 	  if ( !empty($ou) && !empty($entry['uid']) ) {
-	    $entry['dn'] = 'uid='. $entry['uid'] .','. $ou;
+	    $entry['dn'] = 'uid='. ldap_escape($entry['uid'],'',LDAP_ESCAPE_DN) .','. $ou;
 	  }
 	}
       }
