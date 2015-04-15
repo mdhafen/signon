@@ -152,7 +152,7 @@ function do_ldap_add( $userdn, $attrs ) {
 
 function do_ldap_attr_del( $dn, $attrs ) {
 	global $ldap;
-        result = 0;
+        $result = 0;
 	if ( empty($dn) || empty($attrs) || !is_array($attrs) ) {
 		return 0;
 	}
@@ -162,7 +162,7 @@ function do_ldap_attr_del( $dn, $attrs ) {
 
 function do_ldap_rename( $dn, $attr, $new_parent ) {
 	global $ldap;
-        result = 0;
+        $result = 0;
 	if ( empty($dn) || empty($attr) || empty($new_parent) ) {
 		return 0;
 	}

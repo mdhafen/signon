@@ -57,7 +57,7 @@ $adds = array();
 $dels = array();
 $object_attrs = array_keys( $object );
 $all_attrs = array_unique( array_merge( $object_attrs, $input_attrs ) );
-foreach ( $input_attrs as $attr ) {
+foreach ( $all_attrs as $attr ) {
 	if ( ! in_array( $attr, $object_attrs ) ) {
 		$adds[ $attr ] = $input[ $attr ];
 	}
@@ -91,6 +91,7 @@ do_ldap_modify( $objectdn, $adds );
 if ( $new_rdn ) {
 	$new_parent = ldap_dn_get_parent( $objectdn );
 	do_ldap_rename( $objectdn, ldap_escape($new_rdn,'',LDAP_ESCAPE_DN), $new_parent );
+        $objectdn = $new_rdn .','. $new_parent;
 }
 
 if ( ! empty($errors) ) {
