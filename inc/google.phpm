@@ -177,13 +177,21 @@ function google_send_password( $phone, $password ) {
 }
 
 function google_set_password( $email, $password ) {
+  global $GOOGLE_CLIENT;
+  $result = 0;
+
   if ( empty($email) || empty($password) ) {
     return 0;
   }
 
-  // FIXME fill in code to set a google users password by service account
+  $mod = '{
+"password":"'. $password .'",
+"changePasswordAtNextLogin":"0"
+}';
 
-  return 1;
+  $result = updateUser( $GOOGLE_CLIENT, $email, $mod );
+
+  return $result;
 }
 
 ?>
