@@ -4,14 +4,14 @@
 include( 'doc-head-close.php' );
 include( 'doc-header.php' );
 ?>
-<!-- Reset Password Modal -->
-<div class="modal fade" id="reset_modal" role="dialog" aria-labelledby="reset_modal_label" aria-hidden="true">
+<!-- Change Password Modal -->
+<div class="modal fade" id="password_modal" role="dialog" aria-labelledby="password_modal_label" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <form action="profile.php" method="post" class="form-horizontal">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="reset_modal_label">Reset Password</h4>
+        <h4 class="modal-title" id="password_modal_label">Change Password</h4>
       </div>
       <div class="modal-body">
         <div class="container-fluid">
@@ -29,7 +29,7 @@ include( 'doc-header.php' );
           </div>
         </div>
         <div class="modal-footer">
-          <input class="btn btn-primary" type="submit" value="Reset Password">
+          <input class="btn btn-primary" type="submit" value="Change Password">
           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         </div>
       </div>
@@ -102,8 +102,10 @@ include( 'doc-header.php' );
 </div>
 
 <div class="panel panel-default panel-body">
-  <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#reset_modal">Reset Password</button>
-  <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#linkeo_modal">Link to Employee Online</button>
+  <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#password_modal">Change Password</button>
+  <?php if ( !empty($data['object']['employeeType'][0]) && $data['object']['employeeType'][0] == 'Staff' ) { ?>
+<!--  <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#linkeo_modal">Link to Employee Online</button> -->
+<?php } ?>
 </div>
 
 </div>
