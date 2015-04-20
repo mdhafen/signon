@@ -24,7 +24,7 @@ authenticate();
 
 if ( ! ( authorized('reset_password') || ( !empty($_SESSION['loggedin_user']) && strcasecmp($dn,$_SESSION['loggedin_user']['userid']) == 0 ) ) ) {
 	$output['error'] = 'ACCESS_DENIED';
-	output( $output, 'password.tmpl' );
+	output( $output, 'admin/password.tmpl' );
 	exit;
 }
 
@@ -34,20 +34,20 @@ $confirm = input( 'confirm', INPUT_STR );
 if ( ! empty($password) ) {
 	if ( $password !== $confirm ) {
 		$output['error'] = 'PASS_NO_MATCH';
-		output( $output, 'password.tmpl' );
+		output( $output, 'admin/password.tmpl' );
 		exit;
 	}
 
 	if ( set_password( $objectdn, $password ) ) {
 		$output['success'] = 1;
-		output( $output, 'password.tmpl' );
+		output( $output, 'admin/password.tmpl' );
 	}
 	else {
 		$output['error'] = 'PASS_SET_FAILED';
-		output( $output, 'password.tmpl' );
+		output( $output, 'admin/password.tmpl' );
 	}
 }
 else {
-	output( $output, 'password.tmpl' );
+	output( $output, 'admin/password.tmpl' );
 }
 ?>
