@@ -7,3 +7,12 @@ php-google-api-php-client
 php5-imap
 
 And make sure the imap module is getting loaded.
+
+Edit lib/config.phpm with settings for the site title, secure phrase, and
+LDAP settings.  The roles mapping in that file maps members of an LDAP group
+to security roles for access to the 'Manage Users' section.
+
+Also edit the inc/google.phpm file to make sure the correct settings
+are in that file for api access, a GoogleVoice account, the LDAP base,
+and the various location to LDAP base mappings.  And you will need to
+put the private key file in the same directory and include the filename.

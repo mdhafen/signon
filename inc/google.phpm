@@ -4,6 +4,11 @@ global $GOOGLE_CLIENT;
 $GOOGLE_DOMAIN = 'washk12.org';
 $GOOGLE_CLIENT = '';
 
+global $GV_EMAIL;
+global $GV_PASSWD;
+$GV_EMAIL = '';
+$GV_PASSWD = '';
+
 $SERVICE_ACCOUNT_EMAIL = '785115890023@developer.gserviceaccount.com';
 $SERVICE_ACCOUNT_PKCS12_FILE_PATH = '/var/www/signon/inc/WCSD_Drive_API-privatekey.p12';
 $SERVICE_EMAIL = 'apiaccess@washk12.org';
@@ -167,11 +172,17 @@ function loc_to_ou( $loc ) {
 }
 
 function google_send_password( $phone, $password ) {
+  global $GV_EMAIL, $GV_PASSWD;
   if ( empty($phone) || empty($password) ) {
     return 0;
   }
 
-  // FIXME fill in google Voice SMS send stuff here
+  include_once('GoogleVoice.php');
+
+  $message = "You're WCSDsignon password is: $password Please don't reply to this message. For help contact WCSD Tech Support.";
+
+  $gv = new GoogleVoice( $GV_EMAIL, $GV_PASSWD );
+  $gv->sendSMS( $phone, $message );
 
   return 1;
 }

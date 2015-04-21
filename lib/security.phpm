@@ -270,7 +270,7 @@ function new_password( $new_password ) {
   if no dictionary is available then is a typical random 8 character password
  */
 function create_password() {
-	$symbol_set = '!@#$%&*()-_+\'";:/?., '; // reduced for mobile keyboards
+	$symbol_set = '!@#$%&*()-_+\'";:/?.,'; // reduced for mobile keyboards
 	$numeric_set = '0123456789';
 	$alpha_set = 'abcdefghijklmnopqrstuvwxyz';
 	$ualpha_set = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -292,7 +292,9 @@ function create_password() {
 		if ( $changed ) {
 			$dictionary = array_values( $dictionary );
 		}
-		$dict_str = $symbol_set . $numeric_set;
+		if ( !empty($dictionary) ) {
+			$dict_str = $symbol_set . $numeric_set;
+		}
 	}
 
 	$dict_size = count($dictionary) - 1;
