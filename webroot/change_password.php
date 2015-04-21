@@ -96,7 +96,7 @@ if ( ! empty($errors) ) {
 	error( $errors );
 }
 else {
-	if ( !empty($_SESSION['REFERER']) && stripos($_SESSION['REFERER'],'https://myaccount.google.com') !== False ) {
+	if ( !empty($output['success']) && !empty($_SESSION['REFERER']) && stripos($_SESSION['REFERER'],'https://myaccount.google.com') !== False ) {
 		redirect( 'https://myaccount.google.com' );
 	}
 	else {
