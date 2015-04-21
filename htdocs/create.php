@@ -40,6 +40,7 @@ There was an error! <?= $data['error'] ?>
       <label for="password" class="col-sm-4 control-label">Password: </label>
       <div class="col-sm-8">
         <input id="password" name="password" value="" type="password" class="form-control">
+        <div class="help-block">If you are using Google 2-step verification you will need to generate an application-specific password and enter that password in this field to continue.</div>
       </div>
     </div>
     <div class="row form-group">
