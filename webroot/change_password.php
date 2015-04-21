@@ -11,7 +11,7 @@ if ( empty($_SESSION['REFERER']) && !empty($_SERVER['HTTP_REFERER']) ) {
 	$_SESSION['REFERER'] = $_SERVER['HTTP_REFERER'];
 }
 
-$google_domain = 'washk12.org';
+global $GOOGLE_DOMAIN;
 $errors = array();
 $output = array();
 
@@ -22,8 +22,8 @@ $password = input( 'newpassword', INPUT_STR );
 $password2 = input( 'verifypassword', INPUT_STR );
 $username = '';
 
-if ( strpos($username,'@') !== False ) {
-	if ( strripos($username,'@'.$google_domain) !== False ) {
+if ( strpos($email,'@') !== False ) {
+	if ( strripos($email,'@'.$GOOGLE_DOMAIN) !== False ) {
 		$username = substr($email,0,strpos($email,'@'));
 	}
 	else {
@@ -33,10 +33,10 @@ if ( strpos($username,'@') !== False ) {
 else {
 	//$errors[] = 'INVALID_EMAIL';
 	$username = $email;
-	$email = $username .'@'. $google_domain;
+	$email = $username .'@'. $GOOGLE_DOMAIN;
 }
 
-if ( auth_to_google( $email, $oldpassword ) ) {
+if ( !empty($oldpassword) && auth_to_google( $email, $oldpassword ) ) {
 	$dn = '';
 	$set = ldap_quick_search( array( 'uid' => $username ), array() );
 	if ( empty($set) ) {
