@@ -46,27 +46,14 @@ if ( auth_to_google( $email, $oldpassword ) ) {
 			if ( stripos($user['orgUnitPath'],'nonusers') !== FALSE ) {
 				$errors[] = 'REGISTERING_SERVICE_ACCOUNT';
 			}
-		}
-		else if ( stripos($user['orgUnitPath'],'student') !== FALSE ) {
-			$entry['employeeType'] = 'Student';
-		}
-		else {
-			$entry['employeeType'] = 'Staff';
-		}
-
-		if ( !empty($entry['employeeType']) ) {
-			$entry['uid'] = strtolower(substr($user['primaryEmail'],0,strpos($user['primaryEmail'],'@')));
-			$entry['sn'] = $user['name']['familyName'];
-			$entry['givenName'] = $user['name']['givenName'];
-			$entry['cn'] = $user['name']['fullName'];
-			$entry['mail'] = strtolower($user['primaryEmail']);
-			$entry['l'] = google_org_to_loc( $user['orgUnitPath'] );
-			$ou = google_org_to_ou( $user['orgUnitPath'], $entry['l'] );
-			if ( !empty($ou) && !empty($entry['uid']) ) {
-				$dn = 'uid='. ldap_escape($entry['uid'],'',LDAP_ESCAPE_DN) .','. $ou;
+			else {
+				$entry = google_user_hash_for_ldap( $user );
 			}
 
-			if ( !empty($dn) ) {
+
+			if ( !empty($entry['dn']) ) {
+				$dn = $entry['dn'];
+				unset( $entry['dn'] );
 				$entry['sambaSID'] = ldap_get_next_SID();
 				do_ldap_add( $dn, $entry );
 			}
