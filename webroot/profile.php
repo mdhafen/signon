@@ -28,8 +28,8 @@ else {
 		'object' => $object,
 	);
 
-	$password = input( 'newpassword', INPUT_STR );
-	$password2 = input( 'verifypassword', INPUT_STR );
+	$password = input( 'password', INPUT_STR );
+	$password2 = input( 'password2', INPUT_STR );
 
 	if ( !empty($password) && !empty($password2) ) {
 		if ( $password === $password2 ) {
