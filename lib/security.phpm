@@ -141,8 +141,9 @@ function authenticate() {
 	if ( $my_token == $_SESSION[ 'token' ] ) {
 		return 1;
 	} else {
-		destroy_session();
-		$_SERVER['REQUEST_URI'] = substr( $_SERVER['REQUEST_URI'], 0, strrpos( $_SERVER['REQUEST_URI'], '/' ) + 1 );
+		if ( !empty( $_SESSION['token'] ) ) {
+			destroy_session();
+		}
 		return 0;
 	}
 }

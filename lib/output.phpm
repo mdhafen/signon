@@ -5,6 +5,8 @@ require_once( 'security.phpm' );
 
 function redirect( $target = "" ) {
 	global $config;
+
+	save_session();
 	if ( $target ) {
 		if ( ! preg_match( '/^http/', $target ) ) {
 			$target = $config['base_url'] . $target;

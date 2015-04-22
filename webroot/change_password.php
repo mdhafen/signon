@@ -18,8 +18,8 @@ $output = array();
 do_ldap_connect();
 $email = input( 'username', INPUT_HTML_NONE );
 $oldpassword = input( 'oldpassword', INPUT_STR );
-$password = input( 'newpassword', INPUT_STR );
-$password2 = input( 'verifypassword', INPUT_STR );
+$password = input( 'password', INPUT_STR );
+$password2 = input( 'password2', INPUT_STR );
 $username = '';
 
 if ( strpos($email,'@') !== False ) {
@@ -54,6 +54,7 @@ if ( !empty($oldpassword) && auth_to_google( $email, $oldpassword ) ) {
 			if ( !empty($entry['dn']) ) {
 				$dn = $entry['dn'];
 				unset( $entry['dn'] );
+				$entry['objectClass'] = array('top','inetOrgPerson','sambaSamAccount');
 				$entry['sambaSID'] = ldap_get_next_SID();
 				do_ldap_add( $dn, $entry );
 			}
