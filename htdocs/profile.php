@@ -52,7 +52,7 @@ include( 'doc-header.php' );
           <div class="row form-group">
             <label for="employeeid" class="control-label col-sm-6">employeeOnline EmployeeID: </label>
             <div class="col-sm-6">
-              <input id="employeeid" name="employeeNumber" value="<?= $data['object']['employeeNumber'][0] ?>" class="form-control">
+              <input id="employeeid" name="employeeNumber" value="" class="form-control">
             </div>
           </div>
 
