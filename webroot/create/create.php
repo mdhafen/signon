@@ -1,10 +1,10 @@
 <?php
-include_once( '../lib/input.phpm' );
-include_once( '../lib/security.phpm' );
-include_once( '../lib/data.phpm' );
-include_once( '../lib/output.phpm' );
-include_once( '../inc/google.phpm' );
-include_once( '../inc/person.phpm' );
+include_once( '../../lib/input.phpm' );
+include_once( '../../lib/security.phpm' );
+include_once( '../../lib/data.phpm' );
+include_once( '../../lib/output.phpm' );
+include_once( '../../inc/google.phpm' );
+include_once( '../../inc/person.phpm' );
 
 $output = array();
 $result = '';
@@ -102,5 +102,5 @@ $output['op'] = $op;
 $output['result'] = $result;
 $output['error'] = $error;
 
-output( $output, $template );
+output( $output, 'create/'.$template );
 ?>

@@ -1,8 +1,8 @@
-<?php include( 'doc-open.php' ); ?>
+<?php include( $data['_config']['base_dir'] .'/htdocs/doc-open.php' ); ?>
 <title><?= $data['_config']['site_title'] ?></title>
 <?php
-include( 'doc-head-close.php' );
-include( 'doc-header.php' );
+include( $data['_config']['base_dir'] .'/htdocs/doc-head-close.php' );
+include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 ?>
 
 <h1>Create account</h1>
@@ -53,4 +53,4 @@ There was an error! <?= $data['error'] ?>
 <?php } ?>
 
 </div>
-<?php include( 'doc-close.php' ); ?>
+<?php include( $data['_config']['base_dir'] .'/htdocs/doc-close.php' ); ?>
