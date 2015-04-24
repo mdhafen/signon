@@ -11,12 +11,21 @@ global $config, $ldap;
 do_ldap_connect();
 authorize( 'manage_objects' );
 
+$op = input( 'action', INPUT_STR );
 $dn = input( 'dn', INPUT_STR );
+$object = array();
 
-$set = ldap_quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
-$object = $set[0];
-$objectdn = $object['dn'];
-unset( $object['dn'] );
+if ( $op == 'Add' ) {
+	$classes = input( 'classes', INPUT_HTML_NONE );
+	$object['objectClass'] = explode( ' ', $classes );
+	$objectdn = input( 'dn', INPUT_HTML_NONE );
+}
+else {
+	$set = ldap_quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
+	$object = $set[0];
+	$objectdn = $object['dn'];
+	unset( $object['dn'] );
+}
 $rdn_attr = substr( $objectdn, 0, strpos( $objectdn, '=' ) );
 
 ksort( $object, SORT_STRING | SORT_FLAG_CASE );
@@ -43,7 +52,9 @@ for ( $i = 1; $i < $count; $i++ ) {
 $input_attrs = array_keys( $input );
 foreach ( $must as $attr ) {
 	if ( ! in_array( $attr, $input_attrs ) ) {
-		$errors[] = "EDIT_MISSING_ATTR $attr";
+		if ( $op != 'Add' && $attr != 'sambaSID' ) {
+			$errors[] = "EDIT_MISSING_ATTR $attr";
+		}
 	}
 }
 foreach ( $input as $attr => $vals ) {
@@ -78,20 +89,37 @@ foreach ( $all_attrs as $attr ) {
 	}
 }
 
-// watch for $rdn_attr in particular
-$new_rdn = '';
-if ( in_array( $rdn_attr, array_keys($adds) ) || in_array( $rdn_attr, array_keys($dels) ) ) {
-	$new_rdn = $adds[ $rdn_attr ][0];
-	unset( $adds[ $rdn_attr ] );
-	unset( $dels[ $rdn_attr ] );
+if ( $op == 'Add' ) {
+	$password = '';
+	if ( in_array( 'userPassword', array_keys($adds) ) ) {
+		$password = $adds['userPassword'][0];
+		unset( $adds['userPassword'] );
+	}
+	$adds['objectClass'] = $object['objectClass'];
+	if ( in_array( 'sambaSamAccount', $adds['objectClass'] ) ) {
+		$adds['sambaSID'] = ldap_get_next_SID();
+	}
+	do_ldap_add( $objectdn, $adds );
+	if ( !empty($password) ) {
+		set_password( $objectdn, $password );
+	}
 }
+else {
+	// watch for $rdn_attr in particular
+	$new_rdn = '';
+	if ( in_array( $rdn_attr, array_keys($adds) ) || in_array( $rdn_attr, array_keys($dels) ) ) {
+		$new_rdn = $adds[ $rdn_attr ][0];
+		unset( $adds[ $rdn_attr ] );
+		unset( $dels[ $rdn_attr ] );
+	}
 
-do_ldap_attr_del( $objectdn, $dels );
-do_ldap_modify( $objectdn, $adds );
-if ( $new_rdn ) {
-	$new_parent = ldap_dn_get_parent( $objectdn );
-	do_ldap_rename( $objectdn, ldap_escape($new_rdn,'',LDAP_ESCAPE_DN), $new_parent );
-        $objectdn = $new_rdn .','. $new_parent;
+	do_ldap_attr_del( $objectdn, $dels );
+	do_ldap_modify( $objectdn, $adds );
+	if ( $new_rdn ) {
+		$new_parent = ldap_dn_get_parent( $objectdn );
+		do_ldap_rename( $objectdn, ldap_escape($new_rdn,'',LDAP_ESCAPE_DN), $new_parent );
+		$objectdn = $new_rdn .','. $new_parent;
+	}
 }
 
 if ( ! empty($errors) ) {

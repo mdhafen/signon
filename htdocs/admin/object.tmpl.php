@@ -36,6 +36,13 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 <div>
 <a href="edit.php?dn=<?= urlencode($data['object_dn']) ?>">Edit</a>
 </div>
+<div>
+Add:
+<a href="add.php?class=security&amp;parent=<?= urlencode($data['object_dn']) ?>">Security Account<a>
+<a href="add.php?class=user&amp;parent=<?= urlencode($data['object_dn']) ?>">User</a>
+<a href="add.php?class=group&amp;parent=<?= urlencode($data['object_dn']) ?>">Group</a>
+<a href="add.php?class=folder&amp;parent=<?= urlencode($data['object_dn']) ?>">Folder</a>
+</div>
 <?php } ?>
 
 <?php if ( ! empty($data['can_password']) && ! empty($data['is_person']) ) { ?>
@@ -52,7 +59,7 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 <a href="object.php?dn=<?= urlencode($child['dn']) ?>"><?= empty($child['cn']) ? $child['ou'][0] : $child['cn'][0] ?></a>
 <?php if ( in_array('inetOrgPerson',$child['objectClass']) ) { ?>
 (Person)
-<?php } else if ( in_array('person',$child['objectClass']) ) { ?>
+<?php } else if ( in_array('person',$child['objectClass']) || in_array('simpleSecurityObject',$child['objectClass']) ) { ?>
 (System Account)
 <?php } else if ( in_array('groupOfNames',$child['objectClass']) ) { ?>
 (Group)

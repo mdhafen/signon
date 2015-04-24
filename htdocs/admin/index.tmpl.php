@@ -19,7 +19,7 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 <a href="object.php?dn=<?= urlencode($child['dn']) ?>"><?= empty($child['cn']) ? $child['ou'][0] : $child['cn'][0] ?></a>
 <?php if ( in_array('inetOrgPerson',$child['objectClass']) ) { ?>
 (Person)
-<?php } else if ( in_array('person',$child['objectClass']) ) { ?>
+<?php } else if ( in_array('person',$child['objectClass']) || in_array('simpleSecurityObject',$child['objectClass']) ) { ?>
 (System Account)
 <?php } else if ( in_array('groupOfNames',$child['objectClass']) ) { ?>
 (Group)
