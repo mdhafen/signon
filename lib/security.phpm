@@ -275,7 +275,8 @@ function create_password() {
 	$numeric_set = '0123456789';
 	$alpha_set = 'abcdefghijklmnopqrstuvwxyz';
 	$ualpha_set = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-	$dict_str = $symbol_set . $numeric_set . $alpha_set . $ualpha_set;
+	#$dict_str = $symbol_set . $numeric_set . $alpha_set . $ualpha_set;
+	$dict_str = $alpha_set;
 	$dict_file = ''; # /usr/share/dict/words
 	$dictionary = array();
 	$iterations = 0;
@@ -290,7 +291,8 @@ function create_password() {
 
 	$dict_size = count($dictionary) - 1;
 	$dict_str_size = strlen($dict_str) - 1;
-	while ( $iterations < 3 || strlen($password) < 8 ) {
+	#while ( $iterations < 4 || strlen($password) < 16 ) {
+	while ( $iterations < 4 || strlen($password) < 16 ) {
 		$iterations++;
 		if ( !empty($dictionary) ) {
 			$password .= $dictionary[ rand(0,$dict_size) ];
