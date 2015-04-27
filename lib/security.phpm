@@ -276,25 +276,15 @@ function create_password() {
 	$alpha_set = 'abcdefghijklmnopqrstuvwxyz';
 	$ualpha_set = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 	$dict_str = $symbol_set . $numeric_set . $alpha_set . $ualpha_set;
-	$dict_file = '/usr/share/dict/words';
+	$dict_file = ''; # /usr/share/dict/words
 	$dictionary = array();
 	$iterations = 0;
 	$password = '';
 
 	if ( is_readable( $dict_file ) ) {
 		$dictionary = file( $dict_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
-		$changed = 0;
-		foreach ( $dictionary as $index => $word ) {
-			if ( mb_strlen($word) < 4 || mb_strlen($word) > 7 ) {
-				unset( $dictionary[$index] );
-				$changed++;
-			}
-		}
-		if ( $changed ) {
-			$dictionary = array_values( $dictionary );
-		}
 		if ( !empty($dictionary) ) {
-			$dict_str = $symbol_set . $numeric_set;
+			$dict_str = "";
 		}
 	}
 
