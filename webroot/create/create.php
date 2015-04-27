@@ -58,6 +58,7 @@ if ( !empty($submitted) ) {
 	}
 	else {
 	  $entry = google_user_hash_for_ldap( $user );
+	  $entry['objectclass'] = array('top','inetOrgPerson','sambaSamAccount');
 	}
       }
     }
