@@ -4,10 +4,10 @@ global $GOOGLE_CLIENT;
 $GOOGLE_DOMAIN = 'washk12.org';
 $GOOGLE_CLIENT = '';
 
-global $GV_EMAIL;
-global $GV_PASSWD;
+global $GV_EMAIL, $GV_PASSWD, $GV_MESSAGE;
 $GV_EMAIL = '';
 $GV_PASSWD = '';
+$GV_MESSAGE = "You're WCSDsignon password is: {{PASSWORD}} Please don't reply to this message. For help contact WCSD Tech Support.";
 
 $SERVICE_ACCOUNT_EMAIL = '785115890023@developer.gserviceaccount.com';
 $SERVICE_ACCOUNT_PKCS12_FILE_PATH = '/var/www/signon/inc/WCSD_Drive_API-privatekey.p12';
@@ -21,7 +21,9 @@ include_once 'google_functions_directory.php';
 $GOOGLE_CLIENT = buildService( $SERVICE_EMAIL, $SERVICE_SCOPE );
 
 $LDAP_BASE = 'dc=wcsd';
-global $LOCATIONS;
+global $LOCATIONS,$DEFAULT_LOCATION;
+$DEFAULT_LOCATION = 'washk12';
+
 $LOCATIONS = array(
   'AES' => 'ou=Arrowhead Elementary,ou=Elementaries,ou=Snow Cone,'.$LDAP_BASE,
   'BES' => 'ou=Bloomington Elementary,ou=Elementaries,ou=Dixie Cone,'.$LDAP_BASE,
@@ -107,7 +109,7 @@ function get_user_google( $email ) {
 }
 
 function google_org_to_loc( $path ) {
-  global $LOCATIONS;
+  global $LOCATIONS,$DEFAULT_LOCATION;
 
   $ous = explode( '/', $path );
   $ous = array_filter( $ous );
@@ -125,7 +127,7 @@ function google_org_to_loc( $path ) {
     }
   }
 
-  return 'washk12';  // FIXME hard coded default value
+  return $DEFAULT_LOCATION;
 }
 
 function google_org_to_ou( $path, $location ) {
@@ -137,7 +139,6 @@ function google_org_to_ou( $path, $location ) {
   $location = loc_to_ou( $location );
   $ous = preg_split( '/(?<!\\\\),/', $location );
   $ous = array_reverse($ous);
-  // FIXME finish filling this in
   foreach ( $ous as $ou ) {
     if ( stripos($ou,'dc=') !== FALSE ) {
       continue;
@@ -199,14 +200,14 @@ function google_user_hash_for_ldap( $user ) {
 }
 
 function google_send_password( $phone, $password ) {
-  global $GV_EMAIL, $GV_PASSWD;
+  global $GV_EMAIL, $GV_PASSWD, $GV_MESSAGE;
   if ( empty($phone) || empty($password) ) {
     return 0;
   }
 
   include_once('GoogleVoice.php');
 
-  $message = "You're WCSDsignon password is: $password Please don't reply to this message. For help contact WCSD Tech Support.";
+  $message = str_replace( '{{PASSWORD}}', $password, $GV_MESSAGE );
 
   $gv = new GoogleVoice( $GV_EMAIL, $GV_PASSWD );
   $gv->sendSMS( $phone, $message );
