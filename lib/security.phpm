@@ -269,13 +269,14 @@ function new_password( $new_password ) {
   if no dictionary is available then is a random 16 character password
  */
 function create_password() {
+	global $config;
 	$symbol_set = '!@#$%&*()-_+\'";:/?.,'; // reduced for mobile keyboards
 	$numeric_set = '0123456789';
 	$alpha_set = 'abcdefghijklmnopqrstuvwxyz';
 	$ualpha_set = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 	#$dict_str = $symbol_set . $numeric_set . $alpha_set . $ualpha_set;
 	$dict_str = $alpha_set;
-	$dict_file = 'word_dictionary'; # /usr/share/dict/words
+	$dict_file = $config['base_dir'] .'/lib/word_dictionary'; # /usr/share/dict/words
 	$dictionary = array();
 	$iterations = 0;
 	$password = '';
