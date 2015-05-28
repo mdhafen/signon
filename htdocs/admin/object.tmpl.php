@@ -36,14 +36,16 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 <div>
 <a href="edit.php?dn=<?= urlencode($data['object_dn']) ?>">Edit</a>
 </div>
+<?php if ( empty($data['is_person']) ) { ?>
 <div>
 Add:
-<a href="add.php?class=security&amp;parent=<?= urlencode($data['object_dn']) ?>">Security Account<a>
+<a href="add.php?class=security&amp;parent=<?= urlencode($data['object_dn']) ?>">Security Account</a>
 <a href="add.php?class=user&amp;parent=<?= urlencode($data['object_dn']) ?>">User</a>
 <a href="add.php?class=group&amp;parent=<?= urlencode($data['object_dn']) ?>">Group</a>
 <a href="add.php?class=folder&amp;parent=<?= urlencode($data['object_dn']) ?>">Folder</a>
 </div>
-<?php } ?>
+<?php }
+  } ?>
 
 <?php if ( ! empty($data['can_password']) && ! empty($data['is_person']) ) { ?>
 <div>
