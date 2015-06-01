@@ -13,7 +13,7 @@ if ( !empty($data['result']) ) {
   if ( empty($data['error']) ) { ?>
 <div class="alert alert-info alert-dismissible" role="alert">
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-Your account has been created.  Please switch to the WCSDaccess network and use your phone number to login.  Your password will be sent you by in an SMS.
+Your account has been created.  Please switch to the WCSDaccess network and use your phone number, exactly as you entered it on the registration page, to login.  Your password will be sent you by in an SMS.
 </div>
 <?php
   } else { /* error */ ?>

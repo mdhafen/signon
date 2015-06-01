@@ -12,7 +12,7 @@ if ( !empty($data['result']) ) {
   if ( empty($data['error']) ) { ?>
 <div class="alert alert-info alert-dismissible" role="alert">
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-Your account has been created.  Please switch to the WCSDaccess network and use your email <span data-toggle="tooltip" title="Your usename is the part of your email address before the '@'.">username</span> and password to login.
+Your account has been created.  Please switch to the WCSDaccess network and use your email username <span class="text-info small">(Your usename is the part of your email address before the '@')</span> and password to login.
 </div>
 <?php
   } else { /* error */ ?>
