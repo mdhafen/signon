@@ -24,7 +24,7 @@ $GOOGLE_CLIENT = buildService( $SERVICE_EMAIL, $SERVICE_SCOPE );
 global $LDAP_BASE,$LOCATIONS,$DEFAULT_LOCATION,$DEFAULT_OU;
 $LDAP_BASE = 'dc=wcsd';
 $DEFAULT_LOCATION = 'washk12';
-$DEFAULT_OU = 'ou=District Departments,'.$LDAP_BASE,
+$DEFAULT_OU = 'ou=District Departments,'.$LDAP_BASE;
 
 
 $LOCATIONS = array(
