@@ -186,6 +186,7 @@ function google_user_hash_for_ldap( $user ) {
         }
       }
       $entry['l'] = google_org_to_loc( $user['orgUnitPath'] );
+      $entry['description'] = $entry['l'] ."-". $entry['employeeType'];
       $ou = google_org_to_ou( $user['orgUnitPath'] );
       if ( !empty($ou) && !empty($entry['uid']) ) {
         $entry['dn'] = 'uid='. ldap_escape($entry['uid'],'',LDAP_ESCAPE_DN) .','. $ou;
