@@ -21,9 +21,11 @@ include_once 'google_functions_directory.php';
 
 $GOOGLE_CLIENT = buildService( $SERVICE_EMAIL, $SERVICE_SCOPE );
 
+global $LDAP_BASE,$LOCATIONS,$DEFAULT_LOCATION,$DEFAULT_OU;
 $LDAP_BASE = 'dc=wcsd';
-global $LOCATIONS,$DEFAULT_LOCATION;
 $DEFAULT_LOCATION = 'washk12';
+$DEFAULT_OU = 'ou=District Departments,'.$LDAP_BASE,
+
 
 $LOCATIONS = array(
   'AES' => 'ou=Arrowhead Elementary,ou=Elementaries,ou=Snow Cone,'.$LDAP_BASE,
@@ -66,11 +68,16 @@ $LOCATIONS = array(
   'SNDS' => 'ou=Sandstone Elementary,ou=Elementaries,ou=Pine Cone,'.$LDAP_BASE,
   'SRIS' => 'ou=Sunrise Ridge Intermediate,ou=Desert Hills Cone,'.$LDAP_BASE,
   'SSES' => 'ou=Sunset Elementary,ou=Elementaries,ou=Snow Cone,'.$LDAP_BASE,
-  'TECH' => 'ou=Technology,'.$LDAP_BASE,
   'TFES' => 'ou=Three Falls Elementary,ou=Elementaries,ou=Hurricane Cone,'.$LDAP_BASE,
   'TIS' => 'ou=Tonaquint Intermediate,ou=Dixie Cone,'.$LDAP_BASE,
   'WES' => 'ou=Washington Elementary,ou=Elementaries,ou=Pine Cone,'.$LDAP_BASE,
   'WCS' => 'ou=Water Canyon School,ou=Hurricane Cone,'.$LDAP_BASE,
+  'UOHS' => 'ou=Utah Online,ou=District Departments,'.$LDAP_BASE,
+  'ZMD' => 'ou=Maintenance,ou=District Departments,'.$LDAP_BASE,
+  'ZTD' => 'ou=Transportation,ou=District Departments,'.$LDAP_BASE,
+  'ZTECH' => 'ou=Technology,'.$LDAP_BASE,
+  'ZWCN' => 'ou=Food Services,ou=District Departments,'.$LDAP_BASE,
+  'ZSpEd' => 'ou=Special Education,ou=District Departments,'.$LDAP_BASE,
   'washk12' => 'ou=District Departments,'.$LDAP_BASE,
 		   );
 
@@ -131,37 +138,20 @@ function google_org_to_loc( $path ) {
   return $DEFAULT_LOCATION;
 }
 
-function google_org_to_ou( $path, $location ) {
-  global $LOCATIONS;
+function google_org_to_ou( $path ) {
+  global $LDAP_BASE,$DEFAULT_OU;
 
-  $dn = $base = '';
+  $dn = '';
   $paths = explode( '/', $path );
   $paths = array_filter( $paths );
-  $location = loc_to_ou( $location );
-  $ous = preg_split( '/(?<!\\\\),/', $location );
-  $ous = array_reverse($ous);
-  foreach ( $ous as $ou ) {
-    if ( stripos($ou,'dc=') !== FALSE ) {
-      continue;
-    }
-    else {
-      $p = array_shift( $paths );
-      if ( stripos($ou,$p) !== FALSE ) {
-        continue;
-      }
-      else {               //  a fall back,
-        return $location;  //  ous should never be shorter than paths
-      }
-    }
-  }
   if ( !empty($paths) ) {
     $paths = array_reverse($paths);
     foreach ( $paths as $ou ) {
       $dn .= 'ou='. $ou .',';
     }
-    return $dn.$location;
+    return $dn.$LDAP_BASE;
   }
-  return $location;
+  return $DEFAULT_OU;
 }
 
 function loc_to_ou( $loc ) {
@@ -205,7 +195,7 @@ function google_user_hash_for_ldap( $user ) {
         }
       }
       $entry['l'] = google_org_to_loc( $user['orgUnitPath'] );
-      $ou = google_org_to_ou( $user['orgUnitPath'], $entry['l'] );
+      $ou = google_org_to_ou( $user['orgUnitPath'] );
       if ( !empty($ou) && !empty($entry['uid']) ) {
         $entry['dn'] = 'uid='. ldap_escape($entry['uid'],'',LDAP_ESCAPE_DN) .','. $ou;
       }
