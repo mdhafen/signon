@@ -154,15 +154,6 @@ function google_org_to_ou( $path ) {
   return $DEFAULT_OU;
 }
 
-function loc_to_ou( $loc ) {
-  global $LOCATIONS;
-
-  if ( !empty( $LOCATIONS[$loc] ) ) {
-    return $LOCATIONS[$loc];
-  }
-  return '';
-}
-
 function google_user_hash_for_ldap( $user ) {
   $entry = array();
 
