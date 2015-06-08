@@ -11,44 +11,40 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 <div class="panel panel-default panel-body">
 <div class="container-fluid">
 <?php foreach ( $data['object'] as $key => $vals ) { ?>
-<p class="row">
-<div class="col-sm-4"><?= $key ?>:</div><div class="col-sm-8">
+<div class="row">
+<div class="col-sm-4 text-right"><?= $key ?>:</div>
+<div class="col-sm-8">
 <?php   foreach ( $vals as $val ) { ?>
-<div><?= $val ?></div>
+  <div><?= $val ?></div>
 <?php   } ?>
-</div></p>
+</div>
+</div>
 <?php } ?>
 
+<div class="row">
 <?php if ( $data['parentdn'] ) { ?>
-<div>
 <a class="btn btn-default" href="object.php?dn=<?= urlencode($data['parentdn']) ?>">Up</a>
-</div>
 <?php } else { ?>
-<div>
 <a class="btn btn-default" href="index.php">Up</a>
-</div>
 <?php } ?>
 
 <?php if ( ! empty( $data['can_edit'] ) ) { ?>
-<div>
 <a class="btn btn-default" href="edit.php?dn=<?= urlencode($data['object_dn']) ?>">Edit</a>
-</div>
 <?php if ( empty($data['is_person']) ) { ?>
-<div>
 Add:
 <a class="btn btn-default" href="add.php?class=security&amp;parent=<?= urlencode($data['object_dn']) ?>">Security Account</a>
 <a class="btn btn-default" href="add.php?class=user&amp;parent=<?= urlencode($data['object_dn']) ?>">User</a>
 <a class="btn btn-default" href="add.php?class=group&amp;parent=<?= urlencode($data['object_dn']) ?>">Group</a>
 <a class="btn btn-default" href="add.php?class=folder&amp;parent=<?= urlencode($data['object_dn']) ?>">Folder</a>
-</div>
 <?php }
   } ?>
 
 <?php if ( ! empty($data['can_password']) && ! empty($data['is_person']) ) { ?>
-<div>
 <a class="btn btn-default" href="password.php?dn=<?= urlencode($data['object_dn']) ?>">Reset Password</a>
-</div>
 <?php } ?>
+</div>
+
+</div>
 </div><!-- Object Panel -->
 
 <?php if ( count( $data['children'] ) ) { ?>
