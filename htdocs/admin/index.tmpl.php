@@ -16,7 +16,7 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 <div class="panel panel-default panel-body">
 <?php foreach ( $data['children'] as $child ) { ?>
 <div>
-<a href="object.php?dn=<?= urlencode($child['dn']) ?>"><?= empty($child['cn']) ? $child['ou'][0] : $child['cn'][0] ?></a><span class="badge">
+<a href="object.php?dn=<?= urlencode($child['dn']) ?>"><?= empty($child['cn']) ? $child['ou'][0] : $child['cn'][0] ?></a> <span class="badge">
 <?php if ( in_array('inetOrgPerson',$child['objectClass']) ) { ?>
 (Person)
 <?php } else if ( in_array('person',$child['objectClass']) || in_array('simpleSecurityObject',$child['objectClass']) ) { ?>
