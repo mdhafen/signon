@@ -23,15 +23,17 @@ $count = 1;
 ?>
 <div class='row form-group'><label for="<?= $count ?>_val" class="col-sm-4 important">objectClass:</label>
   <input name="<?= $count ?>_attr" type="hidden" value="objectClass">
+  <div class="col-sm-8">
 <?php
 foreach ( $data['classes'] as $class ) {
 ?>
-  <div class="col-sm-8">
   <input type="text" name="<?= $count ?>_val[]" value="<?= $class ?>" class="form-control">
+<?php
+}
+?>
   </div>
 </div>
 <?php
-}
 $count++;
 foreach ( $data['must'] as $attr ) {
    if ( $attr == 'objectClass' ) {
@@ -42,7 +44,6 @@ foreach ( $data['must'] as $attr ) {
 <input name="<?= $count ?>_attr" type="hidden" value="<?= $attr ?>">
 <div class="col-sm-8">
 <input type="text" id="<?= $count ?>_val" name="<?= $count ?>_val[]" value=""<?php if ( $data['rid'] == $attr ) { ?> onchange="update_dn(this.value,'<?= $attr ?>')"<?php } ?> class="form-control">
-</div>
 <?php
    if ( empty($data['attrs'][$attr]['SINGLE-VALUE']) ) {
 ?>
@@ -50,6 +51,7 @@ foreach ( $data['must'] as $attr ) {
 <?php
    }
 ?>
+</div>
 </div>
 <?php
    $count++;

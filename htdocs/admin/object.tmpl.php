@@ -11,12 +11,12 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 <div class="panel panel-default panel-body">
 <div class="container-fluid">
 <?php foreach ( $data['object'] as $key => $vals ) { ?>
-<div class="row">
+<p class="row">
 <div class="col-sm-4"><?= $key ?>:</div><div class="col-sm-8">
 <?php   foreach ( $vals as $val ) { ?>
 <div><?= $val ?></div>
 <?php   } ?>
-</div></div>
+</div></p>
 <?php } ?>
 
 <?php if ( $data['parentdn'] ) { ?>
@@ -55,7 +55,7 @@ Add:
 <h2>Children</h2>
 <div class="panel panel-default panel-body">
 <?php foreach ( $data['children'] as $child ) { ?>
-<div>
+<p>
 <a href="object.php?dn=<?= urlencode($child['dn']) ?>"><?= empty($child['cn']) ? $child['ou'][0] : $child['cn'][0] ?></a><span class="badge">
 <?php if ( in_array('inetOrgPerson',$child['objectClass']) ) { ?>
 (Person)
@@ -66,7 +66,7 @@ Add:
 <?php } else if ( in_array('organizationalUnit',$child['objectClass']) ) { ?>
 (Folder)
 <?php } ?>
-</span></div>
+</span></p>
 <?php } ?>
 </div>
 <?php } ?>
