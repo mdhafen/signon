@@ -21,7 +21,7 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 <?php
 $count = 1;
 ?>
-<div class='row form-group'><label for="<?= $count ?>_val" class="col-sm-4 important">objectClass:</label>
+<div class='row form-group'><label for="<?= $count ?>_val" class="col-sm-4 control-label important">objectClass:</label>
   <input name="<?= $count ?>_attr" type="hidden" value="objectClass">
   <div class="col-sm-8">
 <?php
@@ -40,7 +40,7 @@ foreach ( $data['must'] as $attr ) {
      continue;
    }
 ?>
-<div class='row form-group'><label for="<?= $count ?>_val" class="col-sm-4 important"><?= $attr ?>:</label>
+<div class='row form-group'><label for="<?= $count ?>_val" class="col-sm-4 control-label important"><?= $attr ?>:</label>
 <input name="<?= $count ?>_attr" type="hidden" value="<?= $attr ?>">
 <div class="col-sm-8">
 <input type="text" id="<?= $count ?>_val" name="<?= $count ?>_val[]" value=""<?php if ( $data['rid'] == $attr ) { ?> onchange="update_dn(this.value,'<?= $attr ?>')"<?php } ?> class="form-control">
@@ -59,7 +59,7 @@ foreach ( $data['must'] as $attr ) {
 ?>
 
 <?php foreach ( $data['may'] as $attr ) { ?>
-<div class='row form-group'><label for="<?= $count ?>_val" class="col-sm-4"><?= $attr ?>:</label>
+<div class='row form-group'><label for="<?= $count ?>_val" class="col-sm-4 control-label"><?= $attr ?>:</label>
 <input name="<?= $count ?>_attr" type="hidden" value="<?= $attr ?>">
 <div class="col-sm-8">
 <input type="text" id="<?= $count ?>_val" name="<?= $count ?>_val[]" value="" class="form-control">
