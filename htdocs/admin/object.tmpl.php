@@ -5,47 +5,48 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-head-close.php' );
 include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 ?>
 
+<div class="main-page">
+
 <h1><?= $data['object_dn'] ?></h1>
 <div class="panel panel-default panel-body">
-<table class="table table-striped">
+<div class="container-fluid">
 <?php foreach ( $data['object'] as $key => $vals ) { ?>
-<tr>
-<td><?= $key ?>:</td><td>
+<div class="row">
+<div class="col-sm-4"><?= $key ?>:</div><div class="col-sm-8">
 <?php   foreach ( $vals as $val ) { ?>
 <div><?= $val ?></div>
 <?php   } ?>
-</td></tr>
+</div></div>
 <?php } ?>
-</table>
 
 <?php if ( $data['parentdn'] ) { ?>
 <div>
-<a class="btn" href="object.php?dn=<?= urlencode($data['parentdn']) ?>">Up</a>
+<a class="btn btn-default" href="object.php?dn=<?= urlencode($data['parentdn']) ?>">Up</a>
 </div>
 <?php } else { ?>
 <div>
-<a class="btn" href="index.php">Up</a>
+<a class="btn btn-default" href="index.php">Up</a>
 </div>
 <?php } ?>
 
 <?php if ( ! empty( $data['can_edit'] ) ) { ?>
 <div>
-<a class="btn" href="edit.php?dn=<?= urlencode($data['object_dn']) ?>">Edit</a>
+<a class="btn btn-default" href="edit.php?dn=<?= urlencode($data['object_dn']) ?>">Edit</a>
 </div>
 <?php if ( empty($data['is_person']) ) { ?>
 <div>
 Add:
-<a class="btn" href="add.php?class=security&amp;parent=<?= urlencode($data['object_dn']) ?>">Security Account</a>
-<a class="btn" href="add.php?class=user&amp;parent=<?= urlencode($data['object_dn']) ?>">User</a>
-<a class="btn" href="add.php?class=group&amp;parent=<?= urlencode($data['object_dn']) ?>">Group</a>
-<a class="btn" href="add.php?class=folder&amp;parent=<?= urlencode($data['object_dn']) ?>">Folder</a>
+<a class="btn btn-default" href="add.php?class=security&amp;parent=<?= urlencode($data['object_dn']) ?>">Security Account</a>
+<a class="btn btn-default" href="add.php?class=user&amp;parent=<?= urlencode($data['object_dn']) ?>">User</a>
+<a class="btn btn-default" href="add.php?class=group&amp;parent=<?= urlencode($data['object_dn']) ?>">Group</a>
+<a class="btn btn-default" href="add.php?class=folder&amp;parent=<?= urlencode($data['object_dn']) ?>">Folder</a>
 </div>
 <?php }
   } ?>
 
 <?php if ( ! empty($data['can_password']) && ! empty($data['is_person']) ) { ?>
 <div>
-<a href="password.php?dn=<?= urlencode($data['object_dn']) ?>">Reset Password</a>
+<a class="btn btn-default" href="password.php?dn=<?= urlencode($data['object_dn']) ?>">Reset Password</a>
 </div>
 <?php } ?>
 </div><!-- Object Panel -->
@@ -69,5 +70,7 @@ Add:
 <?php } ?>
 </div>
 <?php } ?>
+
+</div>
 
 <?php include( $data['_config']['base_dir'] .'/htdocs/doc-close.php' ); ?>

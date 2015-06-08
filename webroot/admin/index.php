@@ -16,7 +16,7 @@ $children = ldap_quick_search( array( 'objectClass' => '*' ), array(), 1, $confi
 usort( $children, 'sorter' );
 
 $output = array(
-	'root' => ,$config['ldap']['base']
+	'root' => $config['ldap']['base'],
 	'children' => $children,
 );
 

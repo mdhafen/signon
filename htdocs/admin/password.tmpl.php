@@ -5,6 +5,8 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-head-close.php' );
 include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 ?>
 
+<div class="main-page">
+
 <h1><?= $data['object_dn'] ?></h1>
 
 <?php if ( ! empty($data['success']) ) { ?>
@@ -45,5 +47,7 @@ Success!
 </div>
 </form>
 <?php } ?>
+
+</div>
 
 <?php include( $data['_config']['base_dir'] .'/htdocs/doc-close.php' ); ?>

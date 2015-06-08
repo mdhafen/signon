@@ -12,6 +12,8 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-head-close.php' );
 include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 ?>
 
+<div class="main-page">
+
 <h1>Add Entry</h1>
 <div class="panel panel-default panel-body">
 <div class="container-fluid">
@@ -20,12 +22,13 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 $count = 1;
 ?>
 <div class='row form-group'><label for="<?= $count ?>_val" class="col-sm-4 important">objectClass:</label>
-<input name="<?= $count ?>_attr" type="hidden" value="objectClass">
+  <input name="<?= $count ?>_attr" type="hidden" value="objectClass">
 <?php
 foreach ( $data['classes'] as $class ) {
 ?>
-<div class="col-sm-8">
-<input type="text" name="<?= $count ?>_val[]" value="<?= $class ?>" class="form-control">
+  <div class="col-sm-8">
+  <input type="text" name="<?= $count ?>_val[]" value="<?= $class ?>" class="form-control">
+  </div>
 </div>
 <?php
 }
@@ -78,5 +81,7 @@ foreach ( $data['must'] as $attr ) {
 <a class="btn" href="object.php?dn=<?= urlencode($data['parent']) ?>">Cancel</a>
 </div>
 </form>
+
+</div>
 
 <?php include( $data['_config']['base_dir'] .'/htdocs/doc-close.php' ); ?>

@@ -31,4 +31,6 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 </div>
 <?php } ?>
 
+</div>
+
 <?php include( $data['_config']['base_dir'] .'/htdocs/doc-close.php' ); ?>

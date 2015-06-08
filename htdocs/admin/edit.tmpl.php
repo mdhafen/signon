@@ -5,6 +5,8 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-head-close.php' );
 include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 ?>
 
+<div class="main-page">
+
 <h1><?= $data['object_dn'] ?></h1>
 <div class="panel panel-default panel-body">
 <div class="container-fluid">
@@ -25,7 +27,7 @@ foreach ( $data['must'] as $attr ) {
 <input type="text" id="<?= $count ?>_val" name="<?= $count ?>_val[]" value="" class="form-control">
 <?php   }
         if ( empty($data['attrs'][$attr]['SINGLE-VALUE']) ) { ?>
-<input type="button" class="btn" value="+" onclick="add_field('<?= $count ?>')">
+<input type="button" class="btn btn-default" value="+" onclick="add_field('<?= $count ?>')">
 <?php   } ?>
 </div>
 </div>
@@ -35,7 +37,7 @@ foreach ( $data['must'] as $attr ) {
 ?>
 
 <?php foreach ( $data['may'] as $attr ) { ?>
-<div class='row'><label for="<?= $count ?>_val" class="col-sm-4 control-label"><?= $attr ?>:</label>
+<div class='row form-group'><label for="<?= $count ?>_val" class="col-sm-4 control-label"><?= $attr ?>:</label>
 <input name="<?= $count ?>_attr" type="hidden" value="<?= $attr ?>">
 <div class="col-sm-8">
 <?php   if ( ! empty($data['object'][$attr]) ) { ?>
@@ -64,5 +66,7 @@ foreach ( $data['must'] as $attr ) {
 <a class="btn" href="object.php?dn=<?= urlencode($data['object_dn']) ?>">Cancel</a>
 </div>
 </form>
+
+</div>
 
 <?php include( $data['_config']['base_dir'] .'/htdocs/doc-close.php' ); ?>
