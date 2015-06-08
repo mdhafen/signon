@@ -11,19 +11,12 @@ if ( ! authenticate() ) {
 }
 
 global $config;
-$set = ldap_quick_search( array( 'objectClass' => 'organizationalUnit' ), array(), 1, $config['ldap']['base'] );
-$folders = array();
-foreach ( $set as $ou ) {
-	$folders[] = array( 'ou' => $ou['ou'][0], 'dn' => $ou['dn'] );
-}
-
-usort( $folders, function($a,$b){return strcasecmp($a['ou'],$b['ou']);} );
 
 $children = ldap_quick_search( array( 'objectClass' => '*' ), array(), 1, $config['ldap']['base'] );
 usort( $children, 'sorter' );
 
 $output = array(
-	'folders' => $folders,
+	'root' => ,$config['ldap']['base']
 	'children' => $children,
 );
 

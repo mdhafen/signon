@@ -13,52 +13,54 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 ?>
 
 <h1>Add Entry</h1>
-<form method="post" action="save.php">
-<div>
+<div class="panel panel-default panel-body">
+<div class="container-fluid">
+<form method="post" action="save.php" class="form-horizontal">
 <?php
 $count = 1;
-foreach ( $data['must'] as $attr ) {
 ?>
-<div class='object_attribute'><label for="<?= $count ?>_val" class="object_attr_key important"><?= $attr ?>:</label>
-<input name="<?= $count ?>_attr" type="hidden" value="<?= $attr ?>">
+<div class='row form-group'><label for="<?= $count ?>_val" class="col-sm-4 important">objectClass:</label>
+<input name="<?= $count ?>_attr" type="hidden" value="objectClass">
 <?php
-   if ( $attr == 'objectClass' ) {
+foreach ( $data['classes'] as $class ) {
 ?>
-<div class="object_attr_values">
-<?php
-      foreach ( $data['classes'] as $class ) {
-?>
-<span class="object_attr_value">
-<input name="<?= $count ?>_val[]" value="<?= $class ?>">
-</span>
-<?php
-      }
-?>
+<div class="col-sm-8">
+<input type="text" name="<?= $count ?>_val[]" value="<?= $class ?>" class="form-control">
 </div>
-<?php } else { ?>
-<span class="object_attr_value">
-<input id="<?= $count ?>_val" name="<?= $count ?>_val[]" value=""<?php if ( $data['rid'] == $attr ) { ?> onchange="update_dn(this.value,'<?= $attr ?>')"<?php } ?>>
-</span>
-<?php   if ( empty($data['attrs'][$attr]['SINGLE-VALUE']) ) { ?>
-<input type="button" value="+" onclick="add_field('<?= $count ?>')">
 <?php
-        }
+}
+$count++;
+foreach ( $data['must'] as $attr ) {
+   if ( $attr == 'objectClass' ) {
+     continue;
+   }
+?>
+<div class='row form-group'><label for="<?= $count ?>_val" class="col-sm-4 important"><?= $attr ?>:</label>
+<input name="<?= $count ?>_attr" type="hidden" value="<?= $attr ?>">
+<div class="col-sm-8">
+<input type="text" id="<?= $count ?>_val" name="<?= $count ?>_val[]" value=""<?php if ( $data['rid'] == $attr ) { ?> onchange="update_dn(this.value,'<?= $attr ?>')"<?php } ?> class="form-control">
+</div>
+<?php
+   if ( empty($data['attrs'][$attr]['SINGLE-VALUE']) ) {
+?>
+<input type="button" class="btn" value="+" onclick="add_field('<?= $count ?>')">
+<?php
    }
 ?>
 </div>
 <?php
-        $count++;
+   $count++;
 }
 ?>
 
 <?php foreach ( $data['may'] as $attr ) { ?>
-<div class='object_attribute'><label for="<?= $count ?>_val" class="object_attr_key"><?= $attr ?>:</label>
+<div class='row form-group'><label for="<?= $count ?>_val" class="col-sm-4"><?= $attr ?>:</label>
 <input name="<?= $count ?>_attr" type="hidden" value="<?= $attr ?>">
-<span class="object_attr_value">
-<input id="<?= $count ?>_val" name="<?= $count ?>_val[]" value="">
-</span>
+<div class="col-sm-8">
+<input type="text" id="<?= $count ?>_val" name="<?= $count ?>_val[]" value="" class="form-control">
+</div>
 <?php   if ( empty($data['attrs'][$attr]['SINGLE-VALUE']) ) { ?>
-<input type="button" value="+" onclick="add_field('<?= $count ?>')">
+<input type="button" class="btn" value="+" onclick="add_field('<?= $count ?>')">
 <?php   } ?>
 </div>
 <?php
@@ -73,7 +75,7 @@ foreach ( $data['must'] as $attr ) {
 <input type="hidden" name="dn" id="dn" value="">
 <input type="hidden" name="parent" id="parent" value="<?= $data['parent'] ?>">
 <input type="hidden" name="classes" value="<?= implode(' ',$data['classes']) ?>">
-<a href="object.php?dn=<?= urlencode($data['parent']) ?>">Cancel</a>
+<a class="btn" href="object.php?dn=<?= urlencode($data['parent']) ?>">Cancel</a>
 </div>
 </form>
 
