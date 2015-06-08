@@ -63,10 +63,10 @@ foreach ( $data['must'] as $attr ) {
 <input name="<?= $count ?>_attr" type="hidden" value="<?= $attr ?>">
 <div class="col-sm-8">
 <input type="text" id="<?= $count ?>_val" name="<?= $count ?>_val[]" value="" class="form-control">
-</div>
 <?php   if ( empty($data['attrs'][$attr]['SINGLE-VALUE']) ) { ?>
 <input type="button" class="btn" value="+" onclick="add_field('<?= $count ?>')">
 <?php   } ?>
+</div>
 </div>
 <?php
         $count++;
