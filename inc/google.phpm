@@ -4,10 +4,28 @@ global $GOOGLE_CLIENT;
 $GOOGLE_DOMAIN = 'washk12.org';
 $GOOGLE_CLIENT = '';
 
-global $GV_EMAIL, $GV_PASSWD, $GV_MESSAGE;
+global $GV_EMAIL, $GV_PASSWD, $GV_MESSAGE, $PROVIDER_MAP;
 $GV_EMAIL = '';
 $GV_PASSWD = '';
 $GV_MESSAGE = "You're WCSDsignon password is: {{PASSWORD}} Please don't reply to this message. For help contact WCSD Tech Support.";
+$PROVIDER_MAP = array(
+  'Verizon' => 'vtext.com',
+  'Sprint' => 'messaging.sprintpcs.com',
+  'Alltel' => 'message.alltel.com',
+  'AT&T' => 'txt.att.net',
+  'T-Mobile' => 'tmomail.net',
+  'US Cellular' => 'email.uscc.net',
+  'Virgin Mobile' => 'vmobl.com',
+  'Cingular' => 'cingularme.com',
+  'Cricket' => 'sms.mycricket.com',
+  'Metro PCS' => 'MyMetroPcs.com',
+  'Powertel' => 'ptel.net',
+  'SunCom' => 'tms.suncom.com',
+  'Tracfone' => 'mmst5.tracfone.com',
+  'Consumer Cellular' => 'cingularme.com',
+  'Straight Talk' => 'vtext.com',
+  'Nextel' => 'page.nextel.com',
+                      );
 
 global $SERVICE_ACCOUNT_EMAIL,$SERVICE_ACCOUNT_PKCS12_FILE_PATH;
 $SERVICE_ACCOUNT_EMAIL = '785115890023@developer.gserviceaccount.com';
@@ -196,18 +214,40 @@ function google_user_hash_for_ldap( $user ) {
   return $entry;
 }
 
-function google_send_password( $phone, $password ) {
-  global $GV_EMAIL, $GV_PASSWD, $GV_MESSAGE;
+function google_send_password( $phone, $provider, $password ) {
+  global $GV_EMAIL, $GV_PASSWD, $GV_MESSAGE, $PROVIDER_MAP;
   if ( empty($phone) || empty($password) ) {
     return 0;
   }
 
-  include_once('GoogleVoice.php');
+  $phone = preg_replace( '/\D/', "", $phone );
+  if ( strlen( $phone ) != 10 ) {
+    return 0;
+  }
 
   $message = str_replace( '{{PASSWORD}}', $password, $GV_MESSAGE );
 
-  $gv = new GoogleVoice( $GV_EMAIL, $GV_PASSWD );
-  $gv->sendSMS( $phone, $message );
+  if ( !empty($PROVIDER_MAP[$provider]) ) {
+    $hostname = '{imap.gmail.com:993/imap/ssl/novalidate-cert}[Gmail]/All Mail';
+
+    // imap_open(host,user,pass,options,n_retries)
+    $inbox = @imap_open( $hostname, $GV_EMAIL, $GV_PASSWD, 0, 1 );
+
+    if ( $inbox ) {
+      $to = $phone .'@'. $PROVIDER_MAP[$provider];
+      $subject = 'Your WCSDAccess Password';
+      $message = wordwrap( $message, 70, "\r\n" );
+      $headers = 'From: '. $GV_EMAIL ."\r\n";
+      $headers .= 'Date: '. date(DATE_RFC2822) ."\r\n";
+      mail( $to, $subject, $message, $headers );
+    }
+  }
+  else {
+    include_once('GoogleVoice.php');
+
+    $gv = new GoogleVoice( $GV_EMAIL, $GV_PASSWD );
+    $gv->sendSMS( $phone, $message );
+  }
 
   return 1;
 }

@@ -37,6 +37,19 @@ There was an error! <?= $data['error'] ?>
     </div>
 
     <div class="row form-group">
+      <label for="provider" class="col-sm-4 control-label">Provider: </label>
+      <div class="col-sm-8">
+        <select id="provider" name="provider">
+          <option value="">Choose one...</option>
+<?php foreach ( $data['providers'] as $provider ) { ?>
+          <option value="<?= $provider ?>"><?= $provider ?></option>
+<?php } ?>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row form-group">
       <label for="firstName" class="col-sm-4 control-label">First Name: </label>
       <div class="col-sm-8"><input id="firstName" name="firstName" value="" class="form-control"></div>
     </div>

@@ -6,6 +6,8 @@ include_once( '../../lib/output.phpm' );
 include_once( '../../inc/google.phpm' );
 include_once( '../../inc/person.phpm' );
 
+global $PROVIDER_MAP;
+
 $output = array();
 $result = '';
 $error = 0;
@@ -46,6 +48,7 @@ if ( !empty($submitted) ) {
     $entry['postalCode'] = input( 'zip', INPUT_HTML_NONE );
     $entry['employeeType'] = 'Guest';
     $entry['dn'] = 'uid='. ldap_escape($entry['uid'],'',LDAP_ESCAPE_DN) .',ou=Guest,dc=wcsd';
+    $provider = input( 'provider', INPUT_HTML_NONE );
   }
   else if ( !empty($email) && !empty($password) ) {
     if ( auth_to_google( $email, $password ) ) {
@@ -74,7 +77,7 @@ if ( !empty($submitted) ) {
     if ( count($dups) == 1 ) {
       set_password( $dups[0]['dn'], $password );
       if ( $entry['employeeType'] == 'Guest' ) {
-	google_send_password( $entry['uid'], $password );
+	google_send_password( $entry['uid'], $provider, $password );
       }
       $result = 'Account created';
     }
@@ -87,7 +90,7 @@ if ( !empty($submitted) ) {
 	do_ldap_add( $dn, $entry );
 	set_password( $dn, $password );
 	if ( $entry['employeeType'] == 'Guest' ) {
-	  google_send_password( $entry['uid'], $password );
+	  google_send_password( $entry['uid'], $provider, $password );
 	}
 	$result = 'Account created';
       }
@@ -102,6 +105,7 @@ if ( !empty($submitted) ) {
 $output['op'] = $op;
 $output['result'] = $result;
 $output['error'] = $error;
+$output['providers'] = array_keys( $PROVIDER_MAP );
 
 output( $output, 'create/'.$template );
 ?>
