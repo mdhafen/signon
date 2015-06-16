@@ -25,7 +25,7 @@ There was an error! <?= $data['error'] ?>
 } else { ?>
 <div class="alert alert-info alert-dismissible" role="alert">
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-  Please enter the form below to register for network access.
+  Please enter the form below to register for network access.  You password will then be sent to you by SMS.
 </div>
 
 <div class="panel panel-default panel-body">
@@ -39,7 +39,7 @@ There was an error! <?= $data['error'] ?>
     <div class="row form-group">
       <label for="provider" class="col-sm-4 control-label">Provider: </label>
       <div class="col-sm-8">
-        <select id="provider" name="provider">
+        <select id="provider" name="provider" class="form-control">
           <option value="">Choose one...</option>
 <?php foreach ( $data['providers'] as $provider ) { ?>
           <option value="<?= $provider ?>"><?= $provider ?></option>
