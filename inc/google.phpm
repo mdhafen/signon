@@ -4,9 +4,10 @@ global $GOOGLE_CLIENT;
 $GOOGLE_DOMAIN = 'washk12.org';
 $GOOGLE_CLIENT = '';
 
-global $GV_EMAIL, $GV_PASSWD, $GV_MESSAGE, $PROVIDER_MAP;
+global $GV_EMAIL, $GV_PASSWD, $GV_PHONE, $GV_MESSAGE, $PROVIDER_MAP;
 $GV_EMAIL = '';
 $GV_PASSWD = '';
+$GV_PHONE = '';
 $GV_MESSAGE = "You're WCSDsignon password is: {{PASSWORD}} Please don't reply to this message. For help contact WCSD Tech Support.";
 $PROVIDER_MAP = array(
   'Verizon' => 'vtext.com',
@@ -215,7 +216,7 @@ function google_user_hash_for_ldap( $user ) {
 }
 
 function google_send_password( $phone, $provider, $password ) {
-  global $GV_EMAIL, $GV_PASSWD, $GV_MESSAGE, $PROVIDER_MAP;
+  global $GV_EMAIL, $GV_PASSWD, $GV_PHONE, $GV_MESSAGE, $PROVIDER_MAP;
   if ( empty($phone) || empty($password) ) {
     return 0;
   }
@@ -237,7 +238,7 @@ function google_send_password( $phone, $provider, $password ) {
       $to = $phone .'@'. $PROVIDER_MAP[$provider];
       $subject = 'Your WCSDAccess Password';
       $message = wordwrap( $message, 70, "\r\n" );
-      $headers = 'From: '. $GV_EMAIL ."\r\n";
+      $headers = 'From: '. ( empty($GV_PHONE) ? $GV_EMAIL : $GV_PHONE ) ."\r\n";
       $headers .= 'Date: '. date(DATE_RFC2822) ."\r\n";
       mail( $to, $subject, $message, $headers );
     }
