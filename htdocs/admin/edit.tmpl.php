@@ -49,7 +49,7 @@ foreach ( $data['must'] as $attr ) {
 <input type="text" id="<?= $count ?>_val" name="<?= $count ?>_val[]" value="" class="form-control">
 <?php   }
         if ( empty($data['attrs'][$attr]['SINGLE-VALUE']) ) { ?>
-<input type="button" class="btn" value="+" onclick="add_field('<?= $count ?>')">
+<input type="button" class="btn btn-default" value="+" onclick="add_field('<?= $count ?>')">
 <?php   } ?>
 </div>
 </div>
@@ -60,10 +60,10 @@ foreach ( $data['must'] as $attr ) {
 </div>
 
 <div>
-<input type="submit" class="btn" name="action" value="Update">
+<input type="submit" class="btn btn-default" name="action" value="Update">
 <input type="hidden" name="count" value="<?= $count ?>">
 <input type="hidden" name="dn" value="<?= $data['object_dn'] ?>">
-<a class="btn" href="object.php?dn=<?= urlencode($data['object_dn']) ?>">Cancel</a>
+<a class="btn btn-default" href="object.php?dn=<?= urlencode($data['object_dn']) ?>">Cancel</a>
 </div>
 </form>
 

@@ -47,7 +47,7 @@ foreach ( $data['must'] as $attr ) {
 <?php
    if ( empty($data['attrs'][$attr]['SINGLE-VALUE']) ) {
 ?>
-<input type="button" class="btn" value="+" onclick="add_field('<?= $count ?>')">
+<input type="button" class="btn btn-default" value="+" onclick="add_field('<?= $count ?>')">
 <?php
    }
 ?>
@@ -64,7 +64,7 @@ foreach ( $data['must'] as $attr ) {
 <div class="col-sm-8">
 <input type="text" id="<?= $count ?>_val" name="<?= $count ?>_val[]" value="" class="form-control">
 <?php   if ( empty($data['attrs'][$attr]['SINGLE-VALUE']) ) { ?>
-<input type="button" class="btn" value="+" onclick="add_field('<?= $count ?>')">
+<input type="button" class="btn btn-default" value="+" onclick="add_field('<?= $count ?>')">
 <?php   } ?>
 </div>
 </div>
@@ -75,12 +75,12 @@ foreach ( $data['must'] as $attr ) {
 </div>
 
 <div>
-<input type="submit" name="action" value="Add">
+<input type="submit" name="action" value="Add" class="btn btn-default">
 <input type="hidden" name="count" value="<?= $count ?>">
 <input type="hidden" name="dn" id="dn" value="">
 <input type="hidden" name="parent" id="parent" value="<?= $data['parent'] ?>">
 <input type="hidden" name="classes" value="<?= implode(' ',$data['classes']) ?>">
-<a class="btn" href="object.php?dn=<?= urlencode($data['parent']) ?>">Cancel</a>
+<a class="btn btn-default" href="object.php?dn=<?= urlencode($data['parent']) ?>">Cancel</a>
 </div>
 </form>
 
