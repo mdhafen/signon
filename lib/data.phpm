@@ -150,14 +150,24 @@ function do_ldap_add( $userdn, $attrs ) {
 	return $result;
 }
 
+function do_ldap_attr_add( $dn, $attrs ) {
+	global $ldap;
+	$result = 0;
+	if ( empty($dn) || empty($attrs) || !is_array($attrs) ) {
+		return 0;
+	}
+	$result = @ldap_mod_add( $ldap, $dn, $attrs );
+	return $result;
+}
+
 function do_ldap_attr_del( $dn, $attrs ) {
 	global $ldap;
-        $result = 0;
+	$result = 0;
 	if ( empty($dn) || empty($attrs) || !is_array($attrs) ) {
 		return 0;
 	}
 	$result = @ldap_mod_del( $ldap, $dn, $attrs );
-        return $result;
+	return $result;
 }
 
 function do_ldap_rename( $dn, $attr, $new_parent ) {

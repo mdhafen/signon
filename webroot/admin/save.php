@@ -89,36 +89,49 @@ foreach ( $all_attrs as $attr ) {
 	}
 }
 
-if ( $op == 'Add' ) {
-	$password = '';
-	if ( in_array( 'userPassword', array_keys($adds) ) ) {
-		$password = $adds['userPassword'][0];
-		unset( $adds['userPassword'] );
+if ( !empty($adds) || !empty($dels) ) {
+	if ( $op == 'Add' ) {
+		$password = '';
+		if ( in_array( 'userPassword', array_keys($adds) ) ) {
+			$password = $adds['userPassword'][0];
+			unset( $adds['userPassword'] );
+		}
+		$adds['objectClass'] = $object['objectClass'];
+		if ( in_array( 'sambaSamAccount', $adds['objectClass'] ) ) {
+			$adds['sambaSID'] = ldap_get_next_SID();
+		}
+		do_ldap_add( $objectdn, $adds );
+		if ( !empty($password) ) {
+			set_password( $objectdn, $password );
+		}
 	}
-	$adds['objectClass'] = $object['objectClass'];
-	if ( in_array( 'sambaSamAccount', $adds['objectClass'] ) ) {
-		$adds['sambaSID'] = ldap_get_next_SID();
-	}
-	do_ldap_add( $objectdn, $adds );
-	if ( !empty($password) ) {
-		set_password( $objectdn, $password );
-	}
-}
-else {
-	// watch for $rdn_attr in particular
-	$new_rdn = '';
-	if ( in_array( $rdn_attr, array_keys($adds) ) || in_array( $rdn_attr, array_keys($dels) ) ) {
-		$new_rdn = $adds[ $rdn_attr ][0];
-		unset( $adds[ $rdn_attr ] );
-		unset( $dels[ $rdn_attr ] );
-	}
+	else {
+		// watch for $rdn_attr in particular
+		$new_rdn = '';
+		if ( in_array( $rdn_attr, array_keys($adds) ) || in_array( $rdn_attr, array_keys($dels) ) ) {
+			$new_rdn = $adds[ $rdn_attr ][0];
+			unset( $adds[ $rdn_attr ] );
+			unset( $dels[ $rdn_attr ] );
+		}
 
-	do_ldap_attr_del( $objectdn, $dels );
-	do_ldap_modify( $objectdn, $adds );
-	if ( $new_rdn ) {
-		$new_parent = ldap_dn_get_parent( $objectdn );
-		do_ldap_rename( $objectdn, ldap_escape($new_rdn,'',LDAP_ESCAPE_DN), $new_parent );
-		$objectdn = $new_rdn .','. $new_parent;
+		$password = '';
+		if ( in_array( 'userPassword', array_keys($adds) ) ) {
+			$password = $adds['userPassword'][0];
+			unset( $adds['userPassword'] );
+		}
+
+		do_ldap_attr_del( $objectdn, $dels );
+		do_ldap_attr_add( $objectdn, $adds );
+
+		if ( !empty($password) ) {
+			set_password( $objectdn, $password );
+		}
+
+		if ( $new_rdn ) {
+			$new_parent = ldap_dn_get_parent( $objectdn );
+			do_ldap_rename( $objectdn, ldap_escape($new_rdn,'',LDAP_ESCAPE_DN), $new_parent );
+			$objectdn = $rdn_attr .'='. $new_rdn .','. $new_parent;
+		}
 	}
 }
 
