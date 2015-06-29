@@ -206,8 +206,9 @@ function authen_ldap( $username, $password ) {
 					if ( ! empty($group[0]) && ! empty($group[0]['member']) ) {
 						foreach ( $group[0]['member'] as $member_dn ) {
 							if ( strcasecmp($member_dn,$userdn) == 0 ) {
-								$role = $role_id;
-								break 2;
+								if ( $role_id > $role ) {
+									$role = $role_id;
+								}
 							}
 						}
 					}

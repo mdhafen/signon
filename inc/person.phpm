@@ -31,11 +31,14 @@ function set_password( $userdn, $password ) {
 		$smb_pass = strtoupper(bin2hex(mhash(MHASH_MD4, iconv("UTF-8","UTF-16LE",$password))));
 
 		$entry = array();
-		if ( in_array( 'person', $object['objectClass'] ) ) {
+		if (
+		  in_array( 'inetOrgPerson', $object['objectClass'] ) ||
+		  in_array( 'person', $object['objectClass'] ) ||
+		  in_array( 'simpleSecurityObject', $object['objectClass'] )
+		  ) {
 			$entry['userPassword'] = $hash_pass;
 		}
-		if ( in_array( 'inetOrgPerson', $object['objectClass'] ) ) {
-			$entry['userPassword'] = $hash_pass;
+		if ( in_array( 'sambaSamAccount', $object['objectClass'] ) ) {
 			$entry['sambaNTPassword'] = $smb_pass;
 		}
 
