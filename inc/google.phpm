@@ -248,7 +248,7 @@ function google_send_password( $phone, $provider, $password ) {
       $headers['to'] = $to;
       $headers['subject'] = $subject;
       $mime_message = imap_mail_compose( $headers, $body );
-      if ( imap_mail( $to, $subject, $mime_message ) )
+      if ( imap_mail( $to, $subject, $mime_message ) ) {
         $sent = 1;
       }
     }
