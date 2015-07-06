@@ -222,12 +222,13 @@ function google_send_password( $phone, $provider, $password ) {
   }
 
   $phone = preg_replace( '/\D/', "", $phone );
-  if ( strlen( $phone ) != 10 ) {
+  if ( strlen( $phone ) < 10 ) {
     return 0;
   }
 
   $message = str_replace( '{{PASSWORD}}', $password, $GV_MESSAGE );
 
+  $sent = 0;
   if ( !empty($PROVIDER_MAP[$provider]) ) {
     $hostname = '{imap.gmail.com:993/imap/ssl/novalidate-cert}[Gmail]/All Mail';
 
@@ -236,14 +237,23 @@ function google_send_password( $phone, $provider, $password ) {
 
     if ( $inbox ) {
       $to = $phone .'@'. $PROVIDER_MAP[$provider];
+      $from = ( empty($GV_PHONE) ? $GV_EMAIL : $GV_PHONE );
       $subject = 'Your WCSDAccess Password';
-      $message = wordwrap( $message, 70, "\r\n" );
-      $headers = 'From: '. ( empty($GV_PHONE) ? $GV_EMAIL : $GV_PHONE ) ."\r\n";
-      $headers .= 'Date: '. date(DATE_RFC2822) ."\r\n";
-      mail( $to, $subject, $message, $headers );
+      $body[1]['type'] = TYPETEXT;
+      $body[1]['subtype'] = "plain";
+      $body[1]['contents.data'] = wordwrap( $message, 70, "\r\n" );
+      $headers['from'] = $from;
+      $headers['date'] = date(DATE_RFC2822);
+      $headers['reply_to'] = $from;
+      $headers['to'] = $to;
+      $headers['subject'] = $subject;
+      $mime_message = imap_mail_compose( $headers, $body );
+      if ( imap_mail( $to, $subject, $mime_message ) )
+        $sent = 1;
+      }
     }
   }
-  else {
+  if ( ! $sent ) {
     include_once('GoogleVoice.php');
 
     $gv = new GoogleVoice( $GV_EMAIL, $GV_PASSWD );
