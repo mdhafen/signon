@@ -230,27 +230,16 @@ function google_send_password( $phone, $provider, $password ) {
 
   $sent = 0;
   if ( !empty($PROVIDER_MAP[$provider]) ) {
-    $hostname = '{imap.gmail.com:993/imap/ssl/novalidate-cert}[Gmail]/All Mail';
+    $to = $phone .'@'. $PROVIDER_MAP[$provider];
+    $from = ( empty($GV_PHONE) ? $GV_EMAIL : $GV_PHONE );
+    $subject = 'Your WCSDAccess Password';
 
-    // imap_open(host,user,pass,options,n_retries)
-    $inbox = @imap_open( $hostname, $GV_EMAIL, $GV_PASSWD, 0, 1 );
-
-    if ( $inbox ) {
-      $to = $phone .'@'. $PROVIDER_MAP[$provider];
-      $from = ( empty($GV_PHONE) ? $GV_EMAIL : $GV_PHONE );
-      $subject = 'Your WCSDAccess Password';
-      $body[1]['type'] = TYPETEXT;
-      $body[1]['subtype'] = "plain";
-      $body[1]['contents.data'] = wordwrap( $message, 70, "\r\n" );
-      $headers['from'] = $from;
-      $headers['date'] = date(DATE_RFC2822);
-      $headers['reply_to'] = $from;
-      $headers['to'] = $to;
-      $headers['subject'] = $subject;
-      $mime_message = imap_mail_compose( $headers, $body );
-      if ( imap_mail( $to, $subject, $mime_message ) ) {
-        $sent = 1;
-      }
+    $message = wordwrap( $message, 70, "\r\n" );
+    $headers = 'From: '. $from ."\r\n"
+    $headers .= 'Reply-To: '. $from ."\r\n";
+    $headers .= 'Date: '. date(DATE_RFC2822) ."\r\n";
+    if ( mail( $to, $subject, $message, $headers, "-f$from" ) ) {
+      $sent = 1;
     }
   }
   if ( ! $sent ) {
