@@ -235,7 +235,7 @@ function google_send_password( $phone, $provider, $password ) {
     $subject = 'Your WCSDAccess Password';
 
     $message = wordwrap( $message, 70, "\r\n" );
-    $headers = 'From: '. $from ."\r\n"
+    $headers = 'From: '. $from ."\r\n";
     $headers .= 'Reply-To: '. $from ."\r\n";
     $headers .= 'Date: '. date(DATE_RFC2822) ."\r\n";
     if ( mail( $to, $subject, $message, $headers, "-f$from" ) ) {
