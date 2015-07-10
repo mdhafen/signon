@@ -80,23 +80,23 @@ include( 'doc-header.php' );
   <div class="container-fluid">
     <div class="row">
       <div class="col-sm-4 text-right">First Name: </div>
-      <div class="col-sm-8 text-left"><?= $data['object']['givenName'][0] ?></div>
+      <div class="col-sm-8 text-left"><?= empty($data['object']['givenName'][0]) ? $data['object']['cn'][0] : $data['object']['givenName'][0] ?></div>
     </div>
     <div class="row">
       <div class="col-sm-4 text-right">Last Name: </div>
-      <div class="col-sm-8 text-left"><?= $data['object']['sn'][0] ?></div>
+      <div class="col-sm-8 text-left"><?= empty($data['object']['sn'][0]) ? "" : $data['object']['sn'][0] ?></div>
     </div>
     <div class="row">
       <div class="col-sm-4 text-right">Username: </div>
-      <div class="col-sm-8 text-left"><?= $data['object']['uid'][0] ?></div>
+      <div class="col-sm-8 text-left"><?= empty($data['object']['uid'][0]) ? "" : $data['object']['uid'][0] ?></div>
     </div>
     <div class="row">
       <div class="col-sm-4 text-right">E-Mail: </div>
-      <div class="col-sm-8 text-left"><?= $data['object']['mail'][0] ?></div>
+      <div class="col-sm-8 text-left"><?= empty($data['object']['mail'][0]) ? "" : $data['object']['mail'][0] ?></div>
     </div>
     <div class="row">
       <div class="col-sm-4 text-right">Location: </div>
-      <div class="col-sm-8 text-left"><?= $data['object']['l'][0] ?></div>
+      <div class="col-sm-8 text-left"><?= empty($data['object']['l'][0]) ? "" : $data['object']['l'][0] ?></div>
     </div>
   </div>
 </div>
