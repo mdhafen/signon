@@ -24,7 +24,9 @@ $groups = ldap_quick_search( array( 'member' => "$objectdn" ), array() );
 if ( $op == 'Delete' && count($children) == 0 ) {
 	$parentdn = ldap_dn_get_parent( $objectdn );
 	remove_from_groups( $objectdn );
-	do_ldap_delete( $objectdn );
+	if ( do_ldap_delete( $objectdn ) ) {
+		redirect( 'admin/object.php?dn='. urlencode($parentdn ) );
+	}
 }
 
 $output = array(

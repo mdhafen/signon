@@ -9,13 +9,15 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 
 <h1><?= $data['object_dn'] ?></h1>
 
-<?php if ( empty($data['children']) ) { ?>
+<?php if ( !empty($data['children']) ) { ?>
 <div class="alert alert-danger" role="alert">
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 Object has child objects and so can not be deleted!
 </div>
 
 <form method="post" action="delete.php" class="form-horizontal">
+<div class="panel panel-default panel-body">
+<div class="container-fluid">
 
 <div class="row form-group">
 <p class="help-block has-warning">
@@ -31,9 +33,10 @@ Object has child objects and so can not be deleted!
 <input type="hidden" name="dn" value="<?= htmlspecialchars($data['object_dn']) ?>">
 <a class="btn" href="object.php?dn=<?= urlencode($data['object_dn']) ?>">Cancel</a>
 </div>
+
+</div>
 </div>
 </form>
-<?php } ?>
 
 </div>
 
