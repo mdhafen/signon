@@ -14,6 +14,7 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 Object has child objects and so can not be deleted!
 </div>
+<?php } ?>
 
 <form method="post" action="delete.php" class="form-horizontal">
 <div class="panel panel-default panel-body">
