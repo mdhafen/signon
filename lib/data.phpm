@@ -150,6 +150,19 @@ function do_ldap_add( $userdn, $attrs ) {
 	return $result;
 }
 
+function do_ldap_delete( $userdn ) {
+	global $ldap;
+	$result = 0;
+
+	if ( empty( $userdn ) ) {
+		return $result;
+	}
+
+	$result = ldap_delete( $ldap, $userdn );
+
+	return $result;
+}
+
 function do_ldap_attr_add( $dn, $attrs ) {
 	global $ldap;
 	$result = 0;

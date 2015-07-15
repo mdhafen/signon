@@ -49,4 +49,14 @@ function set_password( $userdn, $password ) {
 	return $result;
 }
 
+function remove_from_groups( $userdn ) {
+	$result = 0;
+	if ( !empty($userdn) ) {
+		$groups = ldap_quick_search( array( 'member' => "$userdn" ) );
+		foreach ( $groups as $group ) {
+			$group_dn = $group['dn'];
+			do_ldap_attr_del( $group_dn, array('member' => $userdn );
+		}
+	}
+}
 ?>

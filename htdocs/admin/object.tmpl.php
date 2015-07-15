@@ -30,6 +30,7 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 
 <?php if ( ! empty( $data['can_edit'] ) ) { ?>
 <a class="btn btn-default" href="edit.php?dn=<?= urlencode($data['object_dn']) ?>">Edit</a>
+<a class="btn btn-warning" href="delete.php?dn=<?= urlencode($data['object_dn']) ?>">Delete</a>
 <?php if ( empty($data['is_person']) ) { ?>
 Add:
 <a class="btn btn-default" href="add.php?class=security&amp;parent=<?= urlencode($data['object_dn']) ?>">Security Account</a>
