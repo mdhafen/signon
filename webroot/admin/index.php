@@ -17,6 +17,7 @@ usort( $children, 'sorter' );
 
 $output = array(
 	'root' => $config['ldap']['base'],
+	'can_edit' => authorized('manage_objects'),
 	'children' => $children,
 );
 
