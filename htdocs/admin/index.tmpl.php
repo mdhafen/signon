@@ -16,10 +16,10 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 <div class="row">
 <?php if ( ! empty( $data['can_edit'] ) ) { ?>
 Add:
-<a class="btn btn-default" href="add.php?class=security&amp;parent=<?= urlencode($data['object_dn']) ?>">Security Account</a>
-<a class="btn btn-default" href="add.php?class=user&amp;parent=<?= urlencode($data['object_dn']) ?>">User</a>
-<a class="btn btn-default" href="add.php?class=group&amp;parent=<?= urlencode($data['object_dn']) ?>">Group</a>
-<a class="btn btn-default" href="add.php?class=folder&amp;parent=<?= urlencode($data['object_dn']) ?>">Folder</a>
+<a class="btn btn-default" href="add.php?class=security&amp;parent=<?= urlencode($data['root']) ?>">Security Account</a>
+<a class="btn btn-default" href="add.php?class=user&amp;parent=<?= urlencode($data['root']) ?>">User</a>
+<a class="btn btn-default" href="add.php?class=group&amp;parent=<?= urlencode($data['root']) ?>">Group</a>
+<a class="btn btn-default" href="add.php?class=folder&amp;parent=<?= urlencode($data['root']) ?>">Folder</a>
 <?php } ?>
 </div>
 
