@@ -18,9 +18,10 @@ $object = $set[0];
 $objectdn = $object['dn'];
 unset( $object['dn'] );
 
+$children = ldap_quick_search( array( 'objectClass' => '*' ), array(), 1, $dn );
 $groups = ldap_quick_search( array( 'member' => "$objectdn" ), array() );
 
-if ( $op == 'Delete' ) {
+if ( $op == 'Delete' && count($children) == 0 ) {
 	$parentdn = ldap_dn_get_parent( $objectdn );
 	remove_from_groups( $objectdn );
 	do_ldap_delete( $objectdn );
@@ -31,6 +32,7 @@ $output = array(
 	'object' => $object,
 	'is_person' => is_person( $object ),
 	'groups' => count($groups),
+        'children' => count($children),
 );
 
 output( $output, 'admin/delete.tmpl' );
