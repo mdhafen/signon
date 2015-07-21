@@ -29,6 +29,7 @@
          <ul class="nav navbar-nav">
           <li class="active"><a href="<?= $data['_config']['base_url'] ?>">Home</a></li>
 <?php if ( ! empty($data['_session']['CAN_manage_objects']) ) { ?>
+          <li><a href="<?= $data['_config']['base_url'] ?>admin/search.php">Search</a></li>
           <li><a href="<?= $data['_config']['base_url'] ?>admin/">Manage Users</a></li>
 <?php } ?>
 
