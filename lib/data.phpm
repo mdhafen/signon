@@ -189,7 +189,9 @@ function do_ldap_rename( $dn, $attr, $new_parent ) {
 	if ( empty($dn) || empty($attr) || empty($new_parent) ) {
 		return 0;
 	}
-	$result = @ldap_rename( $ldap, $dn, $attr, $new_parent, true );
+	if ( ldap_ensure_ous($new_parent) ) {
+		$result = @ldap_rename( $ldap, $dn, $attr, $new_parent, true );
+	}
         return $result;
 }
 
