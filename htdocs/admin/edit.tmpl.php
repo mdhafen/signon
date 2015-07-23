@@ -20,14 +20,14 @@ foreach ( $data['must'] as $attr ) {
 <div class="col-sm-8">
 <?php   if ( ! empty($data['object'][$attr]) ) {
             foreach ( $data['object'][$attr] as $val ) { ?>
-<input type="text" id="<?= $count ?>_val" name="<?= $count ?>_val[]" value="<?= $val ?>" class="form-control">
+<input type="text" name="<?= $count ?>_val[]" value="<?= $val ?>" class="form-control">
 <?php       }
         }
 	else { ?>
-<input type="text" id="<?= $count ?>_val" name="<?= $count ?>_val[]" value="" class="form-control">
+<input type="text" name="<?= $count ?>_val[]" value="" class="form-control">
 <?php   }
         if ( empty($data['attrs'][$attr]['SINGLE-VALUE']) ) { ?>
-<input type="button" class="btn btn-default" value="+" onclick="add_field('<?= $count ?>')">
+<input type="button" class="btn btn-default" value="+" onclick="add_field(this,'<?= $count ?>')">
 <?php   } ?>
 </div>
 </div>
@@ -42,14 +42,14 @@ foreach ( $data['must'] as $attr ) {
 <div class="col-sm-8">
 <?php   if ( ! empty($data['object'][$attr]) ) { ?>
 <?php       foreach ( $data['object'][$attr] as $val ) { ?>
-<input type="text" id="<?= $count ?>_val" name="<?= $count ?>_val[]" value="<?= $val ?>" class="form-control">
+<input type="text" name="<?= $count ?>_val[]" value="<?= $val ?>" class="form-control">
 <?php       }
         }
 	else { ?>
-<input type="text" id="<?= $count ?>_val" name="<?= $count ?>_val[]" value="" class="form-control">
+<input type="text" name="<?= $count ?>_val[]" value="" class="form-control">
 <?php   }
         if ( empty($data['attrs'][$attr]['SINGLE-VALUE']) ) { ?>
-<input type="button" class="btn btn-default" value="+" onclick="add_field('<?= $count ?>')">
+<input type="button" class="btn btn-default" value="+" onclick="add_field(this,'<?= $count ?>')">
 <?php   } ?>
 </div>
 </div>
@@ -68,5 +68,15 @@ foreach ( $data['must'] as $attr ) {
 </form>
 
 </div>
+
+<script type="text/javascript">
+function add_field( btn, attr_num ) {
+  var newInput = document.createElement("input");
+  newInput.setAttribute("type","text");
+  newInput.setAttribute("class","form-control");
+  newInput.setAttribute("name",attr_num+"_val[]");
+  btn.parentNode.insertBefore( newInput, btn )
+}
+</script>
 
 <?php include( $data['_config']['base_dir'] .'/htdocs/doc-close.php' ); ?>
