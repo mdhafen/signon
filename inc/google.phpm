@@ -8,7 +8,7 @@ global $GV_EMAIL, $GV_PASSWD, $GV_PHONE, $GV_MESSAGE, $PROVIDER_MAP;
 $GV_EMAIL = '';
 $GV_PASSWD = '';
 $GV_PHONE = '';
-$GV_MESSAGE = "Your WCSDsignon username/password is {{USERNAME}} and {{PASSWORD}} Please don't reply. For help contact a WCSD Tech.";
+$GV_MESSAGE = "Your login for WCSDAccess follows, username: {{USERNAME}} password: {{PASSWORD}} Please don't reply, for help contact a WCSD Tech.";
 $PROVIDER_MAP = array(
   'Verizon' => 'vtext.com',
   'Sprint' => 'messaging.sprintpcs.com',
@@ -221,8 +221,9 @@ function google_send_password( $phone, $provider, $password ) {
     return 0;
   }
 
-  $message = str_replace( '{{USERNAME}}', $phone, $GV_MESSAGE );
-  $message = str_replace( '{{PASSWORD}}', $password, $GV_MESSAGE );
+  $message = $GV_MESSAGE;
+  $message = str_replace( '{{USERNAME}}', $phone, $message );
+  $message = str_replace( '{{PASSWORD}}', $password, $message );
 
   $phone = preg_replace( '/\D/', "", $phone );
   if ( strlen( $phone ) < 10 ) {
