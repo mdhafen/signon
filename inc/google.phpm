@@ -8,7 +8,7 @@ global $GV_EMAIL, $GV_PASSWD, $GV_PHONE, $GV_MESSAGE, $PROVIDER_MAP;
 $GV_EMAIL = '';
 $GV_PASSWD = '';
 $GV_PHONE = '';
-$GV_MESSAGE = "Your login for WCSDAccess follows, username: {{USERNAME}} password: {{PASSWORD}} Please don't reply, for help contact a WCSD Tech.";
+$GV_MESSAGE = "Your login for WCSDaccess follows, username: {{USERNAME}} password: {{PASSWORD}} Please don't reply, for help contact a WCSD Tech.";
 $PROVIDER_MAP = array(
   'Verizon' => 'vtext.com',
   'Sprint' => 'messaging.sprintpcs.com',
