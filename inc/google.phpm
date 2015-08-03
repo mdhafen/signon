@@ -234,7 +234,7 @@ function google_send_password( $phone, $provider, $password ) {
   if ( !empty($PROVIDER_MAP[$provider]) ) {
     $to = $phone .'@'. $PROVIDER_MAP[$provider];
     $from = ( empty($GV_PHONE) ? $GV_EMAIL : $GV_PHONE );
-    $subject = 'Your WCSDAccess Password';
+    $subject = 'WCSD';
 
     $message = wordwrap( $message, 70, "\r\n" );
     $headers = 'From: '. $from ."\r\n";
