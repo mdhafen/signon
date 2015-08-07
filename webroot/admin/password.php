@@ -4,6 +4,7 @@ include_once( '../../lib/security.phpm' );
 include_once( '../../lib/data.phpm' );
 include_once( '../../lib/output.phpm' );
 include_once( '../../inc/person.phpm' );
+include_once( '../../inc/google.phpm' );
 
 global $config;
 
@@ -39,6 +40,9 @@ if ( ! empty($password) ) {
 	}
 
 	if ( set_password( $objectdn, $password ) ) {
+		if ( !empty($object['mail'][0]) ) {
+			google_set_password( $object['mail'][0], $password );
+		}
 		$output['success'] = 1;
 		output( $output, 'admin/password.tmpl' );
 	}

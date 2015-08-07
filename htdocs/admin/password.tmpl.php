@@ -8,6 +8,7 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 <div class="main-page">
 
 <h1><?= $data['object_dn'] ?></h1>
+<h2>Set WCSDaccess and Google Password</h2>
 
 <?php if ( ! empty($data['success']) ) { ?>
 <div class="alert alert-info alert-dismissible" role="alert">
