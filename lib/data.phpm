@@ -48,19 +48,19 @@ function do_ldap_connect( $userdn = '', $passwd = '' ) {
 			$passwd = $config['ldap']['passwd'];
 		}
 
-		if ( ! empty( $ldap ) ) {
-			$search = @ldap_read( $ldap, $config['ldap']['userdn'], '(objectClass=*)' );
-			if ( $search ) {
-				return $ldap;
-			}
-		}
-
-		$ldap = ldap_connect( $config['ldap']['server'] );
-		ldap_set_option( $ldap, LDAP_OPT_PROTOCOL_VERSION, 3 );
-		ldap_set_option( $ldap, LDAP_OPT_REFERRALS, false );
-		ldap_set_option( $ldap, LDAP_OPT_RESTART, true );
-		ldap_set_option( $ldap, LDAP_OPT_NETWORK_TIMEOUT, 30 );
 	}
+	if ( ! empty( $ldap ) ) {
+		$search = @ldap_read( $ldap, $config['ldap']['userdn'], '(objectClass=*)' );
+		if ( $search ) {
+			return $ldap;
+		}
+	}
+
+	$ldap = ldap_connect( $config['ldap']['server'] );
+	ldap_set_option( $ldap, LDAP_OPT_PROTOCOL_VERSION, 3 );
+	ldap_set_option( $ldap, LDAP_OPT_REFERRALS, false );
+	ldap_set_option( $ldap, LDAP_OPT_RESTART, true );
+	ldap_set_option( $ldap, LDAP_OPT_NETWORK_TIMEOUT, 30 );
 
 	ldap_bind( $ldap, $userdn, $passwd );
 
