@@ -91,7 +91,8 @@ $LOCATIONS = array(
   'TIS' => 'ou=Tonaquint Intermediate,ou=Dixie Cone,'.$LDAP_BASE,
   'WES' => 'ou=Washington Elementary,ou=Elementaries,ou=Pine Cone,'.$LDAP_BASE,
   'WCS' => 'ou=Water Canyon School,ou=Hurricane Cone,'.$LDAP_BASE,
-  'UOHS' => 'ou=Utah Online,ou=District Departments,'.$LDAP_BASE,
+  'WOS' => 'ou=Washington Online,ou=District Departments,'.$LDAP_BASE,
+  'UOHS' => 'ou=Utah Online High School,ou=District Departments,'.$LDAP_BASE,
   'ZMD' => 'ou=Maintenance,ou=District Departments,'.$LDAP_BASE,
   'ZTD' => 'ou=Transportation,ou=District Departments,'.$LDAP_BASE,
   'ZTECH' => 'ou=Technology,'.$LDAP_BASE,
@@ -254,7 +255,7 @@ function google_send_password( $phone, $provider, $password ) {
   return 1;
 }
 
-function google_set_password( $email, $password ) {
+function google_set_password( $email, $password, $force_change = true ) {
   global $GOOGLE_CLIENT;
   $result = 0;
 
@@ -264,7 +265,7 @@ function google_set_password( $email, $password ) {
 
   $mod = '{
 "password":"'. $password .'",
-"changePasswordAtNextLogin":"0"
+"changePasswordAtNextLogin":'. ( $force_change ? "true" : '"0"' ) .'
 }';
 
   $result = updateUser( $GOOGLE_CLIENT, $email, $mod );

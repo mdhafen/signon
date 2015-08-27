@@ -68,7 +68,7 @@ if ( !empty($oldpassword) && auth_to_google( $email, $oldpassword ) ) {
 	if ( ! empty($dn) ) {
 		if ( $password === $password2 && strlen($password) >=8 ) {
 			set_password( $dn, $password );
-			google_set_password( $email, $password );
+			google_set_password( $email, $password, false );
 			$output['success'] = true;
 		}
 		else {
