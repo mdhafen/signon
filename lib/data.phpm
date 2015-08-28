@@ -192,6 +192,7 @@ function do_ldap_rename( $dn, $attr, $new_parent ) {
 	if ( ldap_ensure_ous($new_parent) ) {
 		$result = @ldap_rename( $ldap, $dn, $attr, $new_parent, true );
 	}
+	ldap_fix_group_memberships( $dn, $attr .','. $new_parent );
         return $result;
 }
 
@@ -247,6 +248,15 @@ function ldap_dn_get_parent( $dn ) {
 	array_shift($new_parent);
 	$new_parent = implode(',',$new_parent);
 	return $new_parent;
+}
+
+function ldap_fix_group_memberships( $old_dn, $new_dn ) {
+	$set = ldap_quick_search( array('member'=>$old_dn), array() );
+	foreach ( $set as $group ) {
+		$group_dn = $group['dn'];
+		do_ldap_attr_del( $group_dn, array('member' => $old_dn) );
+		do_ldap_attr_add( $group_dn, array('member' => $new_dn) );
+	}
 }
 
 function ldap_get_next_SID() {
