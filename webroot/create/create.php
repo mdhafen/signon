@@ -67,7 +67,7 @@ if ( !empty($submitted) ) {
     }
     else {
       $error = 1;
-      $result = 'Bad email address or password!';
+      $result = 'Bad email address or password! (Check the IMAP setting in GMail)';
     }
   }
   if ( !empty($entry['dn']) ) {
