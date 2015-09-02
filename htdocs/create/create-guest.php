@@ -18,7 +18,7 @@ Your account has been created.  Please switch to the WCSDaccess network and use 
 <?php
   } else { /* error */ ?>
 <div class="alert alert-danger" role="alert">
-There was an error! <?= $data['error'] ?>
+There was an error! <?= $data['result'] ?>
 </div>
 <?php
   }
