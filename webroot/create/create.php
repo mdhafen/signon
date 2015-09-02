@@ -97,8 +97,10 @@ if ( !empty($submitted) ) {
     }
   }
   else {
-    $error = 1;
-    $result = 'No Location for DN';
+    if ( empty($error) ) {
+      $error = 1;
+      $result = "Couldn't find folder to create account";
+    }
   }
 }
 
