@@ -20,7 +20,7 @@ $attrs = array(
 	       'uid' => 'Username',
 	       'sn' => 'Last Name',
 	       'givenName' => 'First Name',
-	       'member' => 'Group memberships by uid',
+	       'member' => 'Group memberships by Username',
 	       'l' => 'Building Abbreviation',
 );
 if ( !empty($attr) && empty($attrs[$attr]) ) {
@@ -30,8 +30,9 @@ if ( !empty($attr) && empty($attrs[$attr]) ) {
 $output = array( 'attributes' => $attrs );
 
 if ( !empty($attrs[$attr]) && !empty($query) ) {
+  $query = ldap_escape($query,'',LDAP_ESCAPE_FILTER) .'*';
   if ( strcasecmp( $attr, 'member' ) == 0 ) {
-    $set = ldap_quick_search( array( 'uid' => ldap_escape($query,'',LDAP_ESCAPE_FILTER) ), array() );
+    $set = ldap_quick_search( array( 'uid' => $query ), array() );
     if ( !empty($set) ) {
       $query = $set[0]['dn'];
     }
@@ -40,7 +41,7 @@ if ( !empty($attrs[$attr]) && !empty($query) ) {
     }
   }
   if ( !empty($query) ) {
-    $set = ldap_quick_search( array( $attr => ldap_escape($query,'',LDAP_ESCAPE_FILTER) .'*' ), array() );
+    $set = ldap_quick_search( array( $attr => $query ), array() );
     foreach ( $set as $user ) {
       $results[] = $user['dn'];
     }
