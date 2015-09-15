@@ -29,9 +29,6 @@ include( 'doc-header.php' );
 <br>
 <img src='img/WCSDsignon.jpg'>
 
-<h2>Already have an WCSDsignon Account?</h2>
-<a href="profile.php" class="btn btn-primary btn-lg btn-block"><small>Click Here to</small><br>Sign In</a>
-
 </div>
 </div><!-- /container -->
 <?php include( 'doc-close.php' ); ?>
