@@ -31,7 +31,7 @@ $output = array( 'attributes' => $attrs );
 
 if ( !empty($attrs[$attr]) && !empty($query) ) {
   if ( strcasecmp( $attr, 'member' ) == 0 ) {
-    $set = ldap_quick_search( array( 'uid' => ldap_escape($query,'',LDAP_ESCAPE_FILTER), array() );
+    $set = ldap_quick_search( array( 'uid' => ldap_escape($query,'',LDAP_ESCAPE_FILTER) ), array() );
     if ( !empty($set) ) {
       $query = $set[0]['dn'];
     }
