@@ -11,32 +11,32 @@ if ( empty($_SESSION['REFERER']) && !empty($_SERVER['HTTP_REFERER']) ) {
 	$_SESSION['REFERER'] = $_SERVER['HTTP_REFERER'];
 }
 
-global $GOOGLE_DOMAIN;
+global $GOOGLE_DOMAIN,$GOOGLE_CLIENT;
 $errors = array();
 $output = array();
 
 do_ldap_connect();
-$email = input( 'username', INPUT_HTML_NONE );
-$oldpassword = input( 'oldpassword', INPUT_STR );
+$g_token = input( 'token', INPUT_STR );
 $password = input( 'password', INPUT_STR );
 $password2 = input( 'password2', INPUT_STR );
 $username = '';
+$email = '';
 
-if ( strpos($email,'@') !== False ) {
-	if ( strripos($email,'@'.$GOOGLE_DOMAIN) !== False ) {
-		$username = substr($email,0,strpos($email,'@'));
-	}
-	else {
-		$errors[] = 'WRONG_EMAIL_DOMAIN';
-	}
-}
-else {
-	//$errors[] = 'INVALID_EMAIL';
-	$username = $email;
-	$email = $username .'@'. $GOOGLE_DOMAIN;
+if ( !empty($g_token) ) {
+  $ticket = $GOOGLE_CLIENT->verifyIdToken($g_token);
+  if ( !empty($ticket) ) {
+    $data = $ticket->getAttributes();
+    $email = $data['payload']['email'];
+    if ( strripos($email,'@'.$GOOGLE_DOMAIN) !== False ) {
+      $username = substr($email,0,strpos($email,'@'));
+    }
+    else {
+      $errors[] = 'WRONG_EMAIL_DOMAIN';
+    }
+  }
 }
 
-if ( !empty($oldpassword) && auth_to_google( $email, $oldpassword ) ) {
+if ( !empty($username) ) {
 	$dn = '';
 	$set = ldap_quick_search( array( 'uid' => $username ), array() );
 	if ( empty($set) ) {
@@ -78,6 +78,9 @@ if ( !empty($oldpassword) && auth_to_google( $email, $oldpassword ) ) {
 	else {
 		$errors[] = 'USER_NOT_FOUND';
 	}
+}
+else { // Present Google oAuth page
+  output( $output, 'change_password_oauth' );
 }
 
 if ( ! empty($errors) ) {
