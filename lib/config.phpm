@@ -3,7 +3,7 @@
 session_name( 'SAMSESSID' );
 session_start();
 $config = array(
-	'site_title'        => 'WCSD signon Authentication System',
+	'site_title'        => 'WCSDsignon System',
 	'base_dir'          => '/var/www/',  // sane defaults
 	'base_url'	    => '/', // these are set below
 	'secure_phrase'     => 'Time4RedPill',
