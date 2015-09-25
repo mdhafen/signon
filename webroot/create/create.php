@@ -29,7 +29,6 @@ $template = ($op == 'Guest') ? 'create-guest' : 'create';
 
 if ( $op != 'Guest' ) {
   $redirect = $config['base_url'] .'create/create.php';
-error_log( "R: $redirect" );
   $GOOGLE_A_CLIENT->setState( urlencode('{"op":"'. $op .'"}') );
   $user = auth_to_google( $redirect );
 }

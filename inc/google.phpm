@@ -184,7 +184,6 @@ function auth_to_google( $redirect = null ) {
     $GOOGLE_A_CLIENT->setRedirectUri( $redirect );
     $auth_url = $GOOGLE_A_CLIENT->createAuthUrl();
     redirect( $auth_url );
-error_log("redirecting to $redirect");
     exit;
   }
 
