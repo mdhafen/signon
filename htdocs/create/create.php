@@ -24,24 +24,23 @@ There was an error! <?= $data['result'] ?>
 } else { ?>
 <div class="alert alert-info alert-dismissible" role="alert">
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-  Please enter your Washington County School District EMail address and password below.
+  Please enter your Washington County School District EMail password below.
 </div>
 
 <div class="panel panel-default panel-body">
   <div class="container-fluid">
     <form action="create.php" method="post" class="form-horizontal">
     <div class="row form-group">
-      <label for="email" class="col-sm-4 control-label">E-Mail: </label>
-      <div class="col-sm-8">
-        <input id="email" name="email" value="" class="form-control" placeholder="<?= $data['op'] == 'Student' ? 'washk12.org email address' : 'firstname.lastname@washk12.org' ?>">
-      </div>
-    </div>
-    <div class="row form-group">
       <label for="password" class="col-sm-4 control-label">Password: </label>
       <div class="col-sm-8">
         <input id="password" name="password" value="" type="password" class="form-control">
-	<div class="help-block">The password you use here to login to your email will also be the same password that is created for the WCSDsignon System</div>
-        <div class="help-block">If you are using Google 2-step verification you will need to generate an application-specific password and enter that password in this field to continue.</div>
+	<div class="help-block">The password you use to login to your email will also be the same password that is used for the WCSDsignon System</div>
+      </div>
+    </div>
+    <div class="row form-group">
+      <label for="password2" class="col-sm-4 control-label">Password Again: </label>
+      <div class="col-sm-8">
+        <input id="password2" name="password2" value="" type="password" class="form-control">
       </div>
     </div>
     <div class="row form-group">

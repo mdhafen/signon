@@ -6,20 +6,38 @@ include_once( '../../lib/output.phpm' );
 include_once( '../../inc/google.phpm' );
 include_once( '../../inc/person.phpm' );
 
-global $PROVIDER_MAP;
+global $PROVIDER_MAP,$GOOGLE_A_CLIENT;
 
 $output = array();
 $result = '';
 $error = 0;
-$op = input( 'op', INPUT_STR );
+$user = '';
 $submitted = input( 'submit', INPUT_STR );
+$op = input( 'op', INPUT_HTML_NONE );
+if ( empty($op) ) {
+  $op = urldecode( input('state',INPUT_HTML_NONE) );
+  $op = json_decode( $op, true );
+  if ( !empty($op) ) {
+    $op = $op['op'];
+  }
+  else {
+    $op = '';
+  }
+}
 
 $template = ($op == 'Guest') ? 'create-guest' : 'create';
 
+if ( $op != 'Guest' ) {
+  $redirect = $config['base_url'] .'create/create.php';
+error_log( "R: $redirect" );
+  $GOOGLE_A_CLIENT->setState( urlencode('{"op":"'. $op .'"}') );
+  $user = auth_to_google( $redirect );
+}
+
 if ( !empty($submitted) ) {
-  $password = input( 'password', INPUT_STR );
   $email = input( 'email', INPUT_HTML_NONE );
 
+  $password = '';
   $entry = array(
     'objectclass' => array('top','inetOrgPerson','sambaSamAccount'),
     'uid' => '',
@@ -50,27 +68,33 @@ if ( !empty($submitted) ) {
     $entry['dn'] = 'uid='. ldap_escape($entry['uid'],'',LDAP_ESCAPE_DN) .',ou=Guest,dc=wcsd';
     $provider = input( 'provider', INPUT_HTML_NONE );
   }
-  else if ( !empty($email) && !empty($password) ) {
-    if ( auth_to_google( $email, $password ) ) {
-      $user = get_user_google( $email );
+  else if ( !empty($user) ) {
+    $email = $user->email;
+    $user = get_user_google( $email );
 
-      if ( !empty($user) ) {
-	if ( stripos($user['orgUnitPath'],'nonusers') !== FALSE ) {
-	  $error = 1;
-	  $result = 'Trying to register service account';
-	}
-	else {
-	  $entry = google_user_hash_for_ldap( $user );
-	  $entry['objectclass'] = array('top','inetOrgPerson','sambaSamAccount');
-	}
+    if ( !empty($user) ) {
+      if ( stripos($user['orgUnitPath'],'nonusers') !== FALSE ) {
+        $error = 1;
+        $result = 'Trying to register service account';
+      }
+      else {
+        $password = input( 'password', INPUT_STR );
+        $password2 = input( 'password2', INPUT_STR );
+        if ( $password != $password2 ) {
+          unset($password);
+        }
+
+        $entry = google_user_hash_for_ldap( $user );
+        $entry['objectclass'] = array('top','inetOrgPerson','sambaSamAccount');
       }
     }
-    else {
-      $error = 1;
-      $result = 'Bad email address or password! (Check the IMAP setting in GMail)';
-    }
   }
-  if ( !empty($entry['dn']) ) {
+  else {
+    $error = 1;
+    $result = 'User not signed in';
+  }
+
+  if ( !empty($entry['dn']) && !empty($password) ) {
     do_ldap_connect();
     $dups = ldap_quick_search( array( 'uid' => $entry['uid'] ), array() );
 
@@ -83,17 +107,20 @@ if ( !empty($submitted) ) {
     }
     else if ( count($dups) === 0 ) {
       if ( !empty($entry['dn']) ) {
-	$dn = $entry['dn'];
-	unset( $entry['dn'] );
+        $dn = $entry['dn'];
+        unset( $entry['dn'] );
 
-	$entry['sambaSID'] = ldap_get_next_SID();
-	do_ldap_add( $dn, $entry );
-	set_password( $dn, $password );
-	if ( $entry['employeeType'] == 'Guest' ) {
-	  google_send_password( $entry['uid'], $provider, $password );
-	}
-	$result = 'Account created';
+        $entry['sambaSID'] = ldap_get_next_SID();
+        do_ldap_add( $dn, $entry );
+        set_password( $dn, $password );
+        if ( $entry['employeeType'] == 'Guest' ) {
+          google_send_password( $entry['uid'], $provider, $password );
+        }
+        $result = 'Account created';
       }
+    }
+    if ( $result == 'Account created' ) {
+      google_oauth_signout();
     }
   }
   else {

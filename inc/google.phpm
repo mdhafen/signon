@@ -1,8 +1,9 @@
 <?php
 global $GOOGLE_DOMAIN;
-global $GOOGLE_CLIENT;
+global $GOOGLE_A_CLIENT,$GOOGLE_S_CLIENT;
 $GOOGLE_DOMAIN = 'washk12.org';
-$GOOGLE_CLIENT = '';
+$GOOGLE_A_CLIENT = '';
+$GOOGLE_S_CLIENT = '';
 
 global $GV_EMAIL, $GV_PASSWD, $GV_PHONE, $GV_MESSAGE, $PROVIDER_MAP;
 $GV_EMAIL = '';
@@ -28,23 +29,49 @@ $PROVIDER_MAP = array(
   'Nextel' => 'page.nextel.com',
                       );
 
-global $SERVICE_ACCOUNT_EMAIL,$SERVICE_ACCOUNT_PKCS12_FILE_PATH;
-$SERVICE_ACCOUNT_EMAIL = '785115890023@developer.gserviceaccount.com';
-$SERVICE_ACCOUNT_PKCS12_FILE_PATH = '/var/www/signon/inc/WCSD_Drive_API-privatekey.p12';
-$SERVICE_EMAIL = 'apiaccess@washk12.org';
-$SERVICE_SCOPE = 'https://www.googleapis.com/auth/admin.directory.user https://www.googleapis.com/auth/admin.directory.group';
-
-require_once "/usr/share/php/google-api-php-client/src/Google_Client.php";
+set_include_path( get_include_path() . PATH_SEPARATOR . '/var/www/signon/inc/Google_Client' );
+require_once "Google/autoload.php";
 require_once 'XML/Unserializer.php';
 include_once 'google_functions_directory.php';
 
-$GOOGLE_CLIENT = buildService( $SERVICE_EMAIL, $SERVICE_SCOPE );
+global $GOOGLE_CLIENT_SCOPES,$GOOGLE_SERVICE_SCOPES;
+$GOOGLE_CLIENT_SCOPES = array('https://www.googleapis.com/auth/admin.directory.user','https://www.googleapis.com/auth/admin.directory.group https://www.googleapis.com/auth/userinfo.email');
+$GOOGLE_SERVICE_SCOPES = array('https://www.googleapis.com/auth/admin.directory.user','https://www.googleapis.com/auth/admin.directory.group');
+$GOOGLE_CLIENT_CONFIG_FILE = '/var/www/signon/inc/client_secret.json';
+$GOOGLE_A_CLIENT = new Google_Client();
+if ( method_exists( $GOOGLE_A_CLIENT, 'setAuthConfigFile' ) ) {
+  $GOOGLE_A_CLIENT->setAuthConfigFile( $GOOGLE_CLIENT_CONFIG_FILE );
+}
+else {
+  $client_config = file_get_contents( $GOOGLE_CLIENT_CONFIG_FILE );
+  $client_config = json_decode( $client_config, true );
+  $GOOGLE_A_CLIENT->setClientId( $client_config['web']['client_id'] );
+  $GOOGLE_A_CLIENT->setClientSecret( $client_config['web']['client_secret'] );
+}
+$GOOGLE_A_CLIENT->setAccessType('online');
+$GOOGLE_A_CLIENT->setApprovalPrompt('auto');
+$GOOGLE_A_CLIENT->setScopes( $GOOGLE_CLIENT_SCOPES );
+$GOOGLE_A_CLIENT->setRedirectUri($config['base_url'] .'change_password.php');
+$GOOGLE_A_CLIENT->setApplicationName( $config['site_title'] );
+$GOOGLE_A_CLIENT->setHostedDomain($GOOGLE_DOMAIN);
+
+global $SERVICE_ACCOUNT_EMAIL,$SERVICE_ACCOUNT_ID,$SERVICE_ACCOUNT_PKCS12_FILE_PATH;
+$SERVICE_ACCOUNT_EMAIL = 'apiaccess@washk12.org';
+$SERVICE_ACCOUNT_ID = '785115890023@developer.gserviceaccount.com';
+$SERVICE_ACCOUNT_PKCS12_FILE_PATH = '/var/www/signon/inc/WCSD_Drive_API-privatekey.p12';
+$GOOGLE_S_CLIENT = buildService( $SERVICE_ACCOUNT_EMAIL, $SERVICE_ACCOUNT_ID, $SERVICE_ACCOUNT_PKCS12_FILE_PATH, $GOOGLE_SERVICE_SCOPES );
+$GOOGLE_S_CLIENT->setScopes( $GOOGLE_SERVICE_SCOPES );
+$GOOGLE_S_CLIENT->setRedirectUri($config['base_url'] .'change_password.php');
+$GOOGLE_S_CLIENT->setApplicationName( $config['site_title'] );
+$GOOGLE_S_CLIENT->setHostedDomain($GOOGLE_DOMAIN);
+if ( $GOOGLE_S_CLIENT->getAuth()->isAccessTokenExpired() ) {
+  $GOOGLE_S_CLIENT->getAuth()->refreshTokenWithAssertion();
+}
 
 global $LDAP_BASE,$LOCATIONS,$DEFAULT_LOCATION,$DEFAULT_OU;
 $LDAP_BASE = 'dc=wcsd';
 $DEFAULT_LOCATION = 'washk12';
 $DEFAULT_OU = 'ou=District Departments,'.$LDAP_BASE;
-
 
 $LOCATIONS = array(
   'AES' => 'ou=Arrowhead Elementary,ou=Elementaries,ou=Snow Cone,'.$LDAP_BASE,
@@ -101,10 +128,17 @@ $LOCATIONS = array(
   'washk12' => 'ou=District Departments,'.$LDAP_BASE,
 		   );
 
-function auth_to_google( $email, $password ) {
+function google_oauth_signout() {
+  global $GOOGLE_A_CLIENT;
+
+  $GOOGLE_A_CLIENT->revokeToken();
+  unset( $_SESSION['google_oauth_token'] );
+}
+
+function auth_to_google( $redirect = null ) {
+  global $GOOGLE_A_CLIENT;
   /* no workie
-     global $GOOGLE_CLIENT;
-     $request = $GOOGLE_CLIENT->getIo()->authenticatedRequest(
+     $request = $GOOGLE_S_CLIENT->getIo()->authenticatedRequest(
         new Google_HttpRequest(
         // Google_OAuth2::OAUTH2_TOKEN_URI, 'POST', array(), array(
         Google_OAuth2::OAUTH2_AUTH_URL, 'POST', array(), array(
@@ -115,6 +149,8 @@ function auth_to_google( $email, $password ) {
         )));
 
   */
+
+  /* IMAP is now a dead-end with gmail
   $hostname = '{imap.gmail.com:993/imap/ssl/novalidate-cert}[Gmail]/All Mail';
 
   // imap_open(host,user,pass,options,n_retries)
@@ -125,12 +161,45 @@ function auth_to_google( $email, $password ) {
   }
 
   return $inbox;
+  */
+
+  $g_code = input( 'code', INPUT_STR );
+  if ( !empty($redirect) ) {
+    $GOOGLE_A_CLIENT->setRedirectUri( $redirect );
+  }
+  if ( !empty($g_code) ) {
+    $g_oauth = new Google_Service_Oauth2( $GOOGLE_A_CLIENT );
+    $ticket = $GOOGLE_A_CLIENT->authenticate($g_code);
+    if ( !empty($ticket) ) {
+      $_SESSION['google_oauth_token'] = $ticket;
+      $data = $g_oauth->userinfo->get();
+    }
+  }
+  else if ( !empty($_SESSION['google_oauth_token']) ) {
+    $g_oauth = new Google_Service_Oauth2( $GOOGLE_A_CLIENT );
+    $GOOGLE_A_CLIENT->setAccessToken( $_SESSION['google_oauth_token'] );
+    $data = $g_oauth->userinfo->get();
+  }
+  else if ( !empty($redirect) ) {
+    $GOOGLE_A_CLIENT->setRedirectUri( $redirect );
+    $auth_url = $GOOGLE_A_CLIENT->createAuthUrl();
+    redirect( $auth_url );
+error_log("redirecting to $redirect");
+    exit;
+  }
+
+  if ( !empty($data) ) {
+    return $data;
+  }
+  else {
+    return false;
+  }
 }
 
 function get_user_google( $email ) {
-  global $GOOGLE_CLIENT;
+  global $GOOGLE_S_CLIENT;
 
-  $user = getUser( $GOOGLE_CLIENT, $email );
+  $user = getUser( $GOOGLE_S_CLIENT, $email );
   $user = json_decode($user, true);
 
   return $user;
@@ -256,7 +325,7 @@ function google_send_password( $phone, $provider, $password ) {
 }
 
 function google_set_password( $email, $password, $force_change = true ) {
-  global $GOOGLE_CLIENT;
+  global $GOOGLE_S_CLIENT,$GOOGLE_A_CLIENT;
   $result = 0;
 
   if ( empty($email) || empty($password) ) {
@@ -268,7 +337,7 @@ function google_set_password( $email, $password, $force_change = true ) {
 "changePasswordAtNextLogin":'. ( $force_change ? "true" : '"0"' ) .'
 }';
 
-  $result = updateUser( $GOOGLE_CLIENT, $email, $mod );
+  $result = updateUser( $GOOGLE_S_CLIENT, $email, $mod );
 
   return $result;
 }

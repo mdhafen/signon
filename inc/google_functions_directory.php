@@ -39,16 +39,14 @@ function errorTraps($n,$e,$ecode,$emessage){
 	return $e;
 }
 
-function buildService($userEmail,$SCOPE) {
-	global $SERVICE_ACCOUNT_EMAIL, $SERVICE_ACCOUNT_PKCS12_FILE_PATH;
-	$key = file_get_contents($SERVICE_ACCOUNT_PKCS12_FILE_PATH);
-	$auth = new Google_AssertionCredentials(
-		$SERVICE_ACCOUNT_EMAIL,
-		array($SCOPE),
+function buildService($userEmail,$userId,$PKCS12FilePath,$scope) {
+	$key = file_get_contents($PKCS12FilePath);
+	$auth = new Google_Auth_AssertionCredentials(
+		$userId,
+		$scope,
 		$key);
 	$auth->sub = $userEmail;
 	$client = new Google_Client();
-	$client->setUseObjects(true);
 	$client->setAssertionCredentials($auth);
 	if(isset($_SESSION['GoogleToken'])) {
 		$client->setAccessToken($_SESSION['GoogleToken']);
@@ -62,73 +60,73 @@ function getOrgList($client, $userEmail, $pageToken=null, $query=null){
 		$query = '&query='. $query;
 	}
 	if($pageToken){
-		$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/users/?customer=my_customer&maxResults=$max&fields=nextPageToken%2Cusers(orgUnitPath%2CprimaryEmail)&pageToken=$pageToken$query");
+		$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/users/?customer=my_customer&maxResults=$max&fields=nextPageToken%2Cusers(orgUnitPath%2CprimaryEmail)&pageToken=$pageToken$query");
 	}else{
-		$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/users/?customer=my_customer&maxResults=$max&fields=nextPageToken%2Cusers(orgUnitPath%2CprimaryEmail)$query");
+		$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/users/?customer=my_customer&maxResults=$max&fields=nextPageToken%2Cusers(orgUnitPath%2CprimaryEmail)$query");
 	}
 	$req->setRequestMethod('get');
 	$headers	= array('GData-Version'=>'3.0',
 				'Content-type'=>'application/atom+xml');
 	$req->setRequestHeaders($headers);
-	$val		= $client->getIo()->authenticatedRequest($req);
+	$val		= $client->getAuth()->authenticatedRequest($req);
 	return $val->getResponseBody();
 }
 
 function getListOrgs($client, $userEmail, $pageToken=null){
 	$max=500;
 	if($pageToken){
-		$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/customer/my_customer/orgunits?type=all&pageToken=$pageToken");
+		$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/customer/my_customer/orgunits?type=all&pageToken=$pageToken");
 	}else{
-		$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/customer/my_customer/orgunits?type=all");
+		$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/customer/my_customer/orgunits?type=all");
 	}
 	$req->setRequestMethod('get');
 	$headers	= array('GData-Version'=>'3.0',
 				'Content-type'=>'application/atom+xml');
 	$req->setRequestHeaders($headers);
-	$val		= $client->getIo()->authenticatedRequest($req);
+	$val		= $client->getAuth()->authenticatedRequest($req);
 	return $val->getResponseBody();
 }
 
 function getGroupList($client, $userEmail, $pageToken=null){
 	$max=200;
 	if($pageToken){
-		$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/groups/?customer=my_customer&pageToken=$pageToken&maxResults=$max");
+		$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/groups/?customer=my_customer&pageToken=$pageToken&maxResults=$max");
 	}else{
-		$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/groups/?customer=my_customer&maxResults=$max");
+		$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/groups/?customer=my_customer&maxResults=$max");
 	}
 	$req->setRequestMethod('get');
 	$headers	= array('GData-Version'=>'3.0',
 				'Content-type'=>'application/atom+xml');
 	$req->setRequestHeaders($headers);
-	$val		= $client->getIo()->authenticatedRequest($req);
+	$val		= $client->getAuth()->authenticatedRequest($req);
 	return $val->getResponseBody();
 }
 
 function getGroupMembers($client, $groupKey, $pageToken=null){
 	$max = 200;
 	if($pageToken){
-		$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/groups/$groupKey/members?pageToken=$pageToken");
+		$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/groups/$groupKey/members?pageToken=$pageToken");
 	}else{
-		$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/groups/$groupKey/members");
+		$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/groups/$groupKey/members");
 	}
 	$req->setRequestMethod('get');
 	$headers	= array('GData-Version'=>'3.0',
 				'Content-type'=>'application/atom+xml');
 	$req->setRequestHeaders($headers);
-	$val		= $client->getIo()->authenticatedRequest($req);
+	$val		= $client->getAuth()->authenticatedRequest($req);
 	return $val->getResponseBody();
 	//return $val;
 }
 
 function addUser($client,$user){
 	try{
-		$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/users");
+		$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/users");
 		$req->setRequestMethod('post');
 		$headers = array('GData-Version'=>'3.0',
 		'Content-type'=>'application/json');
 		$req->setRequestHeaders($headers);
 		$req->setPostBody($user);
-		$val		= $client->getIo()->authenticatedRequest($req);
+		$val		= $client->getAuth()->authenticatedRequest($req);
 		//return $val;
 		return json_decode($val->getResponseBody(), true);
 	}catch (Exception $e){
@@ -138,13 +136,13 @@ function addUser($client,$user){
 
 function addOrgUnit($client,$postBody){
 	try{
-		$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/customer/my_customer/orgunits");
+		$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/customer/my_customer/orgunits");
 		$req->setRequestMethod('post');
 		$headers = array('GData-Version'=>'3.0',
 		'Content-type'=>'application/json');
 		$req->setRequestHeaders($headers);
 		$req->setPostBody($postBody);
-		$val = $client->getIo()->authenticatedRequest($req);
+		$val = $client->getAuth()->authenticatedRequest($req);
 		return $val->getResponseBody();
 	}catch (Exception $e){
 		print_r($e);
@@ -154,12 +152,12 @@ function addOrgUnit($client,$postBody){
 function getUser($client,$email){
 	//echo 'Trying getUser' . "\r\n";
 	$requestBody = $email;
-	$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/users/$email");
+	$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/users/$email");
 	$req->setRequestMethod('get');
 	$headers = array('GData-Version'=>'3.0',
 	'Content-type'=>'application/atom+xml');
 	$req->setRequestHeaders($headers);
-	$val		= $client->getIo()->authenticatedRequest($req);
+	$val		= $client->getAuth()->authenticatedRequest($req);
 	if(@$val->error){
 		throw new Exception($val->error);
 	}
@@ -168,14 +166,14 @@ function getUser($client,$email){
 
 function updateUser($client,$email,$requestBody){
 	for($n = 0; $n < 10; ++$n){
-		try{	
-			$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/users/$email");
+		try{
+			$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/users/$email");
 			$req->setRequestMethod('put');
 			$headers = array('GData-Version'=>'3.0',
 			'Content-type'=>'application/json');
 			$req->setRequestHeaders($headers);
 			$req->setPostBody($requestBody);
-			$val = $client->getIo()->authenticatedRequest($req);
+			$val = $client->getAuth()->authenticatedRequest($req);
 			return $val->getResponseBody();
 		}catch (Exception $e){
 			print_r($e);
@@ -185,12 +183,12 @@ function updateUser($client,$email,$requestBody){
 
 function deleteUser($client,$email){
 	try{
-		$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/users/$email");
+		$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/users/$email");
 		$req->setRequestMethod('delete');
 		$headers = array('GData-Version'=>'3.0',
 		'Content-type'=>'application/json');
 		$req->setRequestHeaders($headers);
-		$val = $client->getIo()->authenticatedRequest($req);
+		$val = $client->getAuth()->authenticatedRequest($req);
 		return $val->getResponseBody();
 	}catch (Exception $e){
 		print_r($e);
@@ -202,15 +200,15 @@ function getAllUsers($client,$email,$pageToken=null){
 		try{
 			$max=500;
 			if($pageToken){
-				$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/users/?customer=my_customer&pageToken=$pageToken&maxResults=$max&orderBy=email&sortOrder=descending");
+				$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/users/?customer=my_customer&pageToken=$pageToken&maxResults=$max&orderBy=email&sortOrder=descending");
 			}else{
-				$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/users/?customer=my_customer&maxResults=$max&orderBy=email&sortOrder=descending");
+				$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/users/?customer=my_customer&maxResults=$max&orderBy=email&sortOrder=descending");
 			}
 			$req->setRequestMethod('get');
 			$headers	= array('GData-Version'=>'3.0',
 						'Content-type'=>'application/atom+xml');
 			$req->setRequestHeaders($headers);
-			$val		= $client->getIo()->authenticatedRequest($req);
+			$val		= $client->getAuth()->authenticatedRequest($req);
 			return $val->getResponseBody();
 		}catch (Exception $e){
 			errorTraps($n, $e, $e->getCode(), $e->getMessage());
@@ -226,15 +224,15 @@ function searchUsers($client,$email,$query=null,$pageToken=null){
 		try{
 			$max=500;
 			if($pageToken){
-				$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/users/?customer=my_customer&pageToken=$pageToken&maxResults=$max&orderBy=email&sortOrder=descending$Query");
+				$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/users/?customer=my_customer&pageToken=$pageToken&maxResults=$max&orderBy=email&sortOrder=descending$Query");
 			}else{
-				$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/users/?customer=my_customer&maxResults=$max&orderBy=email&sortOrder=descending$Query");
+				$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/users/?customer=my_customer&maxResults=$max&orderBy=email&sortOrder=descending$Query");
 			}
 			$req->setRequestMethod('get');
 			$headers	= array('GData-Version'=>'3.0',
 						'Content-type'=>'application/atom+xml');
 			$req->setRequestHeaders($headers);
-			$val		= $client->getIo()->authenticatedRequest($req);
+			$val		= $client->getAuth()->authenticatedRequest($req);
 			return $val->getResponseBody();
 		}catch (Exception $e){
 			errorTraps($n, $e, $e->getCode(), $e->getMessage());
@@ -244,13 +242,13 @@ function searchUsers($client,$email,$query=null,$pageToken=null){
 
 function createGroup($client,$postBody){
 	try{
-		$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/groups/?customer=my_customer");
+		$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/groups/?customer=my_customer");
 		$req->setRequestMethod('post');
 		$headers = array('GData-Version'=>'3.0',
 		'Content-type'=>'application/json');
 		$req->setRequestHeaders($headers);
 		$req->setPostBody($postBody);
-		$val = $client->getIo()->authenticatedRequest($req);
+		$val = $client->getAuth()->authenticatedRequest($req);
 		return $val->getResponseBody();
 	}catch (Exception $e){
 		print_r($e);
@@ -259,13 +257,13 @@ function createGroup($client,$postBody){
 
 function groupSettings($client,$groupEmail,$postBody){
 	try{
-		$req = new Google_HttpRequest("https://www.googleapis.com/groups/v1/groups/$groupEmail");
+		$req = new Google_Http_Request("https://www.googleapis.com/groups/v1/groups/$groupEmail");
 		$req->setRequestMethod('put');
 		$headers = array('GData-Version'=>'3.0',
 		'Content-type'=>'application/json');
 		$req->setRequestHeaders($headers);
 		$req->setPostBody($postBody);
-		$val = $client->getIo()->authenticatedRequest($req);
+		$val = $client->getAuth()->authenticatedRequest($req);
 		return $val->getResponseBody();
 	}catch (Exception $e){
 		print_r($e);
@@ -274,13 +272,13 @@ function groupSettings($client,$groupEmail,$postBody){
 
 function addGroupMembers($client,$groupEmail, $postBody){
 	try{
-		$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/groups/$groupEmail/members");
+		$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/groups/$groupEmail/members");
 		$req->setRequestMethod('post');
 		$headers = array('GData-Version'=>'3.0',
 		'Content-type'=>'application/json');
 		$req->setRequestHeaders($headers);
 		$req->setPostBody($postBody);
-		$val = $client->getIo()->authenticatedRequest($req);
+		$val = $client->getAuth()->authenticatedRequest($req);
 		return $val->getResponseBody();
 	}catch (Exception $e){
 		print_r($e);
@@ -289,12 +287,12 @@ function addGroupMembers($client,$groupEmail, $postBody){
 
 function removeGroupMembers($client,$groupEmail, $member){
 	try{
-		$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/groups/$groupEmail/members/$member");
+		$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/groups/$groupEmail/members/$member");
 		$req->setRequestMethod('DELETE');
 		//$headers = array('GData-Version'=>'3.0','Content-type'=>'application/json');
 		//$req->setRequestHeaders($headers);
 		//$req->setPostBody($postBody);
-		$val = $client->getIo()->authenticatedRequest($req);
+		$val = $client->getAuth()->authenticatedRequest($req);
 		return $val->getResponseBody();
 	}catch (Exception $e){
 		print_r($e);
@@ -303,12 +301,12 @@ function removeGroupMembers($client,$groupEmail, $member){
 
 function getUsersGroups($client, $member){
 	try{
-		$req = new Google_HttpRequest("https://www.googleapis.com/admin/directory/v1/groups?userKey=$member&maxResults=200");
+		$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/groups?userKey=$member&maxResults=200");
 		$req->setRequestMethod('get');
 		$headers	= array('GData-Version'=>'3.0',
 					'Content-type'=>'application/atom+xml');
 		$req->setRequestHeaders($headers);
-		$val		= $client->getIo()->authenticatedRequest($req);
+		$val		= $client->getAuth()->authenticatedRequest($req);
 		return $val->getResponseBody();
 	}catch (Exception $e){
 		print_r($e);
