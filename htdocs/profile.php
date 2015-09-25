@@ -30,7 +30,7 @@ include( 'doc-header.php' );
         </div>
         <div class="modal-footer">
           <input class="btn btn-primary" type="submit" value="Change Password">
-          <button type="button" class="btn btn-warning" data-dismiss="modal">Close</button>
+          <a href="#" class="btn btn-default" data-dismiss="modal">Cancel</a>
         </div>
       </div>
       </form>
