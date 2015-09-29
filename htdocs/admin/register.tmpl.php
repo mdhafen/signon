@@ -14,6 +14,7 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 Success!
 </div>
+<?php } ?>
 
 <div class="panel panel-default panel-body">
 <div class="container-fluid">
@@ -45,7 +46,6 @@ Success!
 </div>
 </div>
 </form>
-<?php } ?>
 
 </div>
 

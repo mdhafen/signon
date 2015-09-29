@@ -14,11 +14,11 @@ $location = input( 'loc', INPUT_PINT );
 $description = input( 'desc', INPUT_HTML_NONE );
 $op = input( 'op', INPUT_STR );
 
-if ( empty($mac) ) {
+if ( empty($mac) && !empty($_SESSION['client_mac']) ) {
     $mac = $_SESSION['client_mac'];
 }
 
-$locations = lab_get_locations();
+$locations = labs_get_locations();
 $ip = get_remote_ip();
 $curr_loc = lab_get_locationid_for_ip( $ip );
 
