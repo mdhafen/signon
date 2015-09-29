@@ -160,6 +160,18 @@ function input_validation( $output, $type ) {
 	return $return;
 }
 
+function get_remote_ip() {
+	$ip = '';
+	if ( !empty($config['trusted_proxies']) && array_search($_SERVER['REMOTE_ADDR'],$config['trusted_proxies']) !== false && !empty($_SERVER['HTTP_X_FORWARDED_FOR']) ) {
+		$remotes = array_values(array_filter(explode(',',$_SERVER['HTTP_X_FORWARDED_FOR'])));
+		$ip = end($remotes);
+	}
+	else {
+		$ip = $_SERVER['REMOTE_ADDR'];
+	}
+	return $ip;
+}
+
 function clean_string( $string = '' ) {
 	// First fix funky 'Microsoft Quotes', etc from Windows CP-1252
 	// copied from http://stackoverflow.com/questions/20025030/convert-all-types-of-smart-quotes-with-php

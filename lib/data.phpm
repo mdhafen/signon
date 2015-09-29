@@ -5,11 +5,11 @@ include_once( 'config.phpm' );
 $dbh = '';
 $ldap = '';
 
-function db_connect() {
+function db_connect( $num=0 ) {
 	global $dbh, $config;
 
-	if ( ! $dbh ) {
-		$settings = $config['database'];
+	if ( empty($dbh[$num]) ) {
+		$settings = $config['database'][$num];
 		if ( empty($settings) ) {
 			print "No database connection configured";
 			die();
@@ -20,14 +20,14 @@ function db_connect() {
 		$port = ( ! empty($settings['port']) ) ? ";port=$settings[port]" : "";
 		$dsn = "$engine:host=$host$port;dbname=$schema";
 		try {
-			$dbh = new PDO( $dsn, $settings['user'], $settings['passwd'] );
+			$dbh[$num] = new PDO( $dsn, $settings['user'], $settings['passwd'] );
 		} catch ( PDOException $e ) {
 			print "Couldn't connect to database: ". $e->getMessage();
 			die();
 		}
-		$dbh->setAttribute( PDO::ATTR_CASE, PDO::CASE_NATURAL );
+		$dbh[$num]->setAttribute( PDO::ATTR_CASE, PDO::CASE_NATURAL );
 	}
-	return $dbh;
+	return $dbh[$num];
 }
 
 function do_ldap_connect( $userdn = '', $passwd = '' ) {
