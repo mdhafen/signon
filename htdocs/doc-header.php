@@ -16,6 +16,7 @@
 <?php if ( ! empty($data['_session']['CAN_reset_password']) ) { ?>
           <li><a href="<?= $data['_config']['base_url'] ?>admin/search.php">Search</a></li>
           <li><a href="<?= $data['_config']['base_url'] ?>admin/">Manage Users</a></li>
+          <li><a href="<?= $data['_config']['base_url'] ?>admin/register.php">Register a Lab Device</a></li>
 <?php } ?>
 
          </ul>
