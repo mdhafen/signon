@@ -1,0 +1,66 @@
+<?php
+
+function labs_register_mac( $mac, $location = '', $desc = '', $user, $ip ) {
+  $dbh = db_connect();
+
+  $query = "INSERT INTO authorized_macs ( macaddress, device_home, submitted_desc, submitted_user, submitted_ip, submitted_date ) VALUES ( :mac, :loc, :desc, :user, :ip, CURDATE() )";
+  $sth = $dbh->prepare( $query );
+  $sth->bindValue( ':mac', $mac );
+  $sth->bindValue( ':loc', $location );
+  $sth->bindValue( ':desc', $desc );
+  $sth->bindValue( ':user', $user );
+  $sth->bindValue( ':ip', ip_to_decimal( $ip ) );
+
+  $sth->execute();
+}
+
+function labs_get_locations() {
+  $dbh = db_connect(1);
+
+  $query = "SELECT * FROM site_name ORDER BY name";
+  $sth = $dbh->prepare( $query );
+  $sth->execute();
+
+  while ( $row = $sth->fetch() ) {
+    $row = stripslashes_array( $row );
+    $result[] = array( 'id' => $row['id'], 'name' => $row['name'] );
+  }
+
+  return $result;
+}
+
+function lab_get_locationid_for_ip( $ip ) {
+  $dbh = db_connect(1);
+
+  $num = ip_to_decimal( $ip );
+
+  $query = "SELECT site_name FROM ip where ? >= network and ? <= broadcast";
+  $sth = $dbh->prepare( $query );
+  $sth->bindValue( 1, $num );
+  $sth->bindValue( 2, $num );
+  $sth->execute();
+
+  $row = $sth->fetch();
+  if ( !empty($row) ) {
+    return $row['site_name'];
+  }
+
+  return "";
+}
+
+function ip_to_decimal( $ip ) {
+  $ip_dec = inet_pton($ip);
+  if ( $ip_dec === false ) {
+    return "";
+  }
+
+  $bin = '';
+  $num = '';
+  foreach ( unpack('C*'),$ip_dec) as $byte ) {
+    $bin .= str_pad( decbin($byte), 8, "0", STR_PAD_LEFT);
+  }
+  $num = base_convert( ltrim($bin,'0'), 2, 10 );
+
+  return $num;
+}
+?>
