@@ -5,10 +5,7 @@ include_once( '../../lib/data.phpm' );
 include_once( '../../lib/output.phpm' );
 
 do_ldap_connect();
-if ( ! authenticate() ) {
-	output( array(), 'login' );
-	exit;
-}
+authorize( 'reset_password' );
 
 global $config;
 

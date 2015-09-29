@@ -8,10 +8,7 @@ include_once( '../../inc/person.phpm' );
 global $config;
 
 do_ldap_connect();
-if ( ! authenticate() ) {
-	output( array(), 'login' );
-	exit;
-}
+authorize( 'reset_password' );
 
 $attr = input( 'attrib', INPUT_STR );
 $query = input( 'query', INPUT_STR );
