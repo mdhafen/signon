@@ -39,6 +39,7 @@ if ( !empty($op) && !empty($mac) ) {  // force other values here too?
     $user = $object['uid'][0];
     $mac = labs_normalize_mac( $mac );
     labs_register_mac( $mac, $location, $description, $user, $ip );
+    $output['success'] = true;
 }
 
 output( $output, 'admin/register.tmpl' );
