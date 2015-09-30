@@ -44,7 +44,7 @@ Success!
 </div>
 
 <div class="row form-group">
-<input type="submit" name="op" value="Set" class="btn">
+<input type="submit" name="op" value="Register" class="btn">
 </div>
 </div>
 </form>
