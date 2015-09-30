@@ -38,7 +38,9 @@ Success!
 
 <div class="row form-group">
 <label for="desc" class="col-sm-4 control-label">Description</label>
-<div class="col-sm-8"><input type="text" id="desc" name="desc" value="<?= $data['desc'] ?>" class="form-control"></div>
+<div class="col-sm-8">
+ <textarea id="desc" name="desc" rows="3" cols="40" class="form-control"><?= $data['desc'] ?></textarea>
+</div>
 </div>
 
 <div class="row form-group">
