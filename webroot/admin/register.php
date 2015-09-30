@@ -22,7 +22,7 @@ $locations = labs_get_locations();
 $ip = get_remote_ip();
 $curr_loc = lab_get_locationid_for_ip( $ip );
 
-foreach ( $locations as $loc ) {
+foreach ( $locations as &$loc ) {
   if ( $loc['id'] == $curr_loc ) {
     $loc['selected'] = true;
   }
@@ -37,6 +37,7 @@ if ( !empty($op) && !empty($mac) ) {  // force other values here too?
     $set = ldap_quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
     $object = $set[0];
     $user = $object['uid'][0];
+    $mac = labs_normalize_mac( $mac );
     labs_register_mac( $mac, $location, $description, $user, $ip );
 }
 

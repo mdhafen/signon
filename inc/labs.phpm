@@ -1,5 +1,14 @@
 <?php
 
+function labs_normalize_mac( $mac ) {
+  $mac = str_replace( '.', '', $mac );
+  $mac = str_replace( '-', '', $mac );
+  $mac = str_replace( ':', '', $mac );
+  $mac = strtolower( $mac );
+
+  return $mac;
+}
+
 function labs_register_mac( $mac, $location = '', $desc = '', $user, $ip ) {
   $dbh = db_connect();
 
