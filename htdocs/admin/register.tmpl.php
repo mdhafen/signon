@@ -28,7 +28,7 @@ Success!
 <div class="row form-group">
   <label for="loc" class="col-sm-4 control-label">Home Location</label>
   <div class="col-sm-8">
-  <select name="attrib">
+  <select name="loc" id="loc">
 <?php foreach ( $data['locations'] as $loc ) { ?>
   <option value="<?= $loc['id'] ?>"<?= empty($loc['selected']) ? "" : " selected " ?>><?= $loc['name'] ?></option>
 <?php } ?>
