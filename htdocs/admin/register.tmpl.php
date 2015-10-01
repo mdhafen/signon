@@ -13,7 +13,7 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 <div class="alert alert-info alert-dismissible" role="alert">
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 <p>Success!</p>
-<p>Now you can connect to the WCSDlabs wireless network with the pass-phrase theskyisfalling2day!</p>
+<p>Now you can connect to the WCSDlabs wireless network with the pass-phrase "theskyisfalling2day!".</p>
 </div>
 <?php } ?>
 
