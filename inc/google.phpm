@@ -53,7 +53,6 @@ $GOOGLE_A_CLIENT->setApprovalPrompt('auto');
 $GOOGLE_A_CLIENT->setScopes( $GOOGLE_CLIENT_SCOPES );
 $GOOGLE_A_CLIENT->setRedirectUri($config['base_url'] .'change_password.php');
 $GOOGLE_A_CLIENT->setApplicationName( $config['site_title'] );
-$GOOGLE_A_CLIENT->setHostedDomain($GOOGLE_DOMAIN);
 
 global $SERVICE_ACCOUNT_EMAIL,$SERVICE_ACCOUNT_ID,$SERVICE_ACCOUNT_PKCS12_FILE_PATH;
 $SERVICE_ACCOUNT_EMAIL = 'apiaccess@washk12.org';
@@ -63,7 +62,6 @@ $GOOGLE_S_CLIENT = buildService( $SERVICE_ACCOUNT_EMAIL, $SERVICE_ACCOUNT_ID, $S
 $GOOGLE_S_CLIENT->setScopes( $GOOGLE_SERVICE_SCOPES );
 $GOOGLE_S_CLIENT->setRedirectUri($config['base_url'] .'change_password.php');
 $GOOGLE_S_CLIENT->setApplicationName( $config['site_title'] );
-$GOOGLE_S_CLIENT->setHostedDomain($GOOGLE_DOMAIN);
 if ( $GOOGLE_S_CLIENT->getAuth()->isAccessTokenExpired() ) {
   $GOOGLE_S_CLIENT->getAuth()->refreshTokenWithAssertion();
 }
