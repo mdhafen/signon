@@ -6,7 +6,7 @@ include_once( '../../lib/output.phpm' );
 include_once( '../../inc/google.phpm' );
 include_once( '../../inc/person.phpm' );
 
-global $PROVIDER_MAP,$GOOGLE_A_CLIENT;
+global $PROVIDER_MAP,$GOOGLE_DOMAIN,$GOOGLE_A_CLIENT;
 
 $output = array();
 $result = '';
@@ -31,6 +31,10 @@ if ( $op != 'Guest' ) {
   $redirect = $config['base_url'] .'create/create.php';
   $GOOGLE_A_CLIENT->setState( urlencode('{"op":"'. $op .'"}') );
   $user = auth_to_google( $redirect );
+  if ( !empty($user) && strripos($user->email,'@'.$GOOGLE_DOMAIN) === False ) {
+    $error = 1;
+    $result = 'Wrong Google Domain';
+  }
 }
 
 if ( !empty($submitted) ) {
