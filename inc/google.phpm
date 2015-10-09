@@ -202,6 +202,30 @@ function get_user_google( $email ) {
   return $user;
 }
 
+function google_get_all_users() {
+    global $GOOGLE_CLIENT;
+    $pageToken = null;
+    $google_cache = array();
+    do {
+        $cache = getAllUsers( $GOOGLE_CLIENT, '', $pageToken );
+        $cache = json_decode( $cache, true );
+        if ( !empty($cache['users']) ) {
+            foreach ( $cache['users'] as $user ) {
+                if ( empty($user['isSuspended']) || $user['isSuspended'] == false ) {
+                  $google_cache[] = $user;
+                }
+            }
+        }
+        if ( !empty($cache['nextPageToken']) ) {
+            $pageToken = $cache['nextPageToken'];
+        }
+        else {
+            $pageToken = null;
+        }
+    } while ( $pageToken );
+    return $google_cache;
+}
+
 function google_org_to_loc( $path ) {
   global $LOCATIONS,$DEFAULT_LOCATION;
 

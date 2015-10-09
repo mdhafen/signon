@@ -260,22 +260,50 @@ function ldap_fix_group_memberships( $old_dn, $new_dn ) {
 }
 
 function ldap_get_next_SID() {
+	return ldap_get_next_num();
+}
+
+function ldap_get_next_num( $attr='sambaSID' ) {
 	$sid = 0;
 	$prefix = '';
-	$set = ldap_quick_search( array('objectClass'=>'sambaSamAccount'), array('sambaSID') );
+	switch ( $attrib ) {
+	case 'sambaSID':
+		$set = ldap_quick_search( array('objectClass'=>'sambaSamAccount'), array('sambaSID') );
+		break;
+	case 'uidNumber':
+		$set = ldap_quick_search( array('objectClass'=>'posixAccount'), array('uidNumber') );
+		break;
+	default:
+		$set = array();
+		break;
+	}
+	if ( empty($set) ) {
+		return 0;
+	}
 	foreach ( $set as $user ) {
-		$attr = $user['sambaSID'][0];
+		$attr = $user[$attrib][0];
 		$pos = strrpos( $attr, '-' );
-		$this_sid = substr( $attr, $pos + 1 );
-		$prefix = substr( $attr, 0, $pos );
+		if ( $pos !== false ) {
+			$this_sid = substr( $attr, $pos + 1 );
+			$prefix = substr( $attr, 0, $pos );
+		}
+		else {
+			$prefix = "";
+			$this_sid = $attr;
+		}
 		if ( $this_sid > $sid ) {
 			$sid = $this_sid;
 		}
 	}
 
-	if ( $sid > 0 && $prefix ) {
+	if ( $sid > 0 ) {
 		$sid++;
-		return $prefix .'-'. $sid;
+		if ( !empty($prefix) ) {
+			return $prefix .'-'. $sid;
+		}
+		else {
+			return $sid;
+		}
 	}
 }
 
