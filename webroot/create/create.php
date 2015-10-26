@@ -85,6 +85,8 @@ if ( !empty($submitted) ) {
         $password2 = input( 'password2', INPUT_STR );
         if ( $password != $password2 ) {
           unset($password);
+          $error = 1;
+          $result = 'Passwords do not match';
         }
 
         $entry = google_user_hash_for_ldap( $user );
