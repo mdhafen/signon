@@ -100,9 +100,13 @@ if ( !empty($adds) || !empty($dels) ) {
 		if ( in_array( 'sambaSamAccount', $adds['objectClass'] ) ) {
 			$adds['sambaSID'] = ldap_get_next_num('sambaSID');
 		}
-		do_ldap_add( $objectdn, $adds );
-		if ( !empty($password) ) {
-			set_password( $objectdn, $password );
+		if ( do_ldap_add( $objectdn, $adds ) ) {
+			if ( !empty($password) ) {
+				set_password( $objectdn, $password );
+			}
+		}
+		else {
+			$errors[] = "There was an error creating the account";
 		}
 	}
 	else {

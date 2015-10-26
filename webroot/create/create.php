@@ -116,12 +116,17 @@ if ( !empty($submitted) ) {
         unset( $entry['dn'] );
 
         $entry['sambaSID'] = ldap_get_next_num('sambaSID');
-        do_ldap_add( $dn, $entry );
-        set_password( $dn, $password );
-        if ( $entry['employeeType'] == 'Guest' ) {
-          google_send_password( $entry['uid'], $provider, $password );
+        if ( do_ldap_add( $dn, $entry ) ) {
+          set_password( $dn, $password );
+          if ( $entry['employeeType'] == 'Guest' ) {
+            google_send_password( $entry['uid'], $provider, $password );
+          }
+          $result = 'Account created';
         }
-        $result = 'Account created';
+        else {
+          $error = 1;
+          $result = 'There was an Error creating your account';
+        }
       }
     }
     if ( $result == 'Account created' ) {

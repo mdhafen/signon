@@ -47,7 +47,9 @@ if ( !empty($user) ) {
             unset( $entry['dn'] );
             $entry['objectClass'] = array('top','inetOrgPerson','sambaSamAccount');
             $entry['sambaSID'] = ldap_get_next_num('sambaSID');
-            do_ldap_add( $dn, $entry );
+            if ( ! do_ldap_add( $dn, $entry ) ) {
+              $errors[] = 'There was an error creating the account';
+            }
           }
         }
       }
