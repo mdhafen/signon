@@ -259,10 +259,6 @@ function ldap_fix_group_memberships( $old_dn, $new_dn ) {
 	}
 }
 
-function ldap_get_next_SID() {
-	return ldap_get_next_num();
-}
-
 function ldap_get_next_num( $attr='sambaSID' ) {
 	$sid = 0;
 	$prefix = '';
@@ -282,15 +278,8 @@ function ldap_get_next_num( $attr='sambaSID' ) {
 	}
 	foreach ( $set as $user ) {
 		$attr = $user[$attrib][0];
-		$pos = strrpos( $attr, '-' );
-		if ( $pos !== false ) {
-			$this_sid = substr( $attr, $pos + 1 );
-			$prefix = substr( $attr, 0, $pos );
-		}
-		else {
-			$prefix = "";
-			$this_sid = $attr;
-		}
+		preg_match('/(.*\D)?(\d+)/', $attr, $matches);
+		list( $str, $prefix, $this_sid ) = $matches;
 		if ( $this_sid > $sid ) {
 			$sid = $this_sid;
 		}
@@ -298,12 +287,7 @@ function ldap_get_next_num( $attr='sambaSID' ) {
 
 	if ( $sid > 0 ) {
 		$sid++;
-		if ( !empty($prefix) ) {
-			return $prefix .'-'. $sid;
-		}
-		else {
-			return $sid;
-		}
+		return $prefix . $sid;
 	}
 }
 

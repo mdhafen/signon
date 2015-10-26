@@ -98,7 +98,7 @@ if ( !empty($adds) || !empty($dels) ) {
 		}
 		$adds['objectClass'] = $object['objectClass'];
 		if ( in_array( 'sambaSamAccount', $adds['objectClass'] ) ) {
-			$adds['sambaSID'] = ldap_get_next_SID();
+			$adds['sambaSID'] = ldap_get_next_num('sambaSID');
 		}
 		do_ldap_add( $objectdn, $adds );
 		if ( !empty($password) ) {

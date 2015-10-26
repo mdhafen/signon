@@ -46,7 +46,7 @@ if ( !empty($user) ) {
             $dn = $entry['dn'];
             unset( $entry['dn'] );
             $entry['objectClass'] = array('top','inetOrgPerson','sambaSamAccount');
-            $entry['sambaSID'] = ldap_get_next_SID();
+            $entry['sambaSID'] = ldap_get_next_num('sambaSID');
             do_ldap_add( $dn, $entry );
           }
         }

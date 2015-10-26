@@ -115,7 +115,7 @@ if ( !empty($submitted) ) {
         $dn = $entry['dn'];
         unset( $entry['dn'] );
 
-        $entry['sambaSID'] = ldap_get_next_SID();
+        $entry['sambaSID'] = ldap_get_next_num('sambaSID');
         do_ldap_add( $dn, $entry );
         set_password( $dn, $password );
         if ( $entry['employeeType'] == 'Guest' ) {
