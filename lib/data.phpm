@@ -259,7 +259,7 @@ function ldap_fix_group_memberships( $old_dn, $new_dn ) {
 	}
 }
 
-function ldap_get_next_num( $attr='sambaSID' ) {
+function ldap_get_next_num( $attrib='sambaSID' ) {
 	$sid = 0;
 	$prefix = '';
 	switch ( $attrib ) {
