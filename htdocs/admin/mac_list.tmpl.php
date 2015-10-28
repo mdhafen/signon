@@ -1,9 +1,18 @@
 <?php include($data['_config']['base_dir'] .'/htdocs/doc-open.php'); ?>
 <title><?= $data['_config']['site_title'] ?> - Register Lab Device</title>
-<link rel="stylesheet" type="text/css" href="<?= $data['_config']['base_dir'] ?>/css/datatables.min.css"/>
-<script>
+<link rel="stylesheet" type="text/css" href="<?= $data['_config']['base_url'] ?>css/datatables.min.css"/>
+<script type="text/javascript" src="<?= $data['_config']['base_url'] ?>js/datatables.min.js"></script>
+<script type="text/javascript">
 $(document).ready(function() {
-	$('#mac_list').DataTable();
+	$('#mac_list').DataTable({
+		"columnDefs":[
+			{
+				"targets":[ 5 ],
+				"sortable":false,
+				"searchable":false
+			}
+		]
+	});
 });
 </script>
 <?php
@@ -26,9 +35,11 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 <div class="table-responsive">
 
 <table class="table table-striped" id="mac_list">
+<thead>
 <tr>
 <th>M.A.C. Address</th><th>Registered By</th><th>Device Home</th><th>Device Description</th><th>Date Registered</th><th></th>
 </tr>
+</thead>
 <tbody>
 <?php foreach ( $data['mac_list'] as $mac_row ) { ?>
 
@@ -54,5 +65,4 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 
 </div>
 
-<script type="text/javascript" src="<?= $data['_config']['base_dir'] ?>/js/datatables.min.js"></script>
 <?php include( $data['_config']['base_dir'] .'/htdocs/doc-close.php' ); ?>
