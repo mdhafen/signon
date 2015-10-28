@@ -13,6 +13,22 @@ function labs_normalize_mac( $mac ) {
   return $mac;
 }
 
+function labs_get_macs() {
+  $dbh = db_connect();
+
+  $query = "SELECT * FROM authorized_macs";
+  $sth = $dbh->prepare( $query );
+
+  $sth->execute();
+
+  while ( $row = $sth->fetch() ) {
+    $row = stripslashes_array( $row );
+    $result[] = $row;
+  }
+
+  return $result;
+}
+
 function labs_register_mac( $mac, $location = '', $desc = '', $user, $ip ) {
   $dbh = db_connect();
 
@@ -23,6 +39,16 @@ function labs_register_mac( $mac, $location = '', $desc = '', $user, $ip ) {
   $sth->bindValue( ':desc', $desc );
   $sth->bindValue( ':user', $user );
   $sth->bindValue( ':ip', ip_to_decimal( $ip ) );
+
+  $sth->execute();
+}
+
+function labs_unregister_mac( $mac ) {
+  $dbh = db_connect();
+
+  $query = "DELETE FROM authorized_macs WHERE macaddress = :mac";
+  $sth = $dbh->prepare( $query );
+  $sth->bindValue( ':mac', $mac );
 
   $sth->execute();
 }

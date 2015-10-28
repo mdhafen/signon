@@ -9,6 +9,7 @@ do_ldap_connect();
 authorize( 'reset_password' );
 
 $output = array();
+$template = 'admin/register.tmpl';
 $mac = input( 'client_mac', INPUT_STR );
 $location = input( 'loc', INPUT_PINT );
 $description = input( 'desc', INPUT_HTML_NONE );
@@ -68,7 +69,18 @@ if ( !empty($op) ) {  // force other values here too?
             $output['success'] = true;
         }
     }
+    else if ( $op == 'Delete' && !empty($mac) ) {
+        $mac = labs_normalize_mac( $mac );
+        labs_unregister_mac( $mac );
+        $output['deleted'] = true;
+        $output['mac_list'] = labs_get_macs();
+	$template = 'admin/mac_list.tmpl';
+    }
+    else if ( $op == 'List' ) {
+        $output['mac_list'] = labs_get_macs();
+	$template = 'admin/mac_list.tmpl';
+    }
 }
 
-output( $output, 'admin/register.tmpl' );
+output( $output, $template );
 ?>

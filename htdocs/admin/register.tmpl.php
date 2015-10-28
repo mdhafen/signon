@@ -8,6 +8,7 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 <div class="main-page">
 
 <h1>Register Lab Device</h1>
+<h3><a href="register.php?op=List">See registered M.A.C.'s</a></h3>
 
 <?php if ( ! empty($data['success']) ) { ?>
 <div class="alert alert-info alert-dismissible" role="alert">
@@ -62,8 +63,10 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 </div>
 
 <div class="row form-group">
-<label for="drop_first" class="col-sm-4 control-label">Discard first row</label>
-<div class="col-sm-8"><input type="checkbox" id="drop_first" name="drop_first" checked='checked' class="form-control"></div>
+<div class="col-sm-4"></div>
+<div class="col-sm-8">
+<input type="checkbox" id="drop_first" name="drop_first" checked='checked' class="form-control"></div>
+<label for="drop_first" class="control-label">Discard first row</label>
 </div>
 
 <div class="row form-group">
