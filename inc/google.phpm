@@ -203,11 +203,11 @@ function get_user_google( $email ) {
 }
 
 function google_get_all_users() {
-    global $GOOGLE_CLIENT;
+    global $GOOGLE_S_CLIENT;
     $pageToken = null;
     $google_cache = array();
     do {
-        $cache = getAllUsers( $GOOGLE_CLIENT, '', $pageToken );
+        $cache = getAllUsers( $GOOGLE_S_CLIENT, '', $pageToken );
         $cache = json_decode( $cache, true );
         if ( !empty($cache['users']) ) {
             foreach ( $cache['users'] as $user ) {
@@ -282,8 +282,8 @@ function google_user_hash_for_ldap( $user ) {
       $entry['cn'] = $user['name']['fullName'];
       $entry['mail'] = strtolower($user['primaryEmail']);
       if ( !empty($user['organizations']) ) {
-        foreach ( $user['externalIds'] as $org ) {
-          if ( $org['primary'] ) {
+        foreach ( $user['organizations'] as $org ) {
+          if ( !empty($org['title']) ) {
             $entry['title'] = $org['title'];
           }
         }

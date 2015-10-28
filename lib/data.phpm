@@ -72,11 +72,19 @@ function ldap_quick_search( $filter = array('objectclass' => '*'), $attrs = arra
 	$results = array();
 
 	$filter_str = "";
-	foreach ( $filter as $attr => $value ) {
-		$filter_str .= "($attr=$value)";
+	if ( empty($filter) ) {
+		$filter_str = "";
 	}
-	if ( count($filter) > 1 ) {
-		$filter_str = "(&$filter_str)";
+	else if ( is_array($filter) ) {
+		foreach ( $filter as $attr => $value ) {
+			$filter_str .= "($attr=$value)";
+		}
+		if ( count($filter) > 1 ) {
+			$filter_str = "(&$filter_str)";
+		}
+	}
+	else {
+		$filter_str = $filter;
 	}
 
 	if ( empty($base) ) {
