@@ -35,12 +35,12 @@ $output['client_mac'] = $mac;
 $output['locations'] = $locations;
 $output['desc'] = $description;
 
-if ( !empty($op) && !empty($mac) ) {  // force other values here too?
+if ( !empty($op) ) {  // force other values here too?
     $dn = $_SESSION['userid'];
     $set = ldap_quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
     $object = $set[0];
     $user = $object['uid'][0];
-    if ( $op == 'Register' ) {
+    if ( $op == 'Register' && !empty($mac) ) {
         $mac = labs_normalize_mac( $mac );
         labs_register_mac( $mac, $location, $description, $user, $ip );
         $output['success'] = true;
