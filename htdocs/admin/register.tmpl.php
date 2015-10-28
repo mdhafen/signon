@@ -17,9 +17,9 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 </div>
 <?php } ?>
 
+<form method="post" action="register.php" class="form-horizontal" method="post" enctype="multipart/form-data">
 <div class="panel panel-default panel-body">
 <div class="container-fluid">
-<form method="post" action="register.php" class="form-horizontal">
 
 <div class="row form-group">
 <label for="client_mac" class="col-sm-4 control-label">M.A.C. Address</label>
@@ -46,6 +46,40 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 
 <div class="row form-group">
 <input type="submit" name="op" value="Register" class="btn">
+</div>
+
+</div>
+</div>
+
+<h2>Or...</h2>
+
+<div class="panel panel-default panel-body">
+<div class="container-fluid">
+
+<div class="row form-group">
+<label for="importfile" class="col-sm-4 control-label">CSV Import File</label>
+<div class="col-sm-8"><input type="file" id="importfile" name="importfile" class="form-control"></div>
+</div>
+
+<div class="row form-group">
+<label for="mac_column" class="col-sm-4 control-label">Column of M.A.C. Address</label>
+<div class="col-sm-8"><input type="text" id="mac_column" name="mac_column" placeholder="1" class="form-control"></div>
+</div>
+
+<div class="row form-group">
+<label for="desc_column" class="col-sm-4 control-label">Column of Description</label>
+<div class="col-sm-8"><input type="text" id="desc_column" name="desc_column" placeholder="2" class="form-control"></div>
+</div>
+
+<div class="row form-group">
+<label for="loc_column" class="col-sm-4 control-label">Column of Location Number</label>
+<div class="col-sm-8"><input type="text" id="loc_column" name="loc_column" placeholder="3" class="form-control"></div>
+</div>
+
+<div class="row form-group">
+<input type="submit" name="op" value="Import" class="btn">
+</div>
+
 </div>
 </div>
 </form>

@@ -12,6 +12,9 @@ $output = array();
 $mac = input( 'client_mac', INPUT_STR );
 $location = input( 'loc', INPUT_PINT );
 $description = input( 'desc', INPUT_HTML_NONE );
+$mac_column = input( 'mac_column', INPUT_PINT );
+$loc_column = input( 'loc_column', INPUT_PINT );
+$desc_column = input( 'desc_column', INPUT_PINT );
 $op = input( 'op', INPUT_STR );
 
 if ( empty($mac) && !empty($_SESSION['client_mac']) ) {
@@ -37,9 +40,27 @@ if ( !empty($op) && !empty($mac) ) {  // force other values here too?
     $set = ldap_quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
     $object = $set[0];
     $user = $object['uid'][0];
-    $mac = labs_normalize_mac( $mac );
-    labs_register_mac( $mac, $location, $description, $user, $ip );
-    $output['success'] = true;
+    if ( $op == 'Register' ) {
+        $mac = labs_normalize_mac( $mac );
+        labs_register_mac( $mac, $location, $description, $user, $ip );
+        $output['success'] = true;
+    } else if ( $op == 'Import' && !empty($mac_column) ) {
+        if ( isset($_FILES['importfile']['error']) &&
+             $_FILES['importfile']['error'] == UPLOAD_ERR_OK &&
+             !empty($_FILES['importfile']['size']) ) {
+            $in_file = $_FILES['importfile']['tmp_name'];
+            $h = fopen( $in_file, 'r' );
+            while ( ! feof($h) ) {
+                $row = fgetcsv($h);
+
+                $mac = labs_normalize_mac( $row[ $mac_column - 1 ] );
+                $desc = empty($desc_column) ? $description : $row[ $desc_column - 1 ];
+                $loc = empty($loc_column) ? $location : $row[ $loc_column - 1 ];
+                labs_register_mac( $mac, $loc, $desc, $user, $ip );
+            }
+            $output['success'] = true;
+        }
+    }
 }
 
 output( $output, 'admin/register.tmpl' );
