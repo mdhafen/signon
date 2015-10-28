@@ -12,6 +12,7 @@ $output = array();
 $mac = input( 'client_mac', INPUT_STR );
 $location = input( 'loc', INPUT_PINT );
 $description = input( 'desc', INPUT_HTML_NONE );
+$drop_first = input( 'drop_first', INPUT_STR );
 $mac_column = input( 'mac_column', INPUT_PINT );
 $loc_column = input( 'loc_column', INPUT_PINT );
 $desc_column = input( 'desc_column', INPUT_PINT );
@@ -52,11 +53,17 @@ if ( !empty($op) ) {  // force other values here too?
             $h = fopen( $in_file, 'r' );
             while ( ! feof($h) ) {
                 $row = fgetcsv($h);
+                if ( !empty($drop_first) ) {
+                    $drop_first = '';
+                    continue;
+                }
 
                 $mac = labs_normalize_mac( $row[ $mac_column - 1 ] );
                 $desc = empty($desc_column) ? $description : $row[ $desc_column - 1 ];
                 $loc = empty($loc_column) ? $location : $row[ $loc_column - 1 ];
-                labs_register_mac( $mac, $loc, $desc, $user, $ip );
+                if ( !empty($mac) ) {
+                    labs_register_mac( $mac, $loc, $desc, $user, $ip );
+                }
             }
             $output['success'] = true;
         }

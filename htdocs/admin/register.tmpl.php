@@ -62,6 +62,11 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 </div>
 
 <div class="row form-group">
+<label for="drop_first" class="col-sm-4 control-label">Discard first row</label>
+<div class="col-sm-8"><input type="checkbox" id="drop_first" name="drop_first" checked='checked' class="form-control"></div>
+</div>
+
+<div class="row form-group">
 <label for="mac_column" class="col-sm-4 control-label">Column of M.A.C. Address</label>
 <div class="col-sm-8"><input type="text" id="mac_column" name="mac_column" placeholder="1" class="form-control"></div>
 </div>
