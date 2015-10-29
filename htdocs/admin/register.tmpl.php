@@ -59,7 +59,7 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 
 <div class="row form-group">
 <label for="importfile" class="col-sm-4 control-label">CSV Import File</label>
-<div class="col-sm-8"><input type="file" id="importfile" name="importfile" class="form-control"></div>
+<div class="col-sm-8"><input type="file" id="importfile" name="importfile" class="form-control" style="height:auto;"></div>
 </div>
 
 <div class="row form-group">
