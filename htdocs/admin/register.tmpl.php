@@ -74,12 +74,18 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 
 <div class="row form-group">
 <label for="desc_column" class="col-sm-4 control-label">Column of Description</label>
-<div class="col-sm-8"><input type="text" id="desc_column" name="desc_column" placeholder="2" class="form-control"></div>
+<div class="col-sm-8">
+  <input type="text" id="desc_column" name="desc_column" placeholder="2" class="form-control">
+  <span class="help-block">Uses Description field above as a default value.</span>
+</div>
 </div>
 
 <div class="row form-group">
 <label for="loc_column" class="col-sm-4 control-label">Column of Location Number</label>
-<div class="col-sm-8"><input type="text" id="loc_column" name="loc_column" placeholder="3" class="form-control"></div>
+<div class="col-sm-8">
+  <input type="text" id="loc_column" name="loc_column" placeholder="3" class="form-control">
+  <span class="help-block">Uses Location drop-down above as a default value.</span>
+</div>
 </div>
 
 <div class="row form-group">
