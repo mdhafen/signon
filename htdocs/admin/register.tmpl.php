@@ -63,10 +63,8 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 </div>
 
 <div class="row form-group">
-<div class="col-sm-4"></div>
-<div class="col-sm-8">
-<input type="checkbox" id="drop_first" name="drop_first" checked='checked' class="form-control"></div>
-<label for="drop_first" class="control-label">Discard first row</label>
+<label for="drop_first" class="col-sm-4 control-label">Discard first row</label>
+<div class="col-sm-8"><input type="checkbox" id="drop_first" name="drop_first" checked='checked'></div>
 </div>
 
 <div class="row form-group">
