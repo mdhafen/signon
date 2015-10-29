@@ -51,7 +51,7 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 <td><?= $mac_row['submitted_date'] ?></td>
 <td>
   <form method="post" action="register.php" class="form-horizontal" method="post" enctype="multipart/form-data">
-  <input type="hidden" name="mac" value="<?= $mac_row['macaddress'] ?>">
+  <input type="hidden" name="client_mac" value="<?= $mac_row['macaddress'] ?>">
   <input type="submit" name="op" value="Delete" class="form-control">
   </form>
 </td>
