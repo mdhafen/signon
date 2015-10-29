@@ -13,6 +13,7 @@ $(document).ready(function() {
 			}
 		]
 	});
+	$('body .dropdown-toggle').dropdown();
 });
 </script>
 <?php
