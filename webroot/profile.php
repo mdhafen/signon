@@ -34,7 +34,7 @@ else {
 	if ( !empty($password) && !empty($password2) ) {
 		if ( $password === $password2 ) {
 			set_password( $dn, $password );
-                        if ( !empty($object['employeeType'][0]) && $object['employeeType'] != 'Guest' ) {
+                        if ( !empty($object['employeeType'][0]) && $object['employeeType'][0] != 'Guest' ) {
 				google_set_password( $object['mail'][0], $password, false );
 			}
 			$output['result'] = 'Password Set';

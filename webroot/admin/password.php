@@ -40,7 +40,7 @@ if ( ! empty($password) ) {
 	}
 
 	if ( set_password( $objectdn, $password ) ) {
-		if ( !empty($object['mail'][0]) ) {
+		if ( !empty($object['employeeType'][0]) && $object['employeeType'][0] != 'Guest' ) {
 			google_set_password( $object['mail'][0], $password );
 		}
 		$output['success'] = 1;
