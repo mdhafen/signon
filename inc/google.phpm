@@ -231,17 +231,13 @@ function google_org_to_loc( $path ) {
 
   $ous = explode( '/', $path );
   $ous = array_filter( $ous );
-  $ou = array_shift($ous);
-  if ( stripos($ou,'cone') !== FALSE ) {  // drop cone level
-    $ou = array_shift($ous);
-  }
-  if ( strtolower($ou) == 'elementaries' ) {  // drop elementaries level
-    $ou = array_shift($ous);
-  }
+  $ous = array_reverse( $ous );
 
-  foreach ( $LOCATIONS as $loc => $location ) {
-    if ( stripos($location,$ou) !== FALSE ) {
-      return $loc;
+  foreach ( $ous as $ou ) {
+    foreach ( $LOCATIONS as $loc => $location ) {
+      if ( stripos($location,$ou) !== FALSE ) {
+        return $loc;
+      }
     }
   }
 
