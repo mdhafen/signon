@@ -211,7 +211,7 @@ function google_get_all_users() {
         $cache = json_decode( $cache, true );
         if ( !empty($cache['users']) ) {
             foreach ( $cache['users'] as $user ) {
-                if ( empty($user['isSuspended']) || $user['isSuspended'] == false ) {
+                if ( empty($user['suspended']) || $user['suspended'] == false ) {
                   $google_cache[] = $user;
                 }
             }
