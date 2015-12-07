@@ -5,6 +5,7 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-head-close.php' );
 include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 ?>
 
+<div class="container">
 <div class="main-page">
 
 <h1><?= $data['object_dn'] ?></h1>
@@ -67,6 +68,7 @@ foreach ( $data['must'] as $attr ) {
 </div>
 </form>
 
+</div>
 </div>
 
 <script type="text/javascript">

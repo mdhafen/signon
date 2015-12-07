@@ -21,6 +21,7 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-head-close.php' );
 include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 ?>
 
+<div class="container">
 <div class="main-page">
 
 <h1>List Of Registered Lab Device</h1>
@@ -64,6 +65,7 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 </div>
 </div>
 
+</div>
 </div>
 
 <?php include( $data['_config']['base_dir'] .'/htdocs/doc-close.php' ); ?>

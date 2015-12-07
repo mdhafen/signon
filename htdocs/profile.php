@@ -38,41 +38,7 @@ include( 'doc-header.php' );
   </div>
 </div>
 
-<!-- Link to EmployeeOnline Modal -->
-<div class="modal fade" id="linkeo_modal" role="dialog" aria-labelledby="linkeo_modal_label" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form action="profile.php" method="post" class="form-horizontal">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="linkeo_modal_label">Link to EmployeeOnline</h4>
-      </div>
-      <div class="modal-body">
-        <div class="container-fluid">
-          <div class="row form-group">
-            <label for="employeeid" class="control-label col-sm-6">employeeOnline EmployeeID: </label>
-            <div class="col-sm-6">
-              <input id="employeeid" name="employeeNumber" value="" class="form-control">
-            </div>
-          </div>
-
-          <div class="row form-group">
-            <label for="employeessn" class="control-label col-sm-6">Social Security Number: </label>
-            <div class="col-sm-6">
-              <input id="employeessn" name="SSN" value="" class="form-control">
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <input class="btn btn-primary" type="submit" value="Link to EmployeeOnline">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      </div>
-      </form>
-    </div>
-  </div>
-</div>
-
+<div class="container">
 <h1><?= $data['object']['cn'][0] ?></h1>
 <div class="mainpage">
 
@@ -108,5 +74,6 @@ include( 'doc-header.php' );
 <?php } ?>
 </div>
 
+</div>
 </div>
 <?php include( 'doc-close.php' ); ?>

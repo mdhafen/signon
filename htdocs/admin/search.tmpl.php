@@ -5,6 +5,7 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-head-close.php' );
 include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 ?>
 
+<div class="container">
 <div class="main-page">
 
 <h1>Search</h1>
@@ -46,6 +47,7 @@ Nothing Found
 </div>
 <?php } ?>
 
+</div>
 </div>
 
 <?php include( $data['_config']['base_dir'] .'/htdocs/doc-close.php' ); ?>

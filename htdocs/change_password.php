@@ -4,6 +4,7 @@
 include( 'doc-head-close.php' );
 include( 'doc-header.php' );
 ?>
+<div class="container">
 <div class="mainpage">
 <?php if ( !empty($data['success']) ) { ?>
 <div class="alert alert-info alert-dismissible" role="alert">
@@ -35,5 +36,6 @@ Your password has been changed.
 </form>
 
 <?php } ?>
+</div>
 </div>
 <?php include( 'doc-close.php' ); ?>

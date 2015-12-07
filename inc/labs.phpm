@@ -1,9 +1,6 @@
 <?php
 
 function labs_normalize_mac( $mac ) {
-  $mac = str_replace( '.', '', $mac );
-  $mac = str_replace( '-', '', $mac );
-  $mac = str_replace( ':', '', $mac );
   $mac = strtolower( $mac );
   $mac = preg_replace( '/[^a-f0-9]/', '', $mac );
   if ( strlen($mac) != 12 ) {

@@ -52,6 +52,7 @@ if ( !empty($op) ) {  // force other values here too?
              !empty($_FILES['importfile']['size']) ) {
             $in_file = $_FILES['importfile']['tmp_name'];
             $h = fopen( $in_file, 'r' );
+            $registered = 0;
             while ( ! feof($h) ) {
                 $row = fgetcsv($h);
                 if ( !empty($drop_first) ) {
@@ -60,13 +61,19 @@ if ( !empty($op) ) {  // force other values here too?
                 }
 
                 $mac = labs_normalize_mac( $row[ $mac_column - 1 ] );
-                $desc = empty($desc_column) ? $description : $row[ $desc_column - 1 ];
-                $loc = empty($loc_column) ? $location : $row[ $loc_column - 1 ];
+                $desc = empty($desc_column) && empty($row[ $desc_column - 1 ]) ? $description : $row[ $desc_column - 1 ];
+                $loc = empty($loc_column) && empty($row[ $loc_column - 1 ]) ? $location : $row[ $loc_column - 1 ];
                 if ( !empty($mac) ) {
                     labs_register_mac( $mac, $loc, $desc, $user, $ip );
+                    $registered++;
                 }
             }
+            $output['registered'] = $registered;
             $output['success'] = true;
+        }
+        else {
+            $output['error'] = 1;
+            $output['err_msg'] = 'Import file seems empty';
         }
     }
     else if ( $op == 'Delete' && !empty($mac) ) {
@@ -79,6 +86,17 @@ if ( !empty($op) ) {  // force other values here too?
     else if ( $op == 'List' ) {
         $output['mac_list'] = labs_get_macs();
 	$template = 'admin/mac_list.tmpl';
+    }
+    else {
+        $output['error'] = 1;
+        switch ($op) {
+            case 'Register':
+            case 'Delete': $err_msg = 'No MAC Address given'; break;
+            case 'Import': empty($output['registered']) ? $err_msg = 'No MAC Addresses found in file' : "";break;
+        }
+        if ( !empty($err_msg) ) {
+            $output['err_msg'] = $err_msg;
+        }
     }
 }
 

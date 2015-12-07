@@ -5,10 +5,17 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-head-close.php' );
 include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 ?>
 
+<div class="container">
 <div class="main-page">
 
 <h1>Register Lab Device</h1>
-<h3><a href="register.php?op=List">See registered M.A.C.'s</a></h3>
+<h3><a href="register.php?op=List">See registered M.A.C.&apos;s</a></h3>
+
+<?php if ( ! empty($data['error']) ) { ?>
+<div class="alert alert-danger" role="alert">
+There was an error! <?= $data['err_msg'] ?>
+</div>
+<?php } ?>
 
 <?php if ( ! empty($data['success']) ) { ?>
 <div class="alert alert-info alert-dismissible" role="alert">
@@ -96,6 +103,7 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 </div>
 </form>
 
+</div>
 </div>
 
 <?php include( $data['_config']['base_dir'] .'/htdocs/doc-close.php' ); ?>
