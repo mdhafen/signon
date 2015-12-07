@@ -76,13 +76,13 @@ There was an error! <?= $data['err_msg'] ?>
 
 <div class="row form-group">
 <label for="mac_column" class="col-sm-4 control-label">Column of M.A.C. Address</label>
-<div class="col-sm-8"><input type="text" id="mac_column" name="mac_column" placeholder="1" class="form-control"></div>
+<div class="col-sm-8"><input type="text" id="mac_column" name="mac_column" class="form-control"></div>
 </div>
 
 <div class="row form-group">
 <label for="desc_column" class="col-sm-4 control-label">Column of Description</label>
 <div class="col-sm-8">
-  <input type="text" id="desc_column" name="desc_column" placeholder="2" class="form-control">
+  <input type="text" id="desc_column" name="desc_column" class="form-control">
   <span class="help-block">Uses Description field above as a default value.</span>
 </div>
 </div>
@@ -90,7 +90,7 @@ There was an error! <?= $data['err_msg'] ?>
 <div class="row form-group">
 <label for="loc_column" class="col-sm-4 control-label">Column of Location Number</label>
 <div class="col-sm-8">
-  <input type="text" id="loc_column" name="loc_column" placeholder="3" class="form-control">
+  <input type="text" id="loc_column" name="loc_column" class="form-control">
   <span class="help-block">Uses Location drop-down above as a default value.</span>
 </div>
 </div>
