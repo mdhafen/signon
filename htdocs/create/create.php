@@ -26,7 +26,7 @@ There was an error! <?= $data['result'] ?>
 <div class="alert alert-info alert-dismissible" role="alert">
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 <?php if ( !empty($data['username']) ) { ?>
-  <div>Welcome <?= $data['username'] ?></div>
+  <h2>Welcome <?= $data['username'] ?></h2>
 <?php } ?>
   Please enter your Washington County School District EMail password below.
 </div>
