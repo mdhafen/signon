@@ -145,6 +145,7 @@ $output['op'] = $op;
 $output['result'] = $result;
 $output['error'] = $error;
 $output['providers'] = array_keys( $PROVIDER_MAP );
+$output['username'] = (empty($user))? "" : $user->email;
 
 output( $output, 'create/'.$template );
 ?>
