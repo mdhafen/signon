@@ -5,6 +5,7 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-head-close.php' );
 include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 ?>
 
+<div class="container">
 <h1>Create account</h1>
 <div class="mainpage">
 
@@ -93,5 +94,6 @@ There was an error! <?= $data['result'] ?>
 </div>
 <?php } ?>
 
+</div>
 </div>
 <?php include( $data['_config']['base_dir'] .'/htdocs/doc-close.php' ); ?>
