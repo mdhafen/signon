@@ -53,7 +53,7 @@ function labs_unregister_mac( $mac ) {
 function labs_get_locations() {
   $dbh = db_connect(1);
 
-  $query = "SELECT * FROM site_name ORDER BY name";
+  $query = "SELECT * FROM site_name WHERE region_id = 1 ORDER BY name";
   $sth = $dbh->prepare( $query );
   $sth->execute();
 
@@ -70,7 +70,7 @@ function lab_get_locationid_for_ip( $ip ) {
 
   $num = ip_to_decimal( $ip );
 
-  $query = "SELECT site_name FROM ip where ? >= network and ? <= broadcast";
+  $query = "SELECT site_name FROM ip WHERE region_id = 1 AND ? >= network AND ? <= broadcast";
   $sth = $dbh->prepare( $query );
   $sth->bindValue( 1, $num );
   $sth->bindValue( 2, $num );
