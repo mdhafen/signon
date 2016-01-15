@@ -101,12 +101,15 @@ function authenticate() {
 			$user = 0;
 			if ( !empty( $config['authen_modules'] ) ) {
 				if ( !empty($config['authen_modules']['ldap']) ) {
-					$user = authen_ldap( $username, $password );
+					$module = $config['authen_modules']['ldap'];
+					$user = authen_ldap( $module, $username, $password );
 				}
 				if ( ! $user && !empty($config['authen_modules']['external']) ) {
+					$module = $config['authen_modules']['external'];
 				}
 				if ( ! $user && !empty($config['authen_modules']['db']) ) {
-					$user = authen_db( $username, $password );
+					$module = $config['authen_modules']['db'];
+					$user = authen_db( $module, $username, $password );
 				}
 			}
 			if ( $user && $user['username'] ) {
@@ -148,9 +151,9 @@ function authenticate() {
 	}
 }
 
-function authen_db( $username, $password ) {
+function authen_db( $module, $username, $password ) {
 	global $config;
-	$user = user_by_username( $username );
+	$user = user_by_username( $username, $module );
 	if ( $user && $user['username'] && $user['password'] ) {
 		$cipher = mcrypt_module_open( 'blowfish', '', 'ecb', '' );
 		$iv = mcrypt_create_iv( mcrypt_enc_get_iv_size( $cipher ), MCRYPT_RAND );
@@ -171,19 +174,19 @@ function authen_db( $username, $password ) {
 	return 0;
 }
 
-function authen_ldap( $username, $password ) {
+function authen_ldap( $module, $username, $password ) {
 	global $config;
 	$user = 0;
 	$userdn = 0;
 	$name = '';
 	$email = '';
 
-	$ldap = do_ldap_connect();
-	if ( strcasecmp( $username, $config['ldap']['core']['userdn'] ) == 0 ) {
+	$ldap = do_ldap_connect( $module );
+	if ( strcasecmp( $username, $config['ldap'][$module]['userdn'] ) == 0 ) {
 		$set = array();
 		$set[] = array( 'dn' => $username, 'cn' => array($username) );
 	}
-	else if ( strripos( $username, $config['ldap']['core']['base'] ) > 0 ) {
+	else if ( strripos( $username, $config['ldap'][$module]['base'] ) > 0 ) {
 		$set = ldap_quick_search( $ldap, array('objectClass'=>'*'), array(), 0, $username );
 	}
 	else {
@@ -200,8 +203,8 @@ function authen_ldap( $username, $password ) {
 	if ( $userdn ) {
 		if ( ldap_bind( $ldap['handle'], $userdn, $password ) ) {
 			$role = 1;
-			if ( ! empty($config['ldap']['core']['roles']) ) {
-				foreach ( $config['ldap']['core']['roles'] as $role_id => $group_dn ) {
+			if ( ! empty($config['ldap'][$module]['roles']) ) {
+				foreach ( $config['ldap'][$module]['roles'] as $role_id => $group_dn ) {
 					$group = ldap_quick_search( $ldap, array('objectClass'=>'groupOfNames'), array(), 0, $group_dn );
 					if ( ! empty($group[0]) && ! empty($group[0]['member']) ) {
 						foreach ( $group[0]['member'] as $member_dn ) {
@@ -226,9 +229,9 @@ function authen_ldap( $username, $password ) {
 		}
 		else {
 			// re-bind as root
-			$userdn = $config['ldap']['core']['userdn'];
-			$password = $config['ldap']['core']['passwd'];
-			do_ldap_connect( 'core', $userdn, $password );
+			$userdn = $config['ldap'][$module]['userdn'];
+			$password = $config['ldap'][$module]['passwd'];
+			do_ldap_connect( $module, $userdn, $password );
 		}
 	}
 

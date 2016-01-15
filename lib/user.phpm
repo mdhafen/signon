@@ -2,8 +2,8 @@
 
 require_once( 'data.phpm' );
 
-function user_by_userid( $userid ) {
-  $dbh = db_connect();
+function user_by_userid( $userid, $module = 'core' ) {
+  $dbh = db_connect( $module );
   $query = "SELECT * FROM user WHERE userid = :uid";
   $sth = $dbh->prepare( $query );
   $sth->bindParam( ':uid', $userid );
@@ -22,8 +22,8 @@ function user_by_userid( $userid ) {
 	       );
 }
 
-function user_by_username( $username ) {
-  $dbh = db_connect();
+function user_by_username( $username, $module = 'core' ) {
+  $dbh = db_connect( $module );
   $query = "SELECT * FROM user WHERE username = :username";
   $sth = $dbh->prepare( $query );
   $sth->bindParam( ':username', $username );

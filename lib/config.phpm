@@ -11,7 +11,7 @@ $config = array(
 	'authen_modules'      => array(
 		'db'       => 0,
 		'external' => 0,
-		'ldap'     => 1,
+		'ldap'     => 'core',
 	),
 	'trusted_proxies'   => array(),
 	'database'          => array(
