@@ -100,11 +100,11 @@ if ( !empty($submitted) ) {
   }
 
   if ( !empty($entry['dn']) && !empty($password) ) {
-    do_ldap_connect();
-    $dups = ldap_quick_search( array( 'uid' => $entry['uid'] ), array() );
+    $ldap = do_ldap_connect();
+    $dups = ldap_quick_search( $ldap, array( 'uid' => $entry['uid'] ), array() );
 
     if ( count($dups) == 1 ) {
-      set_password( $dups[0]['dn'], $password );
+      set_password( $ldap, $dups[0]['dn'], $password );
       if ( $entry['employeeType'] == 'Guest' ) {
 	google_send_password( $entry['uid'], $provider, $password );
       }
@@ -115,9 +115,9 @@ if ( !empty($submitted) ) {
         $dn = $entry['dn'];
         unset( $entry['dn'] );
 
-        $entry['sambaSID'] = ldap_get_next_num('sambaSID');
-        if ( do_ldap_add( $dn, $entry ) ) {
-          set_password( $dn, $password );
+        $entry['sambaSID'] = ldap_get_next_num($ldap,'sambaSID');
+        if ( do_ldap_add( $ldap, $dn, $entry ) ) {
+          set_password( $ldap, $dn, $password );
           if ( $entry['employeeType'] == 'Guest' ) {
             google_send_password( $entry['uid'], $provider, $password );
           }

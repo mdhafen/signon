@@ -6,9 +6,7 @@ include_once( '../../lib/output.phpm' );
 include_once( '../../inc/person.phpm' );
 include_once( '../../inc/schema.phpm' );
 
-global $config, $ldap;
-
-do_ldap_connect();
+$ldap = do_ldap_connect();
 authorize( 'manage_objects' );
 
 $parent = input( 'parent', INPUT_HTML_NONE );
@@ -35,7 +33,7 @@ switch ( $class ) {
 }
 
 if ( $class ) {
-   list( $must, $may ) = schema_get_object_requirements($class);
+   list( $must, $may ) = schema_get_object_requirements($ldap,$class);
 }
 
 $output['rid'] = $rid;

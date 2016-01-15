@@ -4,14 +4,14 @@ include_once( '../../lib/security.phpm' );
 include_once( '../../lib/data.phpm' );
 include_once( '../../lib/output.phpm' );
 
-do_ldap_connect();
+$ldap = do_ldap_connect();
 if ( ! authenticate() ) {
 	output( '<?xml version ="1.0"?><error>ACCESS_DENIED</error>', '', $xml=1 );
 	exit;
 }
 
 $dn = input( 'dn', INPUT_STR );
-$objects = ldap_quick_search( array( 'objectClass' => '*' ), array(), 1, $dn );
+$objects = ldap_quick_search( $ldap, array( 'objectClass' => '*' ), array(), 1, $dn );
 
 usort( $objects, "sorter" );
 

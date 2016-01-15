@@ -28,9 +28,9 @@ if ( !empty($user) ) {
     $username = substr($email,0,strpos($email,'@'));
 
     if ( !empty($password) && !empty($password2) ) {
-      do_ldap_connect();
+      $ldap = do_ldap_connect();
       $dn = '';
-      $set = ldap_quick_search( array( 'uid' => $username ), array() );
+      $set = ldap_quick_search( $ldap, array( 'uid' => $username ), array() );
       if ( empty($set) ) {
         $user = get_user_google( $email );
 
@@ -46,8 +46,8 @@ if ( !empty($user) ) {
             $dn = $entry['dn'];
             unset( $entry['dn'] );
             $entry['objectClass'] = array('top','inetOrgPerson','sambaSamAccount');
-            $entry['sambaSID'] = ldap_get_next_num('sambaSID');
-            if ( ! do_ldap_add( $dn, $entry ) ) {
+            $entry['sambaSID'] = ldap_get_next_num($ldap,'sambaSID');
+            if ( ! do_ldap_add( $ldap, $dn, $entry ) ) {
               $errors[] = 'There was an error creating the account';
             }
           }
@@ -60,7 +60,7 @@ if ( !empty($user) ) {
 
       if ( ! empty($dn) ) {
         if ( $password === $password2 && strlen($password) >=8 ) {
-          set_password( $dn, $password );
+          set_password( $ldap, $dn, $password );
           $result = google_set_password( $email, $password, false );
           $output['success'] = true;
         }

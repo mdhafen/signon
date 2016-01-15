@@ -5,7 +5,7 @@ include_once( '../../lib/data.phpm' );
 include_once( '../../lib/output.phpm' );
 include_once( '../../inc/labs.phpm' );
 
-do_ldap_connect();
+$ldap = do_ldap_connect();
 authorize( 'reset_password' );
 
 $output = array();
@@ -39,7 +39,7 @@ $output['desc'] = $description;
 
 if ( !empty($op) ) {  // force other values here too?
     $dn = $_SESSION['userid'];
-    $set = ldap_quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
+    $set = ldap_quick_search( $ldap, array( 'objectClass' => '*' ), array(), 0, $dn );
     $object = $set[0];
     $user = $object['uid'][0];
     if ( $op == 'Register' && !empty($mac) ) {

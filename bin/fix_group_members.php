@@ -1,7 +1,8 @@
 <?php
 include_once( '../lib/data.phpm' );
 
-$groups = ldap_quick_search( '(objectClass=groupOfNames)', array() );
+$ldap = do_ldap_connect();
+$groups = ldap_quick_search( $ldap, '(objectClass=groupOfNames)', array() );
 $dns = array();
 
 foreach ( $groups as $group ) {
@@ -16,15 +17,15 @@ foreach ( $groups as $group ) {
 }
 
 foreach ( $dns as $dn => $count ) {
-  $user = ldap_quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
+  $user = ldap_quick_search( $ldap, array( 'objectClass' => '*' ), array(), 0, $dn );
   if ( empty($user) ) {
     $user = preg_split('/(?<!\\\\),/',$dn);
     $user = explode( '=', $user[0] );
     $uid = $user[1];
-    $users = ldap_quick_search( array( 'uid' => $uid ), array() );
+    $users = ldap_quick_search( $ldap, array( 'uid' => $uid ), array() );
     if ( !empty($users) ) {
       $user = $users[0];
-      ldap_fix_group_memberships( $dn, $user['dn'] );
+      ldap_fix_group_memberships( $ldap, $dn, $user['dn'] );
       print "fixed $dn => ". $user['dn'] ."\n";
     }
   }

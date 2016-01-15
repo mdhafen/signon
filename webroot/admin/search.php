@@ -5,9 +5,7 @@ include_once( '../../lib/data.phpm' );
 include_once( '../../lib/output.phpm' );
 include_once( '../../inc/person.phpm' );
 
-global $config;
-
-do_ldap_connect();
+$ldap = do_ldap_connect();
 authorize( 'reset_password' );
 
 $attr = input( 'attrib', INPUT_STR );
@@ -29,7 +27,7 @@ $output = array( 'attributes' => $attrs );
 if ( !empty($attrs[$attr]) && !empty($query) ) {
   $query = ldap_escape($query,'',LDAP_ESCAPE_FILTER) .'*';
   if ( strcasecmp( $attr, 'member' ) == 0 ) {
-    $set = ldap_quick_search( array( 'uid' => $query ), array() );
+    $set = ldap_quick_search( $ldap, array( 'uid' => $query ), array() );
     if ( !empty($set) ) {
       $query = $set[0]['dn'];
     }
@@ -38,7 +36,7 @@ if ( !empty($attrs[$attr]) && !empty($query) ) {
     }
   }
   if ( !empty($query) ) {
-    $set = ldap_quick_search( array( $attr => $query ), array() );
+    $set = ldap_quick_search( $ldap, array( $attr => $query ), array() );
     foreach ( $set as $user ) {
       $results[] = $user['dn'];
     }

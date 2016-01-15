@@ -3,13 +3,11 @@
 // Schemas are large and mostly static.  It is recommended they be cached.
 require_once( $config['base_dir'] ."/lib/data.phpm" );
 
-function get_schema_objects() {
-	global $ldap;
+function get_schema_objects( $ldap ) {
+	$subschema = get_subschema_base( $ldap );
 
-	$subschema = get_subschema_base();
-
-	$set = ldap_read( $ldap, $subschema, 'objectClass=*', array('objectclasses') );
-	$schema = ldap_get_entries( $ldap, $set );
+	$set = ldap_read( $ldap['handle'], $subschema, 'objectClass=*', array('objectclasses') );
+	$schema = ldap_get_entries( $ldap['handle'], $set );
 
 	$objects = array();
 	foreach ( $schema as $entry ) {
@@ -25,13 +23,11 @@ function get_schema_objects() {
 	return $objects;
 }
 
-function get_schema_attributes() {
-	global $ldap;
+function get_schema_attributes( $ldap ) {
+	$subschema = get_subschema_base( $ldap );
 
-	$subschema = get_subschema_base();
-
-	$set = ldap_read( $ldap, $subschema, 'objectClass=*', array('attributeTypes') );
-	$schema = ldap_get_entries( $ldap, $set );
+	$set = ldap_read( $ldap['handle'], $subschema, 'objectClass=*', array('attributeTypes') );
+	$schema = ldap_get_entries( $ldap['handle'], $set );
 
 	$attrs = array();
 	foreach ( $schema as $entry ) {
@@ -49,11 +45,9 @@ function get_schema_attributes() {
 	return $attrs;
 }
 
-function get_subschema_base() {
-	global $ldap;
-
-	$set = ldap_read( $ldap, '', 'objectClass=*', array('*','subschemaSubentry') );
-	$schema = ldap_get_entries( $ldap, $set );
+function get_subschema_base( $ldap ) {
+	$set = ldap_read( $ldap['handle'], '', 'objectClass=*', array('*','subschemaSubentry') );
+	$schema = ldap_get_entries( $ldap['handle'], $set );
 	$subschema = $schema[0]['subschemasubentry'][0];
 
 	return $subschema;
@@ -160,9 +154,9 @@ function parse_asn_schema( $asn_str ) {
 	return $object;
 }
 
-function schema_get_object_requirements( $objectClasses ) {
+function schema_get_object_requirements( $ldap, $objectClasses ) {
 	if ( empty( $_SESSION['schema_objects'] ) ) {
-		$schema_objects = get_schema_objects();
+		$schema_objects = get_schema_objects($ldap);
 		$_SESSION['schema_objects'] = $schema_objects;
 	}
 	else {

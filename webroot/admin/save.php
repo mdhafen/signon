@@ -6,9 +6,7 @@ include_once( '../../lib/output.phpm' );
 include_once( '../../inc/person.phpm' );
 include_once( '../../inc/schema.phpm' );
 
-global $config, $ldap;
-
-do_ldap_connect();
+$ldap = do_ldap_connect();
 authorize( 'manage_objects' );
 
 $op = input( 'action', INPUT_STR );
@@ -21,7 +19,7 @@ if ( $op == 'Add' ) {
 	$objectdn = input( 'dn', INPUT_HTML_NONE );
 }
 else {
-	$set = ldap_quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
+	$set = ldap_quick_search( $ldap, array( 'objectClass' => '*' ), array(), 0, $dn );
 	$object = $set[0];
 	$objectdn = $object['dn'];
 	unset( $object['dn'] );
@@ -30,11 +28,11 @@ $rdn_attr = substr( $objectdn, 0, strpos( $objectdn, '=' ) );
 
 ksort( $object, SORT_STRING | SORT_FLAG_CASE );
 
-list( $must, $may ) = schema_get_object_requirements($object['objectClass']);
+list( $must, $may ) = schema_get_object_requirements($ldap,$object['objectClass']);
 
 $errors = array();
 
-if ( $objectdn == $config['ldap']['base'] ) {
+if ( $objectdn == $ldap['base'] ) {
 	$errors[] = 'EDIT_BASE_DENIED';
 }
 
@@ -98,11 +96,11 @@ if ( !empty($adds) || !empty($dels) ) {
 		}
 		$adds['objectClass'] = $object['objectClass'];
 		if ( in_array( 'sambaSamAccount', $adds['objectClass'] ) ) {
-			$adds['sambaSID'] = ldap_get_next_num('sambaSID');
+			$adds['sambaSID'] = ldap_get_next_num($ldap,'sambaSID');
 		}
-		if ( do_ldap_add( $objectdn, $adds ) ) {
+		if ( do_ldap_add( $ldap, $objectdn, $adds ) ) {
 			if ( !empty($password) ) {
-				set_password( $objectdn, $password );
+				set_password( $ldap, $objectdn, $password );
 			}
 		}
 		else {
@@ -124,16 +122,16 @@ if ( !empty($adds) || !empty($dels) ) {
 			unset( $adds['userPassword'] );
 		}
 
-		do_ldap_attr_del( $objectdn, $dels );
-		do_ldap_attr_add( $objectdn, $adds );
+		do_ldap_attr_del( $ldap, $objectdn, $dels );
+		do_ldap_attr_add( $ldap, $objectdn, $adds );
 
 		if ( !empty($password) ) {
-			set_password( $objectdn, $password );
+			set_password( $ldap, $objectdn, $password );
 		}
 
 		if ( $new_rdn ) {
 			$new_parent = ldap_dn_get_parent( $objectdn );
-			do_ldap_rename( $objectdn, $rdn_attr ."=". ldap_escape($new_rdn,'',LDAP_ESCAPE_DN), $new_parent );
+			do_ldap_rename( $ldap, $objectdn, $rdn_attr ."=". ldap_escape($new_rdn,'',LDAP_ESCAPE_DN), $new_parent );
 			$objectdn = $rdn_attr ."=". $new_rdn .','. $new_parent;
 		}
 	}

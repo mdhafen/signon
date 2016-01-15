@@ -23,9 +23,9 @@ if ( !empty($argv[1]) ) {
   $students = array_filter($students);
 }
 
-do_ldap_connect();
+$ldap = do_ldap_connect();
 $users = array();
-$users = ldap_quick_search( '(&(!(employeeType=Guest))(objectClass=inetOrgPerson))' , array() );
+$users = ldap_quick_search( $ldap, '(&(!(employeeType=Guest))(objectClass=inetOrgPerson))' , array() );
 $users_lookup = array();
 
 while ( !empty($users) ) {
@@ -64,13 +64,13 @@ foreach ( $google_cache as $g_user ) {
     }
 
     if ( !empty($mod) ) {
-      do_ldap_attr_del( $dn, array_keys($mod) );
-      do_ldap_modify( $dn, $mod );
+      do_ldap_attr_del( $ldap, $dn, array_keys($mod) );
+      do_ldap_modify( $ldap, $dn, $mod );
       $output .= "mod ";
     }
 
     if ( strcasecmp( $dn, $entry['dn'] ) != 0 ) {
-      do_ldap_rename( $dn, "uid=". ldap_escape($entry['uid'],'',LDAP_ESCAPE_DN), ldap_dn_get_parent($entry['dn']) );
+      do_ldap_rename( $ldap, $dn, "uid=". ldap_escape($entry['uid'],'',LDAP_ESCAPE_DN), ldap_dn_get_parent($entry['dn']) );
       $output .= "move ";
     }
 
@@ -85,9 +85,9 @@ foreach ( $google_cache as $g_user ) {
     $dn = $entry['dn'];
     unset( $entry['dn'] );
 
-    $entry['sambaSID'] = ldap_get_next_num( 'sambaSID' );
+    $entry['sambaSID'] = ldap_get_next_num( $ldap, 'sambaSID' );
 
-    do_ldap_add( $dn, $entry );
+    do_ldap_add( $ldap, $dn, $entry );
     $entry['dn'] = $dn;
     $output .= "Add ";
 
@@ -103,7 +103,7 @@ foreach ( $google_cache as $g_user ) {
 foreach ( $users_lookup as $lookup => $thisUser ) {
   print "Working ". $thisUser['mail'][0] ." : isn't in google! ";
   $dn = $thisUser['dn'];
-  do_ldap_delete( $dn );
+  do_ldap_delete( $ldap, $dn );
   print "Deleted\n";
 }
 

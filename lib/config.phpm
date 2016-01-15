@@ -15,29 +15,36 @@ $config = array(
 	),
 	'trusted_proxies'   => array(),
 	'database'          => array(
-		array(
-		'engine' => 'mysql',
-		'host'   => '205.126.10.160',
-		'schema' => 'Labs_Auth_mac',
-		'user'   => 'labs_mac_access',
-		'passwd' => 'MarmaladeWrappedInLayers',
+		'core' => array(),
+		'Labs' => array(
+			'write' => array(
+				'engine' => 'mysql',
+				'host'   => '205.126.10.160',
+				'schema' => 'Labs_Auth_mac',
+				'user'   => 'labs_mac_access',
+				'passwd' => 'MarmaladeWrappedInLayers',
+			),
 		),
-		array(
-		'engine' => 'mysql',
-		'host'   => '205.126.10.170',
-		'schema' => 'tech_qt',
-		'user'   => 'quickticket',
-		'passwd' => 'docsisforWUSs',
+		'TMS' => array(
+			'write' => array(
+				'engine' => 'mysql',
+				'host'   => '205.126.10.170',
+				'schema' => 'tech_qt',
+				'user'   => 'quickticket',
+				'passwd' => 'docsisforWUSs',
+			),
 		),
 	),
 	'ldap' => array(
-		'server' => 'ldaps://ldap.washk12.org/ ldaps://ldap2.washk12.org/',
-		'base' => 'dc=wcsd',
-		'userdn' => 'cn=root,dc=wcsd',
-		'passwd' => 'r@@t1dm0n',
-		'roles' => array(
-			2 => 'cn=TechnologyStaff,dc=wcsd',
-			3 => 'cn=DistrictManagers,dc=wcsd',
+		'core' => array(
+			'server' => 'ldaps://ldap.washk12.org/ ldaps://ldap2.washk12.org/',
+			'base' => 'dc=wcsd',
+			'userdn' => 'cn=root,dc=wcsd',
+			'passwd' => 'r@@t1dm0n',
+			'roles' => array(
+				2 => 'cn=TechnologyStaff,dc=wcsd',
+				3 => 'cn=DistrictManagers,dc=wcsd',
+			),
 		),
 	),
 	'auth' => array(

@@ -11,9 +11,9 @@ authorize( 'set_password' );
 
 $errors = array();
 
-do_ldap_connect();
+$ldap = do_ldap_connect();
 $dn = $_SESSION['userid'];
-$set = ldap_quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
+$set = ldap_quick_search( $ldap, array( 'objectClass' => '*' ), array(), 0, $dn );
 $object = $set[0];
 
 if ( ! is_person( $object ) ) {
@@ -33,7 +33,7 @@ else {
 
 	if ( !empty($password) && !empty($password2) ) {
 		if ( $password === $password2 ) {
-			set_password( $dn, $password );
+			set_password( $ldap, $dn, $password );
                         if ( !empty($object['employeeType'][0]) && $object['employeeType'][0] != 'Guest' ) {
 				google_set_password( $object['mail'][0], $password, false );
 			}

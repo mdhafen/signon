@@ -6,13 +6,11 @@ include_once( '../../lib/output.phpm' );
 include_once( '../../inc/person.phpm' );
 include_once( '../../inc/google.phpm' );
 
-global $config;
-
-do_ldap_connect();
+$ldap = do_ldap_connect();
 
 $dn = input( 'dn', INPUT_STR );
 
-$set = ldap_quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
+$set = ldap_quick_search( $ldap, array( 'objectClass' => '*' ), array(), 0, $dn );
 $object = $set[0];
 $objectdn = $object['dn'];
 unset( $object['dn'] );

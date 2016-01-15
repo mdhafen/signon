@@ -4,16 +4,14 @@ include_once( '../../lib/security.phpm' );
 include_once( '../../lib/data.phpm' );
 include_once( '../../lib/output.phpm' );
 
-do_ldap_connect();
+$ldap = do_ldap_connect();
 authorize( 'reset_password' );
 
-global $config;
-
-$children = ldap_quick_search( array( 'objectClass' => '*' ), array(), 1, $config['ldap']['base'] );
+$children = ldap_quick_search( $ldap, array( 'objectClass' => '*' ), array(), 1, $ldap['base'] );
 usort( $children, 'sorter' );
 
 $output = array(
-	'root' => $config['ldap']['base'],
+	'root' => $ldap['base'],
 	'can_edit' => authorized('manage_objects'),
 	'children' => $children,
 );

@@ -11,7 +11,7 @@ function labs_normalize_mac( $mac ) {
 }
 
 function labs_get_macs() {
-  $dbh = db_connect();
+  $dbh = db_connect('Labs');
 
   $query = "SELECT * FROM authorized_macs";
   $sth = $dbh->prepare( $query );
@@ -27,7 +27,7 @@ function labs_get_macs() {
 }
 
 function labs_register_mac( $mac, $location = '', $desc = '', $user, $ip ) {
-  $dbh = db_connect();
+  $dbh = db_connect('Labs');
 
   $query = "INSERT INTO authorized_macs ( macaddress, device_home, submitted_desc, submitted_user, submitted_ip, submitted_date ) VALUES ( :mac, :loc, :desc, :user, :ip, CURDATE() )";
   $sth = $dbh->prepare( $query );
@@ -41,7 +41,7 @@ function labs_register_mac( $mac, $location = '', $desc = '', $user, $ip ) {
 }
 
 function labs_unregister_mac( $mac ) {
-  $dbh = db_connect();
+  $dbh = db_connect('Labs');
 
   $query = "DELETE FROM authorized_macs WHERE macaddress = :mac";
   $sth = $dbh->prepare( $query );
@@ -51,7 +51,7 @@ function labs_unregister_mac( $mac ) {
 }
 
 function labs_get_locations() {
-  $dbh = db_connect(1);
+  $dbh = db_connect('TMS');
 
   $query = "SELECT * FROM site_name WHERE region_id = 1 ORDER BY name";
   $sth = $dbh->prepare( $query );
@@ -66,7 +66,7 @@ function labs_get_locations() {
 }
 
 function lab_get_locationid_for_ip( $ip ) {
-  $dbh = db_connect(1);
+  $dbh = db_connect('TMS');
 
   $num = ip_to_decimal( $ip );
 

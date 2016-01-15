@@ -2,14 +2,25 @@
 include_once( 'config.phpm' );
 //require PDO;
 
-$dbh = '';
-$ldap = '';
+$dbh_cache = array();
+$ldap_cache = array();
 
-function db_connect( $num=0 ) {
-	global $dbh, $config;
+function db_connect( $module = 'core', $write = 0 ) {
+	global $dbh_cache, $config;
+	$mode = 'read';
 
-	if ( empty($dbh[$num]) ) {
-		$settings = $config['database'][$num];
+	if ( empty($write) ) {
+		if ( empty($settings[$module]['read']) ) {
+			$mode = 'write';
+		}
+	}
+	else {
+		$mode = 'write';
+	}
+
+	if ( empty($dbh_cache[$module][$mode]) ) {
+		$settings = $config['database'][$module][$mode];
+
 		if ( empty($settings) ) {
 			print "No database connection configured";
 			die();
@@ -20,20 +31,20 @@ function db_connect( $num=0 ) {
 		$port = ( ! empty($settings['port']) ) ? ";port=$settings[port]" : "";
 		$dsn = "$engine:host=$host$port;dbname=$schema";
 		try {
-			$dbh[$num] = new PDO( $dsn, $settings['user'], $settings['passwd'] );
+			$dbh_cache[$module][$mode] = new PDO( $dsn, $settings['user'], $settings['passwd'] );
 		} catch ( PDOException $e ) {
 			print "Couldn't connect to database: ". $e->getMessage();
 			die();
 		}
-		$dbh[$num]->setAttribute( PDO::ATTR_CASE, PDO::CASE_NATURAL );
+		$dbh_cache[$module][$mode]->setAttribute( PDO::ATTR_CASE, PDO::CASE_NATURAL );
 	}
-	return $dbh[$num];
+	return $dbh_cache[$module][$mode];
 }
 
-function do_ldap_connect( $userdn = '', $passwd = '' ) {
-	global $ldap, $config;
+function do_ldap_connect( $module = 'core', $userdn = '', $passwd = '' ) {
+	global $ldap_cache, $config;
 
-	if ( empty($config['ldap']['server']) ) {
+	if ( empty($config['ldap'][$module]['server']) ) {
 		print "No ldap connection configured";
 		die();
 	}
@@ -44,31 +55,32 @@ function do_ldap_connect( $userdn = '', $passwd = '' ) {
 			$passwd = $_SESSION['loggedin_user']['password'];
 		}
 		else {
-			$userdn = $config['ldap']['userdn'];
-			$passwd = $config['ldap']['passwd'];
+			$userdn = $config['ldap'][$module]['userdn'];
+			$passwd = $config['ldap'][$module]['passwd'];
 		}
 
 	}
-	if ( ! empty( $ldap ) ) {
-		$search = @ldap_read( $ldap, $config['ldap']['userdn'], '(objectClass=*)' );
+	if ( ! empty( $ldap_cache[$module]['handle'] ) ) {
+		$search = @ldap_read( $ldap_cache[$module]['handle'], $config['ldap'][$module]['userdn'], '(objectClass=*)' );
 		if ( $search ) {
-			return $ldap;
+			return $ldap_cache[$module];
 		}
 	}
 
-	$ldap = ldap_connect( $config['ldap']['server'] );
-	ldap_set_option( $ldap, LDAP_OPT_PROTOCOL_VERSION, 3 );
-	ldap_set_option( $ldap, LDAP_OPT_REFERRALS, false );
-	ldap_set_option( $ldap, LDAP_OPT_RESTART, true );
-	ldap_set_option( $ldap, LDAP_OPT_NETWORK_TIMEOUT, 30 );
+	$ldap_cache[$module]['handle'] = ldap_connect( $config['ldap'][$module]['server'] );
+	ldap_set_option( $ldap_cache[$module]['handle'], LDAP_OPT_PROTOCOL_VERSION, 3 );
+	ldap_set_option( $ldap_cache[$module]['handle'], LDAP_OPT_REFERRALS, false );
+	ldap_set_option( $ldap_cache[$module]['handle'], LDAP_OPT_RESTART, true );
+	ldap_set_option( $ldap_cache[$module]['handle'], LDAP_OPT_NETWORK_TIMEOUT, 30 );
 
-	ldap_bind( $ldap, $userdn, $passwd );
+	ldap_bind( $ldap_cache[$module]['handle'], $userdn, $passwd );
+	$ldap_cache[$module]['base'] = $config['ldap'][$module]['base'];
 
-	return $ldap;
+	return $ldap_cache[$module];
 }
 
-function ldap_quick_search( $filter = array('objectclass' => '*'), $attrs = array('cn'), $scope = 2, $base = '' ) {
-	global $config, $ldap;
+function ldap_quick_search( $ldap, $filter = array('objectclass' => '*'), $attrs = array('cn'), $scope = 2, $base = '' ) {
+	global $config;
 	$results = array();
 
 	$filter_str = "";
@@ -88,30 +100,30 @@ function ldap_quick_search( $filter = array('objectclass' => '*'), $attrs = arra
 	}
 
 	if ( empty($base) ) {
-		$base = $config['ldap']['base'];
+		$base = $ldap['base'];
 	}
 
 	$paged_cookie = '';
 	do {
-		ldap_control_paged_result( $ldap, 100, false, $paged_cookie );
+		ldap_control_paged_result( $ldap['handle'], 100, false, $paged_cookie );
 		if ( $scope == 0 ) {
-			$search = @ldap_read( $ldap, $base, $filter_str, $attrs );
+			$search = @ldap_read( $ldap['handle'], $base, $filter_str, $attrs );
 		}
 		else if ( $scope == 1 ) {
-			$search = @ldap_list( $ldap, $base, $filter_str, $attrs );
+			$search = @ldap_list( $ldap['handle'], $base, $filter_str, $attrs );
 		}
 		else {
-			$search = @ldap_search( $ldap, $base, $filter_str, $attrs );
+			$search = @ldap_search( $ldap['handle'], $base, $filter_str, $attrs );
 		}
 		if ( empty($search) ) {
 			return $results;
 		}
 
-		$entry = ldap_first_entry( $ldap, $search );
+		$entry = ldap_first_entry( $ldap['handle'], $search );
 		if ( $entry ) {
 			do {
-				$result = array( 'dn' => ldap_get_dn( $ldap, $entry ) );
-				$attribs = ldap_get_attributes( $ldap, $entry );
+				$result = array( 'dn' => ldap_get_dn( $ldap['handle'], $entry ) );
+				$attribs = ldap_get_attributes( $ldap['handle'], $entry );
 				for ( $i = 0; $i < $attribs['count']; $i++) {
 					$attr_name = $attribs[$i];
 					$values = array();
@@ -121,29 +133,26 @@ function ldap_quick_search( $filter = array('objectclass' => '*'), $attrs = arra
 					$result[ $attr_name ] = $values;
 				}
 				$results[] = $result;
-			} while ( $entry = ldap_next_entry( $ldap, $entry ) );
+			} while ( $entry = ldap_next_entry( $ldap['handle'], $entry ) );
 		}
-		ldap_control_paged_result_response( $ldap, $search, $paged_cookie );
+		ldap_control_paged_result_response( $ldap['handle'], $search, $paged_cookie );
 	} while ( $paged_cookie !== null && $paged_cookie != '' );
 
 	return $results;
 }
 
-function do_ldap_modify( $userdn, $attrs ) {
-	global $ldap;
-
+function do_ldap_modify( $ldap, $userdn, $attrs ) {
 	$attrs = array_filter( $attrs );
 	if ( empty( $userdn ) || ! is_array( $attrs ) || empty( $attrs ) ) {
 		return 0;
 	}
 
-	$result = @ldap_modify( $ldap, $userdn, $attrs );
+	$result = @ldap_modify( $ldap['handle'], $userdn, $attrs );
 
 	return $result;
 }
 
-function do_ldap_add( $userdn, $attrs ) {
-	global $ldap;
+function do_ldap_add( $ldap, $userdn, $attrs ) {
 	$result = 0;
 
 	$attrs = array_filter( $attrs );
@@ -151,60 +160,56 @@ function do_ldap_add( $userdn, $attrs ) {
 		return $result;
 	}
 
-	if ( ldap_ensure_ous( ldap_dn_get_parent( $userdn ) ) ) {
-		$result = ldap_add( $ldap, $userdn, $attrs );
+	if ( ldap_ensure_ous( $ldap, ldap_dn_get_parent( $userdn ) ) ) {
+		$result = ldap_add( $ldap['handle'], $userdn, $attrs );
 	}
 
 	return $result;
 }
 
-function do_ldap_delete( $userdn ) {
-	global $ldap;
+function do_ldap_delete( $ldap, $userdn ) {
 	$result = 0;
 
 	if ( empty( $userdn ) ) {
 		return $result;
 	}
 
-	$result = ldap_delete( $ldap, $userdn );
+	$result = ldap_delete( $ldap['handle'], $userdn );
 
 	return $result;
 }
 
-function do_ldap_attr_add( $dn, $attrs ) {
-	global $ldap;
+function do_ldap_attr_add( $ldap, $dn, $attrs ) {
 	$result = 0;
 	if ( empty($dn) || empty($attrs) || !is_array($attrs) ) {
 		return 0;
 	}
-	$result = @ldap_mod_add( $ldap, $dn, $attrs );
+	$result = @ldap_mod_add( $ldap['handle'], $dn, $attrs );
 	return $result;
 }
 
-function do_ldap_attr_del( $dn, $attrs ) {
-	global $ldap;
+function do_ldap_attr_del( $ldap, $dn, $attrs ) {
 	$result = 0;
 	if ( empty($dn) || empty($attrs) || !is_array($attrs) ) {
 		return 0;
 	}
-	$result = @ldap_mod_del( $ldap, $dn, $attrs );
+	$result = @ldap_mod_del( $ldap['handle'], $dn, $attrs );
 	return $result;
 }
 
-function do_ldap_rename( $dn, $attr, $new_parent ) {
-	global $ldap;
+function do_ldap_rename( $ldap, $dn, $attr, $new_parent ) {
         $result = 0;
 	if ( empty($dn) || empty($attr) || empty($new_parent) ) {
 		return 0;
 	}
-	if ( ldap_ensure_ous($new_parent) ) {
-		$result = @ldap_rename( $ldap, $dn, $attr, $new_parent, true );
+	if ( ldap_ensure_ous($ldap,$new_parent) ) {
+		$result = @ldap_rename( $ldap['handle'], $dn, $attr, $new_parent, true );
 	}
-	ldap_fix_group_memberships( $dn, $attr .','. $new_parent );
+	ldap_fix_group_memberships( $ldap, $dn, $attr .','. $new_parent );
         return $result;
 }
 
-function ldap_ensure_ous( $dn ) {
+function ldap_ensure_ous( $ldap, $dn ) {
 	$work = preg_split( '/(?<!\\\\),/', $dn );
 	$result = 1;
 	$base = '';
@@ -223,17 +228,16 @@ function ldap_ensure_ous( $dn ) {
 		}
 		else {
 			$dn = $ou .','. $dn;
-			$set = ldap_quick_search( array('objectClass'=>'*'), array(), 0, $dn.$base );
+			$set = ldap_quick_search( $ldap, array('objectClass'=>'*'), array(), 0, $dn.$base );
 			if ( empty($set) ) {
-				$result = ldap_create_ou( $dn.$base );
+				$result = ldap_create_ou( $ldap, $dn.$base );
 			}
 		}
 	}
 	return $result;
 }
 
-function ldap_create_ou( $dn ) {
-	global $ldap;
+function ldap_create_ou( $ldap, $dn ) {
 	$result = 0;
 
 	$work = preg_split( '/(?<!\\\\),/', $dn );
@@ -245,7 +249,7 @@ function ldap_create_ou( $dn ) {
 			'ou' => $ou,
 		);
 
-		$result = ldap_add( $ldap, $dn, $work );
+		$result = ldap_add( $ldap['handle'], $dn, $work );
 	}
 
 	return $result;
@@ -258,24 +262,24 @@ function ldap_dn_get_parent( $dn ) {
 	return $new_parent;
 }
 
-function ldap_fix_group_memberships( $old_dn, $new_dn ) {
-	$set = ldap_quick_search( array('member'=>$old_dn), array() );
+function ldap_fix_group_memberships( $ldap, $old_dn, $new_dn ) {
+	$set = ldap_quick_search( $ldap, array('member'=>$old_dn), array() );
 	foreach ( $set as $group ) {
 		$group_dn = $group['dn'];
-		do_ldap_attr_del( $group_dn, array('member' => $old_dn) );
-		do_ldap_attr_add( $group_dn, array('member' => $new_dn) );
+		do_ldap_attr_del( $ldap, $group_dn, array('member' => $old_dn) );
+		do_ldap_attr_add( $ldap, $group_dn, array('member' => $new_dn) );
 	}
 }
 
-function ldap_get_next_num( $attrib='sambaSID' ) {
+function ldap_get_next_num( $ldap, $attrib='sambaSID' ) {
 	$sid = 0;
 	$prefix = '';
 	switch ( $attrib ) {
 	case 'sambaSID':
-		$set = ldap_quick_search( array('objectClass'=>'sambaSamAccount'), array('sambaSID') );
+		$set = ldap_quick_search( $ldap, array('objectClass'=>'sambaSamAccount'), array('sambaSID') );
 		break;
 	case 'uidNumber':
-		$set = ldap_quick_search( array('objectClass'=>'posixAccount'), array('uidNumber') );
+		$set = ldap_quick_search( $ldap, array('objectClass'=>'posixAccount'), array('uidNumber') );
 		break;
 	default:
 		$set = array();
