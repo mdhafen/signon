@@ -66,10 +66,17 @@ if ( $GOOGLE_S_CLIENT->getAuth()->isAccessTokenExpired() ) {
   $GOOGLE_S_CLIENT->getAuth()->refreshTokenWithAssertion();
 }
 
-global $LDAP_BASE,$LOCATIONS,$DEFAULT_LOCATION,$DEFAULT_OU;
+global $LDAP_BASE,$LOCATIONS,$OTHER_TITLES,$DEFAULT_LOCATION,$DEFAULT_OU;
 $LDAP_BASE = 'dc=wcsd';
 $DEFAULT_LOCATION = 'washk12';
 $DEFAULT_OU = 'ou=District Departments,'.$LDAP_BASE;
+
+$OTHER_TITLES = array(
+'Extra Duty',
+'SRO',
+'school board',
+'FIRST AID/CPR INSTRUCTOR',
+);
 
 $LOCATIONS = array(
   'AES' => 'ou=Arrowhead Elementary,ou=Elementaries,ou=Snow Cone,'.$LDAP_BASE,
@@ -261,6 +268,7 @@ function google_org_to_ou( $path ) {
 }
 
 function google_user_hash_for_ldap( $user ) {
+  global $OTHER_TITLES;
   $entry = array();
 
   if ( !empty($user) ) {
@@ -289,6 +297,11 @@ function google_user_hash_for_ldap( $user ) {
           if ( $xid['type'] == 'organization' ) {
             $entry['employeeNumber'] = $xid['value'];
           }
+        }
+      }
+      if ( !empty($entry['title']) ) {
+        if ( in_array( strtolower($entry['title']), array_map('strtolower',$OTHER_TITLES) ) ) {
+          $entry['employeeType'] = 'Other';
         }
       }
       $entry['l'] = google_org_to_loc( $user['orgUnitPath'] );

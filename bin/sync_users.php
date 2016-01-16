@@ -52,6 +52,9 @@ foreach ( $google_cache as $g_user ) {
     if ( !empty($entry['title']) && ( empty($thisUser['title']) || $thisUser['title'][0] != $entry['title'] ) ) {
       $mod['title'] = $entry['title'];
     }
+    if ( !empty($entry['employeeType']) && ( empty($thisUser['employeeType']) || $thisUser['employeeType'][0] != $entry['employeeType'] ) ) {
+      $mod['employeeType'] = $entry['employeeType'];
+    }
     if ( !empty($entry['employeeNumber']) && ( empty($thisUser['employeeNumber']) || $thisUser['employeeNumber'][0] != $entry['employeeNumber'] ) ) {
       $mod['employeeNumber'] = $entry['employeeNumber'];
     }
