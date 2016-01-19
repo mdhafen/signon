@@ -12,6 +12,7 @@ $output = array();
 $result = '';
 $error = 0;
 $user = '';
+$user_email = '';
 $submitted = input( 'submit', INPUT_STR );
 $op = input( 'op', INPUT_HTML_NONE );
 if ( empty($op) ) {
@@ -39,6 +40,7 @@ if ( $op != 'Guest' ) {
 
 if ( !empty($submitted) ) {
   $email = input( 'email', INPUT_HTML_NONE );
+  $user_email = $email;
 
   $password = '';
   $entry = array(
@@ -73,6 +75,7 @@ if ( !empty($submitted) ) {
   }
   else if ( !empty($user) ) {
     $email = $user->email;
+    $user_email = $email;
     $user = get_user_google( $email );
 
     if ( !empty($user) ) {
@@ -145,7 +148,7 @@ $output['op'] = $op;
 $output['result'] = $result;
 $output['error'] = $error;
 $output['providers'] = array_keys( $PROVIDER_MAP );
-$output['username'] = (empty($user))? "" : $user->email;
+$output['username'] = (empty($user_email))? "" : $user_email;
 
 output( $output, 'create/'.$template );
 ?>
