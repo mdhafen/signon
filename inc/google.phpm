@@ -76,6 +76,7 @@ $OTHER_TITLES = array(
 'SRO',
 'school board',
 'FIRST AID/CPR INSTRUCTOR',
+'sweeper',
 );
 
 $LOCATIONS = array(
