@@ -243,7 +243,7 @@ function google_org_to_loc( $path ) {
 
   foreach ( $ous as $ou ) {
     foreach ( $LOCATIONS as $loc => $location ) {
-      if ( stripos($location,$ou) !== FALSE ) {
+      if ( stripos($location,$ou) == 3 ) {
         return $loc;
       }
     }
