@@ -81,7 +81,7 @@ class LDAP_Wrapper {
 				$this->ldap = $ldap_cache[$module];
 				$search = @ldap_read( $this->ldap, $this->config['userdn'], '(objectClass=*)' );
 				if ( $search ) {
-					return;
+					return 1;
 				}
 			}
 		}
@@ -97,10 +97,10 @@ class LDAP_Wrapper {
 			ldap_set_option( $this->ldap, LDAP_OPT_NETWORK_TIMEOUT, 30 );
 		}
 
-		ldap_bind( $this->ldap, $userdn, $passwd );
-		$ldap_cache[$module] = $this->ldap;
+		$result = ldap_bind( $this->ldap, $userdn, $passwd );
+		if ( $result) $ldap_cache[$module] = $this->ldap;
 
-		return;
+		return $result;
 	}
 
 	public function quick_search( $filter = array('objectclass' => '*'), $attrs = array('cn'), $scope = 2, $base = '' ) {

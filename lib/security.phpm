@@ -182,11 +182,11 @@ function authen_ldap( $module, $username, $password ) {
 	$email = '';
 
 	$ldap = new LDAP_Wrapper( $module );
-	if ( strcasecmp( $username, $config['ldap'][$module]['userdn'] ) == 0 ) {
+	if ( strcasecmp( $username, $ldap->config['userdn'] ) == 0 ) {
 		$set = array();
 		$set[] = array( 'dn' => $username, 'cn' => array($username) );
 	}
-	else if ( strripos( $username, $config['ldap'][$module]['base'] ) > 0 ) {
+	else if ( strripos( $username, $ldap->config['base'] ) > 0 ) {
 		$set = $ldap->quick_search( array('objectClass'=>'*'), array(), 0, $username );
 	}
 	else {
@@ -203,8 +203,8 @@ function authen_ldap( $module, $username, $password ) {
 	if ( $userdn ) {
 		if ( $ldap->do_connect( $module, $userdn, $password ) ) {
 			$role = 1;
-			if ( ! empty($config['ldap'][$module]['roles']) ) {
-				foreach ( $config['ldap'][$module]['roles'] as $role_id => $group_dn ) {
+			if ( ! empty($ldap->config['roles']) ) {
+				foreach ( $ldap->config['roles'] as $role_id => $group_dn ) {
 					$group = $ldap->quick_search( array('objectClass'=>'groupOfNames'), array(), 0, $group_dn );
 					if ( ! empty($group[0]) && ! empty($group[0]['member']) ) {
 						foreach ( $group[0]['member'] as $member_dn ) {
@@ -229,8 +229,8 @@ function authen_ldap( $module, $username, $password ) {
 		}
 		else {
 			// re-bind as root
-			$userdn = $config['ldap'][$module]['userdn'];
-			$password = $config['ldap'][$module]['passwd'];
+			$userdn = $ldap->config['userdn'];
+			$password = $ldap->config['passwd'];
 			$ldap->do_connect( $module, $userdn, $password );
 		}
 	}
