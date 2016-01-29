@@ -25,7 +25,7 @@ foreach ( $data['must'] as $attr ) {
 <?php       }
         }
 	else { ?>
-<input type="text" name="<?= $count ?>_val[]" value="" class="form-control">
+<input type="text" name="<?= $count ?>_val[]" value="" class="form-control" required="true">
 <?php   }
         if ( empty($data['attrs'][$attr]['SINGLE-VALUE']) ) { ?>
 <input type="button" class="btn btn-default" value="+" onclick="add_field(this,'<?= $count ?>')">

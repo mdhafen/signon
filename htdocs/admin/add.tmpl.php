@@ -44,7 +44,7 @@ foreach ( $data['must'] as $attr ) {
 <div class='row form-group'><label for="<?= $count ?>_val" class="col-sm-4 control-label important"><?= $attr ?>:</label>
 <input name="<?= $count ?>_attr" type="hidden" value="<?= $attr ?>">
 <div class="col-sm-8">
-<input type="text" id="<?= $count ?>_val" name="<?= $count ?>_val[]" value=""<?php if ( $data['rid'] == $attr ) { ?> onchange="update_dn(this.value,'<?= $attr ?>')"<?php } ?> class="form-control">
+<input type="text" id="<?= $count ?>_val" name="<?= $count ?>_val[]" value=""<?php if ( $data['rid'] == $attr ) { ?> onchange="update_dn(this.value,'<?= $attr ?>')"<?php } ?> class="form-control" required="true">
 <?php
    if ( empty($data['attrs'][$attr]['SINGLE-VALUE']) ) {
 ?>
