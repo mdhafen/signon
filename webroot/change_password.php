@@ -28,9 +28,9 @@ if ( !empty($user) ) {
     $username = substr($email,0,strpos($email,'@'));
 
     if ( !empty($password) && !empty($password2) ) {
-      $ldap = do_ldap_connect();
+      $ldap = new LDAP_Wrapper();
       $dn = '';
-      $set = ldap_quick_search( $ldap, array( 'uid' => $username ), array() );
+      $set = $ldap->quick_search( array( 'uid' => $username ), array() );
       if ( empty($set) ) {
         $user = get_user_google( $email );
 
@@ -46,8 +46,8 @@ if ( !empty($user) ) {
             $dn = $entry['dn'];
             unset( $entry['dn'] );
             $entry['objectClass'] = array('top','inetOrgPerson','sambaSamAccount');
-            $entry['sambaSID'] = ldap_get_next_num($ldap,'sambaSID');
-            if ( ! do_ldap_add( $ldap, $dn, $entry ) ) {
+            $entry['sambaSID'] = $ldap->get_next_num('sambaSID');
+            if ( ! $ldap->do_add( $dn, $entry ) ) {
               $errors[] = 'There was an error creating the account';
             }
           }

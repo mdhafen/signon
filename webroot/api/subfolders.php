@@ -4,14 +4,14 @@ include_once( '../../lib/security.phpm' );
 include_once( '../../lib/data.phpm' );
 include_once( '../../lib/output.phpm' );
 
-$ldap = do_ldap_connect();
+$ldap = new LDAP_Wrapper();
 if ( ! authenticate() ) {
 	output( '<?xml version="1.0"?><error>ACCESS_DENIED</error>', '', $xml=1 );
 	exit;
 }
 
 $dn = input( 'dn', INPUT_STR );
-$set = ldap_quick_search( $ldap, array( 'objectClass' => 'organizationalUnit' ), array(), 1, $dn );
+$set = $ldap->quick_search( array( 'objectClass' => 'organizationalUnit' ), array(), 1, $dn );
 $folders = array();
 foreach ( $set as $ou ) {
 	$folders[] = array( 'ou' => $ou['ou'][0], 'dn' => $ou['dn'] );

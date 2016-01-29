@@ -11,9 +11,9 @@ authorize( 'set_password' );
 
 $errors = array();
 
-$ldap = do_ldap_connect();
+$ldap = new LDAP_Wrapper();
 $dn = $_SESSION['userid'];
-$set = ldap_quick_search( $ldap, array( 'objectClass' => '*' ), array(), 0, $dn );
+$set = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
 $object = $set[0];
 
 if ( ! is_person( $object ) ) {

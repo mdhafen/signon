@@ -5,24 +5,24 @@ include_once( '../../lib/data.phpm' );
 include_once( '../../lib/output.phpm' );
 include_once( '../../inc/person.phpm' );
 
-$ldap = do_ldap_connect();
+$ldap = new LDAP_Wrapper();
 authorize( 'manage_objects' );
 
 $dn = input( 'dn', INPUT_STR );
 $op = input( 'op', INPUT_STR );
 
-$set = ldap_quick_search( $ldap, array( 'objectClass' => '*' ), array(), 0, $dn );
+$set = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
 $object = $set[0];
 $objectdn = $object['dn'];
 unset( $object['dn'] );
 
-$children = ldap_quick_search( $ldap, array( 'objectClass' => '*' ), array(), 1, $dn );
-$groups = ldap_quick_search( $ldap, array( 'member' => "$objectdn" ), array() );
+$children = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 1, $dn );
+$groups = $ldap->quick_search( array( 'member' => "$objectdn" ), array() );
 
 if ( $op == 'Delete' && count($children) == 0 ) {
-	$parentdn = ldap_dn_get_parent( $objectdn );
+	$parentdn = $ldap->dn_get_parent( $objectdn );
 	remove_from_groups( $ldap, $objectdn );
-	if ( do_ldap_delete( $ldap, $objectdn ) ) {
+	if ( $ldap->do_delete( $objectdn ) ) {
 		redirect( 'admin/object.php?dn='. urlencode($parentdn ) );
 	}
 }

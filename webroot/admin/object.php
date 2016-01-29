@@ -5,24 +5,24 @@ include_once( '../../lib/data.phpm' );
 include_once( '../../lib/output.phpm' );
 include_once( '../../inc/person.phpm' );
 
-$ldap = do_ldap_connect();
+$ldap = new LDAP_Wrapper();
 authorize( 'reset_password' );
 
 $dn = input( 'dn', INPUT_STR );
 
-$set = ldap_quick_search( $ldap, array( 'objectClass' => '*' ), array(), 0, $dn );
+$set = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
 $object = $set[0];
 $objectdn = $object['dn'];
 unset( $object['dn'] );
 
 ksort( $object, SORT_STRING | SORT_FLAG_CASE );
 
-$parentdn = ldap_dn_get_parent( $objectdn );
-if ( $parentdn == $ldap['base'] ) {
+$parentdn = $ldap->dn_get_parent( $objectdn );
+if ( $parentdn == $ldap->config['base'] ) {
 	$parentdn = '';
 }
 
-$children = ldap_quick_search( $ldap, array( 'objectClass' => '*' ), array(), 1, $dn );
+$children = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 1, $dn );
 usort( $children, 'sorter' );
 
 $output = array(

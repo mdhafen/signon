@@ -23,9 +23,9 @@ if ( !empty($argv[1]) ) {
   $students = array_filter($students);
 }
 
-$ldap = do_ldap_connect();
+$ldap = new LDAP_Wrapper();
 $users = array();
-$users = ldap_quick_search( $ldap, '(&(!(employeeType=Guest))(objectClass=inetOrgPerson))' , array() );
+$users = $ldap->quick_search( '(&(!(employeeType=Guest))(objectClass=inetOrgPerson))' , array() );
 $users_lookup = array();
 
 while ( !empty($users) ) {
@@ -36,7 +36,7 @@ while ( !empty($users) ) {
 unset($users);
 
 foreach ( $google_cache as $g_user ) {
-  if ( stripos($g_user['orgUnitPath']),'nonusers') !== FALSE ) continue; //service account
+  if ( stripos($g_user['orgUnitPath'],'nonusers') !== FALSE ) continue; //service account
   $entry = google_user_hash_for_ldap( $g_user );
   $output = "";
   if ( ( !empty($entry['employeeNumber']) && !empty($users_lookup[ $entry['employeeNumber'] ]) ) || !empty($users_lookup[ $entry['mail'] ]) ) {
@@ -68,18 +68,18 @@ foreach ( $google_cache as $g_user ) {
     }
 
     if ( !empty($mod) ) {
-      do_ldap_attr_del( $ldap, $dn, array_keys($mod) );
-      do_ldap_modify( $ldap, $dn, $mod );
+      $ldap->do_attr_del( $dn, array_keys($mod) );
+      $ldap->do_modify( $dn, $mod );
       $output .= "mod ";
     }
 
     if ( strcasecmp( $dn, $entry['dn'] ) != 0 ) {
-      do_ldap_rename( $ldap, $dn, "uid=". ldap_escape($entry['uid'],'',LDAP_ESCAPE_DN), ldap_dn_get_parent($entry['dn']) );
+      $ldap->do_rename( $dn, "uid=". ldap_escape($entry['uid'],'',LDAP_ESCAPE_DN), $ldap->dn_get_parent($entry['dn']) );
       $output .= "move ";
     }
 
     if ( $entry['employeeType'] == 'Student' && empty($thisUser['userPassword']) && !empty($students[ $entry['mail'] ]) ) {
-      set_password( $entry['dn'], $students[ $entry['mail'] ] );
+      set_password( $ldap, $entry['dn'], $students[ $entry['mail'] ] );
       $output .= "And set Password ";
     }
   }
@@ -89,14 +89,14 @@ foreach ( $google_cache as $g_user ) {
     $dn = $entry['dn'];
     unset( $entry['dn'] );
 
-    $entry['sambaSID'] = ldap_get_next_num( $ldap, 'sambaSID' );
+    $entry['sambaSID'] = $ldap->get_next_num( 'sambaSID' );
 
-    do_ldap_add( $ldap, $dn, $entry );
+    $ldap->do_add( $dn, $entry );
     $entry['dn'] = $dn;
     $output .= "Add ";
 
     if ( $entry['employeeType'] == 'Student' && !empty($students[ $entry['mail'] ]) ) {
-      set_password( $dn, $students[ $entry['mail'] ] );
+      set_password( $ldap, $dn, $students[ $entry['mail'] ] );
       $output .= "And set Password ";
     }
   }
@@ -107,7 +107,7 @@ foreach ( $google_cache as $g_user ) {
 foreach ( $users_lookup as $lookup => $thisUser ) {
   print "Working ". $thisUser['mail'][0] ." : isn't in google! ";
   $dn = $thisUser['dn'];
-  do_ldap_delete( $ldap, $dn );
+  $ldap->do_delete( $dn );
   print "Deleted\n";
 }
 

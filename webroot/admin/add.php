@@ -4,9 +4,8 @@ include_once( '../../lib/security.phpm' );
 include_once( '../../lib/data.phpm' );
 include_once( '../../lib/output.phpm' );
 include_once( '../../inc/person.phpm' );
-include_once( '../../inc/schema.phpm' );
 
-$ldap = do_ldap_connect();
+$ldap = new LDAP_Wrapper();
 authorize( 'manage_objects' );
 
 $parent = input( 'parent', INPUT_HTML_NONE );
@@ -33,7 +32,7 @@ switch ( $class ) {
 }
 
 if ( $class ) {
-   list( $must, $may ) = schema_get_object_requirements($ldap,$class);
+   list( $must, $may ) = $ldap->schema_get_object_requirements($class);
 }
 
 $output['rid'] = $rid;

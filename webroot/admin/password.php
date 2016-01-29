@@ -6,11 +6,11 @@ include_once( '../../lib/output.phpm' );
 include_once( '../../inc/person.phpm' );
 include_once( '../../inc/google.phpm' );
 
-$ldap = do_ldap_connect();
+$ldap = new LDAP_Wrapper();
 
 $dn = input( 'dn', INPUT_STR );
 
-$set = ldap_quick_search( $ldap, array( 'objectClass' => '*' ), array(), 0, $dn );
+$set = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
 $object = $set[0];
 $objectdn = $object['dn'];
 unset( $object['dn'] );
@@ -37,7 +37,7 @@ if ( ! empty($password) ) {
 		exit;
 	}
 
-	if ( set_password( $objectdn, $password ) ) {
+	if ( set_password( $ldap, $objectdn, $password ) ) {
 		if ( !empty($object['employeeType'][0]) && $object['employeeType'][0] != 'Guest' ) {
 			google_set_password( $object['mail'][0], $password );
 		}

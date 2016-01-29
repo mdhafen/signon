@@ -1,5 +1,6 @@
 <?php
 include_once( 'config.phpm' );
+include_once( 'output.phpm' );
 //require PDO;
 
 $dbh_cache = array();
@@ -22,8 +23,7 @@ function db_connect( $module = 'core', $write = 0 ) {
 		$settings = $config['database'][$module][$mode];
 
 		if ( empty($settings) ) {
-			print "No database connection configured";
-			die();
+			error( array('CONF'=>"No database connection configured") );
 		}
 		$engine = $settings['engine'];
 		$host = $settings['host'];
@@ -33,274 +33,11 @@ function db_connect( $module = 'core', $write = 0 ) {
 		try {
 			$dbh_cache[$module][$mode] = new PDO( $dsn, $settings['user'], $settings['passwd'] );
 		} catch ( PDOException $e ) {
-			print "Couldn't connect to database: ". $e->getMessage();
-			die();
+			error( array('CONN'=>"Couldn't connect to database: ". $e->getMessage()) );
 		}
 		$dbh_cache[$module][$mode]->setAttribute( PDO::ATTR_CASE, PDO::CASE_NATURAL );
 	}
 	return $dbh_cache[$module][$mode];
-}
-
-function do_ldap_connect( $module = 'core', $userdn = '', $passwd = '' ) {
-	global $ldap_cache, $config;
-
-	if ( empty($config['ldap'][$module]['server']) ) {
-		print "No ldap connection configured";
-		die();
-	}
-
-	if ( empty( $userdn ) ) {
-		if ( ! empty($_SESSION['loggedin_user']) ) {
-			$userdn = $_SESSION['loggedin_user']['userid'];
-			$passwd = $_SESSION['loggedin_user']['password'];
-		}
-		else {
-			$userdn = $config['ldap'][$module]['userdn'];
-			$passwd = $config['ldap'][$module]['passwd'];
-		}
-
-	}
-	if ( ! empty( $ldap_cache[$module]['handle'] ) ) {
-		$search = @ldap_read( $ldap_cache[$module]['handle'], $config['ldap'][$module]['userdn'], '(objectClass=*)' );
-		if ( $search ) {
-			return $ldap_cache[$module];
-		}
-	}
-
-	$ldap_cache[$module]['handle'] = ldap_connect( $config['ldap'][$module]['server'] );
-	ldap_set_option( $ldap_cache[$module]['handle'], LDAP_OPT_PROTOCOL_VERSION, 3 );
-	ldap_set_option( $ldap_cache[$module]['handle'], LDAP_OPT_REFERRALS, false );
-	ldap_set_option( $ldap_cache[$module]['handle'], LDAP_OPT_RESTART, true );
-	ldap_set_option( $ldap_cache[$module]['handle'], LDAP_OPT_NETWORK_TIMEOUT, 30 );
-
-	ldap_bind( $ldap_cache[$module]['handle'], $userdn, $passwd );
-	$ldap_cache[$module]['base'] = $config['ldap'][$module]['base'];
-
-	return $ldap_cache[$module];
-}
-
-function ldap_quick_search( $ldap, $filter = array('objectclass' => '*'), $attrs = array('cn'), $scope = 2, $base = '' ) {
-	global $config;
-	$results = array();
-
-	$filter_str = "";
-	if ( empty($filter) ) {
-		$filter_str = "";
-	}
-	else if ( is_array($filter) ) {
-		foreach ( $filter as $attr => $value ) {
-			$filter_str .= "($attr=$value)";
-		}
-		if ( count($filter) > 1 ) {
-			$filter_str = "(&$filter_str)";
-		}
-	}
-	else {
-		$filter_str = $filter;
-	}
-
-	if ( empty($base) ) {
-		$base = $ldap['base'];
-	}
-
-	$paged_cookie = '';
-	do {
-		ldap_control_paged_result( $ldap['handle'], 100, false, $paged_cookie );
-		if ( $scope == 0 ) {
-			$search = @ldap_read( $ldap['handle'], $base, $filter_str, $attrs );
-		}
-		else if ( $scope == 1 ) {
-			$search = @ldap_list( $ldap['handle'], $base, $filter_str, $attrs );
-		}
-		else {
-			$search = @ldap_search( $ldap['handle'], $base, $filter_str, $attrs );
-		}
-		if ( empty($search) ) {
-			return $results;
-		}
-
-		$entry = ldap_first_entry( $ldap['handle'], $search );
-		if ( $entry ) {
-			do {
-				$result = array( 'dn' => ldap_get_dn( $ldap['handle'], $entry ) );
-				$attribs = ldap_get_attributes( $ldap['handle'], $entry );
-				for ( $i = 0; $i < $attribs['count']; $i++) {
-					$attr_name = $attribs[$i];
-					$values = array();
-					for( $j = 0; $j < $attribs[$attr_name]['count']; $j++ ) {
-						$values[] = $attribs[$attr_name][$j];
-					}
-					$result[ $attr_name ] = $values;
-				}
-				$results[] = $result;
-			} while ( $entry = ldap_next_entry( $ldap['handle'], $entry ) );
-		}
-		ldap_control_paged_result_response( $ldap['handle'], $search, $paged_cookie );
-	} while ( $paged_cookie !== null && $paged_cookie != '' );
-
-	return $results;
-}
-
-function do_ldap_modify( $ldap, $userdn, $attrs ) {
-	$attrs = array_filter( $attrs );
-	if ( empty( $userdn ) || ! is_array( $attrs ) || empty( $attrs ) ) {
-		return 0;
-	}
-
-	$result = @ldap_modify( $ldap['handle'], $userdn, $attrs );
-
-	return $result;
-}
-
-function do_ldap_add( $ldap, $userdn, $attrs ) {
-	$result = 0;
-
-	$attrs = array_filter( $attrs );
-	if ( empty( $userdn ) || ! is_array( $attrs ) || empty( $attrs ) ) {
-		return $result;
-	}
-
-	if ( ldap_ensure_ous( $ldap, ldap_dn_get_parent( $userdn ) ) ) {
-		$result = ldap_add( $ldap['handle'], $userdn, $attrs );
-	}
-
-	return $result;
-}
-
-function do_ldap_delete( $ldap, $userdn ) {
-	$result = 0;
-
-	if ( empty( $userdn ) ) {
-		return $result;
-	}
-
-	$result = ldap_delete( $ldap['handle'], $userdn );
-
-	return $result;
-}
-
-function do_ldap_attr_add( $ldap, $dn, $attrs ) {
-	$result = 0;
-	if ( empty($dn) || empty($attrs) || !is_array($attrs) ) {
-		return 0;
-	}
-	$result = @ldap_mod_add( $ldap['handle'], $dn, $attrs );
-	return $result;
-}
-
-function do_ldap_attr_del( $ldap, $dn, $attrs ) {
-	$result = 0;
-	if ( empty($dn) || empty($attrs) || !is_array($attrs) ) {
-		return 0;
-	}
-	$result = @ldap_mod_del( $ldap['handle'], $dn, $attrs );
-	return $result;
-}
-
-function do_ldap_rename( $ldap, $dn, $attr, $new_parent ) {
-        $result = 0;
-	if ( empty($dn) || empty($attr) || empty($new_parent) ) {
-		return 0;
-	}
-	if ( ldap_ensure_ous($ldap,$new_parent) ) {
-		$result = @ldap_rename( $ldap['handle'], $dn, $attr, $new_parent, true );
-	}
-	ldap_fix_group_memberships( $ldap, $dn, $attr .','. $new_parent );
-        return $result;
-}
-
-function ldap_ensure_ous( $ldap, $dn ) {
-	$work = preg_split( '/(?<!\\\\),/', $dn );
-	$result = 1;
-	$base = '';
-	$dn = '';
-
-	$work = array_reverse($work);
-	foreach ( $work as $ou ) {
-		if ( empty($ou) ) { continue; }
-		if ( stripos($ou,'dc=') !== FALSE ) {
-			if ( empty($base) ) {
-				$base = $ou;
-			}
-			else {
-				$base = $ou .','. $base;
-			}
-		}
-		else {
-			$dn = $ou .','. $dn;
-			$set = ldap_quick_search( $ldap, array('objectClass'=>'*'), array(), 0, $dn.$base );
-			if ( empty($set) ) {
-				$result = ldap_create_ou( $ldap, $dn.$base );
-			}
-		}
-	}
-	return $result;
-}
-
-function ldap_create_ou( $ldap, $dn ) {
-	$result = 0;
-
-	$work = preg_split( '/(?<!\\\\),/', $dn );
-	$work = explode( '=', $work[0] );
-	$ou = $work[1];
-	if ( !empty($ou) ) {
-		$work = array(
-			'objectClass' => 'organizationalUnit',
-			'ou' => $ou,
-		);
-
-		$result = ldap_add( $ldap['handle'], $dn, $work );
-	}
-
-	return $result;
-}
-
-function ldap_dn_get_parent( $dn ) {
-	$new_parent = preg_split('/(?<!\\\\),/',$dn);
-	array_shift($new_parent);
-	$new_parent = implode(',',$new_parent);
-	return $new_parent;
-}
-
-function ldap_fix_group_memberships( $ldap, $old_dn, $new_dn ) {
-	$set = ldap_quick_search( $ldap, array('member'=>$old_dn), array() );
-	foreach ( $set as $group ) {
-		$group_dn = $group['dn'];
-		do_ldap_attr_del( $ldap, $group_dn, array('member' => $old_dn) );
-		do_ldap_attr_add( $ldap, $group_dn, array('member' => $new_dn) );
-	}
-}
-
-function ldap_get_next_num( $ldap, $attrib='sambaSID' ) {
-	$sid = 0;
-	$prefix = '';
-	switch ( $attrib ) {
-	case 'sambaSID':
-		$set = ldap_quick_search( $ldap, array('objectClass'=>'sambaSamAccount'), array('sambaSID') );
-		break;
-	case 'uidNumber':
-		$set = ldap_quick_search( $ldap, array('objectClass'=>'posixAccount'), array('uidNumber') );
-		break;
-	default:
-		$set = array();
-		break;
-	}
-	if ( empty($set) ) {
-		return 0;
-	}
-	foreach ( $set as $user ) {
-		$attr = $user[$attrib][0];
-		preg_match('/(.*\D)?(\d+)/', $attr, $matches);
-		list( $str, $prefix, $this_sid ) = $matches;
-		if ( $this_sid > $sid ) {
-			$sid = $this_sid;
-		}
-	}
-
-	if ( $sid > 0 ) {
-		$sid++;
-		return $prefix . $sid;
-	}
 }
 
 function stripslashes_array( $array ) {
@@ -310,6 +47,432 @@ function stripslashes_array( $array ) {
     $value = stripslashes( $value );
   }
   return $array;
+}
+
+// ldap handle wrapper class
+class LDAP_Wrapper {
+	private $ldap = null;
+	public $config = [];
+
+	function __construct( $module = 'core', $userdn = '', $passwd = '' ) {
+		$this->do_connect( $module, $userdn, $passwd );
+	}
+
+	public function do_connect( $module = 'core', $userdn = '', $passwd = '' ) {
+		global $ldap_cache, $config;
+
+		if ( empty($config['ldap'][$module]['server']) ) {
+			error( array('CONF'=>"No ldap connection configured") );
+		}
+                $this->config = $config['ldap'][$module];
+
+		if ( empty( $userdn ) ) {
+			if ( ! empty($_SESSION['loggedin_user']) ) {
+				$userdn = $_SESSION['loggedin_user']['userid'];
+				$passwd = $_SESSION['loggedin_user']['password'];
+			}
+			else {
+				$userdn = $this->config['userdn'];
+				$passwd = $this->config['passwd'];
+			}
+
+
+			if ( ! empty( $ldap_cache[$module] ) ) {
+				$this->ldap = $ldap_cache[$module];
+				$search = @ldap_read( $this->ldap, $this->config['userdn'], '(objectClass=*)' );
+				if ( $search ) {
+					return;
+				}
+			}
+		}
+
+		if ( !empty($ldap_cache[$module]) ) {
+			$this->ldap = $ldap_cache[$module];
+		}
+		else {
+			$this->ldap = ldap_connect( $this->config['server'] );
+			ldap_set_option( $this->ldap, LDAP_OPT_PROTOCOL_VERSION, 3 );
+			ldap_set_option( $this->ldap, LDAP_OPT_REFERRALS, false );
+			ldap_set_option( $this->ldap, LDAP_OPT_RESTART, true );
+			ldap_set_option( $this->ldap, LDAP_OPT_NETWORK_TIMEOUT, 30 );
+		}
+
+		ldap_bind( $this->ldap, $userdn, $passwd );
+		$ldap_cache[$module] = $this->ldap;
+
+		return;
+	}
+
+	public function quick_search( $filter = array('objectclass' => '*'), $attrs = array('cn'), $scope = 2, $base = '' ) {
+		$results = array();
+
+		$filter_str = "";
+		if ( empty($filter) ) {
+			$filter_str = "";
+		}
+		else if ( is_array($filter) ) {
+			foreach ( $filter as $attr => $value ) {
+				$filter_str .= "($attr=$value)";
+			}
+			if ( count($filter) > 1 ) {
+				$filter_str = "(&$filter_str)";
+			}
+		}
+		else {
+			$filter_str = $filter;
+		}
+
+		if ( empty($base) ) {
+			$base = $this->config['base'];
+		}
+
+		$paged_cookie = '';
+		do {
+			ldap_control_paged_result( $this->ldap, 100, false, $paged_cookie );
+			if ( $scope == 0 ) {
+				$search = @ldap_read( $this->ldap, $base, $filter_str, $attrs );
+			}
+			else if ( $scope == 1 ) {
+				$search = @ldap_list( $this->ldap, $base, $filter_str, $attrs );
+			}
+			else {
+				$search = @ldap_search( $this->ldap, $base, $filter_str, $attrs );
+			}
+			if ( empty($search) ) {
+				return $results;
+			}
+
+			$entry = ldap_first_entry( $this->ldap, $search );
+			if ( $entry ) {
+				do {
+					$result = array( 'dn' => ldap_get_dn( $this->ldap, $entry ) );
+					$attribs = ldap_get_attributes( $this->ldap, $entry );
+					for ( $i = 0; $i < $attribs['count']; $i++) {
+						$attr_name = $attribs[$i];
+						$values = array();
+						for( $j = 0; $j < $attribs[$attr_name]['count']; $j++ ) {
+							$values[] = $attribs[$attr_name][$j];
+						}
+						$result[ $attr_name ] = $values;
+					}
+					$results[] = $result;
+				} while ( $entry = ldap_next_entry( $this->ldap, $entry ) );
+			}
+			ldap_control_paged_result_response( $this->ldap, $search, $paged_cookie );
+		} while ( $paged_cookie !== null && $paged_cookie != '' );
+
+		return $results;
+	}
+
+	public function do_modify( $userdn, $attrs ) {
+		$attrs = array_filter( $attrs );
+		if ( empty( $userdn ) || ! is_array( $attrs ) || empty( $attrs ) ) {
+			return 0;
+		}
+
+		$result = @ldap_modify( $this->ldap, $userdn, $attrs );
+
+		return $result;
+	}
+
+	public function do_add( $userdn, $attrs ) {
+		$result = 0;
+
+		$attrs = array_filter( $attrs );
+		if ( empty( $userdn ) || ! is_array( $attrs ) || empty( $attrs ) ) {
+			return $result;
+		}
+
+		if ( $this->ensure_ous( $this->dn_get_parent( $userdn ) ) ) {
+			$result = ldap_add( $this->ldap, $userdn, $attrs );
+		}
+
+		return $result;
+	}
+
+	public function do_delete( $userdn ) {
+		$result = 0;
+
+		if ( empty( $userdn ) ) {
+			return $result;
+		}
+
+		$result = ldap_delete( $this->ldap, $userdn );
+
+		return $result;
+	}
+
+	public function do_attr_add( $dn, $attrs ) {
+		$result = 0;
+		if ( empty($dn) || empty($attrs) || !is_array($attrs) ) {
+			return 0;
+		}
+		$result = @ldap_mod_add( $this->ldap, $dn, $attrs );
+		return $result;
+	}
+
+	public function do_attr_del( $dn, $attrs ) {
+		$result = 0;
+		if ( empty($dn) || empty($attrs) || !is_array($attrs) ) {
+			return 0;
+		}
+		$result = @ldap_mod_del( $this->ldap, $dn, $attrs );
+		return $result;
+	}
+
+	public function do_rename( $dn, $attr, $new_parent ) {
+        	$result = 0;
+		if ( empty($dn) || empty($attr) || empty($new_parent) ) {
+			return 0;
+		}
+		if ( $this->ensure_ous($new_parent) ) {
+			$result = @ldap_rename( $this->ldap, $dn, $attr, $new_parent, true );
+		}
+		$this->fix_group_memberships( $dn, $attr .','. $new_parent );
+        	return $result;
+	}
+
+	function ensure_ous( $dn ) {
+		$work = preg_split( '/(?<!\\\\),/', $dn );
+		$result = 1;
+		$base = '';
+		$dn = '';
+
+		$work = array_reverse($work);
+		foreach ( $work as $ou ) {
+			if ( empty($ou) ) { continue; }
+			if ( stripos($ou,'dc=') !== FALSE ) {
+				if ( empty($base) ) {
+					$base = $ou;
+				}
+				else {
+					$base = $ou .','. $base;
+				}
+			}
+			else {
+				$dn = $ou .','. $dn;
+				$set = $this->quick_search( array('objectClass'=>'*'), array(), 0, $dn.$base );
+				if ( empty($set) ) {
+					$result = $this->create_ou( $dn.$base );
+				}
+			}
+		}
+		return $result;
+	}
+
+	function create_ou( $dn ) {
+		$result = 0;
+
+		$work = preg_split( '/(?<!\\\\),/', $dn );
+		$work = explode( '=', $work[0] );
+		$ou = $work[1];
+		if ( !empty($ou) ) {
+			$work = array(
+				'objectClass' => 'organizationalUnit',
+				'ou' => $ou,
+			);
+
+			$result = ldap_add( $this->ldap, $dn, $work );
+		}
+
+		return $result;
+	}
+
+	public function dn_get_parent( $dn ) {
+		$new_parent = preg_split('/(?<!\\\\),/',$dn);
+		array_shift($new_parent);
+		$new_parent = implode(',',$new_parent);
+		return $new_parent;
+	}
+
+	public function fix_group_memberships( $old_dn, $new_dn ) {
+		$set = $this->quick_search( array('member'=>$old_dn), array() );
+		foreach ( $set as $group ) {
+			$group_dn = $group['dn'];
+			$this->do_attr_del( $group_dn, array('member' => $old_dn) );
+			$this->do_attr_add( $group_dn, array('member' => $new_dn) );
+		}
+	}
+
+	public function get_next_num( $attrib='sambaSID' ) {
+		$sid = 0;
+		$prefix = '';
+		switch ( $attrib ) {
+		case 'sambaSID':
+			$set = $this->quick_search( array('objectClass'=>'sambaSamAccount'), array('sambaSID') );
+			break;
+		case 'uidNumber':
+			$set = $this->quick_search( array('objectClass'=>'posixAccount'), array('uidNumber') );
+			break;
+		default:
+			$set = array();
+			break;
+		}
+		if ( empty($set) ) {
+			return 0;
+		}
+		foreach ( $set as $user ) {
+			$attr = $user[$attrib][0];
+			preg_match('/(.*\D)?(\d+)/', $attr, $matches);
+			list( $str, $prefix, $this_sid ) = $matches;
+			if ( $this_sid > $sid ) {
+				$sid = $this_sid;
+			}
+		}
+
+		if ( $sid > 0 ) {
+			$sid++;
+			return $prefix . $sid;
+		}
+	}
+
+	public function get_schema_objects() {
+		$subschema = $this->get_subschema_base();
+
+		$set = ldap_read( $this->ldap, $subschema, 'objectClass=*', array('objectclasses') );
+		$schema = ldap_get_entries( $this->ldap, $set );
+
+		$objects = array();
+		foreach ( $schema as $entry ) {
+			for ( $i = 0; $i < $entry['objectclasses']['count']; $i++ ) {
+				$oC_str = $entry['objectclasses'][$i];
+				$o = parse_asn_schema( $oC_str );
+				if ( ! empty( $o ) && ! empty($o['NAME']) && ! empty($o['NAME'][0]) ) {
+					$objects[ $o['NAME'][0] ] = $o;
+				}
+			}
+		}
+
+		return $objects;
+	}
+
+	public function get_schema_attributes() {
+		$subschema = $this->get_subschema_base();
+
+		$set = ldap_read( $this->ldap, $subschema, 'objectClass=*', array('attributeTypes') );
+		$schema = ldap_get_entries( $this->ldap, $set );
+
+		$attrs = array();
+		foreach ( $schema as $entry ) {
+			for ( $i = 0; $i < $entry['attributetypes']['count']; $i++ ) {
+				$attr_str = $entry['attributetypes'][$i];
+				$a = parse_asn_schema( $attr_str );
+				if ( ! empty( $a ) && ! empty($a['NAME']) ) {
+					foreach ( $a['NAME'] as $name ) {
+						$attrs[ $name ] = $a;
+					}
+				}
+			}
+		}
+
+		return $attrs;
+	}
+
+	public function get_subschema_base() {
+		$set = ldap_read( $this->ldap, '', 'objectClass=*', array('*','subschemaSubentry') );
+		$schema = ldap_get_entries( $this->ldap, $set );
+		$subschema = $schema[0]['subschemasubentry'][0];
+
+		return $subschema;
+	}
+
+	function parse_asn_schema( $asn_str ) {
+		$schema_flags = array(
+			'STRUCTURAL', 'AUXILIARY', 'ABSTRACT',
+			'OBSOLETE', 'SINGLE-VALUE', 'COLLECTIVE',
+			'NO-USER-MODIFICATION',
+		);
+		$object = array();
+		$asn_str = substr( $asn_str, 2, -2 );
+
+		$end_pos = strpos( $asn_str, " " );
+		$object['OID'] = substr( $asn_str, 0, $end_pos );
+		$asn_str = substr( $asn_str, $end_pos + 1 );
+
+		while ( ! empty( $asn_str ) ) {
+			$end_pos = strpos( $asn_str, " " );
+			$key = substr( $asn_str, 0, $end_pos );
+			$asn_str = substr( $asn_str, $end_pos + 1 );
+			$values = array();
+
+			if ( in_array( $key, $schema_flags ) ) {
+				$object[$key] = 1;
+				continue;
+			}
+
+			$char = substr( $asn_str, 0, 1 );
+			switch ($char) {
+				case "(":
+					$end_pos = strpos( $asn_str, ")" );
+					$set = substr( $asn_str, 1, $end_pos - 1 );
+					$values = preg_split( "/[\s$]+/", $set, 0, PREG_SPLIT_NO_EMPTY );
+					$end_pos++;
+					break;
+				case "'":
+					$end_pos = strpos( $asn_str, "'", 1 );
+					$values[] = substr( $asn_str, 1, $end_pos - 1 );
+					$end_pos++;
+					break;
+				default:
+					$end_pos = @strpos( $asn_str, " ", 1 );
+					if ( $end_pos === false ) {
+						$end_pos = strlen( $asn_str );
+					}
+					$values[] = substr( $asn_str, 0, $end_pos );
+					break;
+			}
+			$asn_str = substr( $asn_str, $end_pos + 1 );
+
+			reset( $values );
+			while ( list($k,$v) = each($values) ) {
+				$values[$k] = trim( $values[$k], " '" );
+			}
+
+			if ( ! empty($key) && ! empty($values) ) {
+				$object[$key] = $values;
+			}
+		}
+
+		return $object;
+	}
+
+	public function schema_get_object_requirements( $objectClasses ) {
+		if ( empty( $_SESSION['schema_objects'] ) ) {
+			$schema_objects = $this->get_schema_objects();
+			$_SESSION['schema_objects'] = $schema_objects;
+		}
+		else {
+			$schema_objects = $_SESSION['schema_objects'];
+		}
+
+		$must = array();
+		$may = array();
+		for ( $i = 0; $i < count($objectClasses); $i++ ) {
+			$oc = $objectClasses[$i];
+
+			if ( ! empty($schema_objects[$oc]['SUP']) ) {
+				foreach ( $schema_objects[$oc]['SUP'] as $sup_oc ) {
+					$objectClasses[] = $sup_oc;
+				}
+			}
+
+			if ( ! empty($schema_objects[$oc]['MUST']) ) {
+				$must = array_merge( $must, $schema_objects[$oc]['MUST'] );
+			}
+			if ( ! empty($schema_objects[$oc]['MAY']) ) {
+				$may = array_merge( $may, $schema_objects[$oc]['MAY'] );
+			}
+		}
+
+		$must = array_unique( $must );
+		$may = array_unique( $may );
+		$may = array_diff( $may, $must );
+
+		sort( $must );
+		sort( $may );
+
+		return array( $must, $may );
+	}
 }
 
 //  copied from http://stackoverflow.com/questions/8560874/
@@ -387,4 +550,46 @@ if (!function_exists('ldap_escape')) {
     }
 }
 
+/* ASN info
+
+   objectClass info: http://www.zytrax.com/books/ldap/ch3/
+ObjectClassDescription = "(" whsp
+ numericoid whsp      ; ObjectClass identifier
+ [ "NAME" qdescrs ]
+ [ "DESC" qdstring ]
+ [ "OBSOLETE" whsp ]
+ [ "SUP" oids ]       ; Superior ObjectClasses
+ [ ( "ABSTRACT" / "STRUCTURAL" / "AUXILIARY" ) whsp ]
+                      ; default structural
+ [ "MUST" oids ]      ; AttributeTypes
+ [ "MAY" oids ]       ; AttributeTypes
+  whsp ")"
+
+   example:
+ ( 1.3.6.1.4.1.7165.2.2.16 NAME 'sambaTrustedDomain' DESC 'Samba
+  Trusted Domain Object' SUP top STRUCTURAL MUST cn MAY ( sambaTrustType $ sam
+ baTrustAttributes $ sambaTrustDirection $ sambaTrustPartner $ sambaFlatName $
+  sambaTrustAuthOutgoing $ sambaTrustAuthIncoming $ sambaSecurityIdentifier $ 
+ sambaTrustForestTrustInfo $ sambaTrustPosixOffset $ sambaSupportedEncryptionT
+ ypes ) )
+
+AttributeTypeDescription = "(" whsp
+   numericoid whsp     ; AttributeType identifier
+ [ "NAME" qdescrs ]             ; name used in AttributeType
+ [ "DESC" qdstring ]            ; description
+ [ "OBSOLETE" whsp ]
+ [ "SUP" woid ]                 ; derived from this other
+                                ; AttributeType
+ [ "EQUALITY" woid              ; Matching Rule name
+ [ "ORDERING" woid              ; Matching Rule name
+ [ "SUBSTR" woid ]              ; Matching Rule name
+ [ "SYNTAX" whsp noidlen whsp ] ; Syntax OID
+ [ "SINGLE-VALUE" whsp ]        ; default multi-valued
+ [ "COLLECTIVE" whsp ]          ; default not collective
+ [ "NO-USER-MODIFICATION" whsp ]; default user modifiable
+ [ X-ORDERED whsp type ]        ; non-standard - default not X-ORDERED
+ [ "USAGE" whsp AttributeUsage ]; default userApplications
+ whsp ")"
+
+ */
 ?>

@@ -14,7 +14,7 @@ function is_person( $o=array() ) {
 function set_password( $ldap, $userdn, $password ) {
 	$result = 0;
 	if ( ! empty($userdn) && ! empty($password) ) {
-		$set = ldap_quick_search( $ldap, array( 'objectClass' => '*' ), array(), 0, $userdn );
+		$set = $ldap->ldap_quick_search( array( 'objectClass' => '*' ), array(), 0, $userdn );
 		if ( !empty($set) ) {
 			$object = $set[0];
 		}
@@ -43,7 +43,7 @@ function set_password( $ldap, $userdn, $password ) {
 		}
 
 		if ( ! empty( $entry ) ) {
-			$result = do_ldap_modify( $ldap, $userdn, $entry );
+			$result = $ldap->do_modify( $userdn, $entry );
 		}
 	}
 	return $result;
@@ -52,10 +52,10 @@ function set_password( $ldap, $userdn, $password ) {
 function remove_from_groups( $ldap, $userdn ) {
 	$result = 0;
 	if ( !empty($userdn) ) {
-		$groups = ldap_quick_search( $ldap, array( 'member' => "$userdn" ) );
+		$groups = $ldap->ldap_quick_search( array( 'member' => "$userdn" ) );
 		foreach ( $groups as $group ) {
 			$group_dn = $group['dn'];
-			do_ldap_attr_del( $ldap, $group_dn, array('member' => $userdn) );
+			$ldap->do_attr_del( $group_dn, array('member' => $userdn) );
 		}
 	}
 }
