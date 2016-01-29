@@ -336,7 +336,7 @@ class LDAP_Wrapper {
 		foreach ( $schema as $entry ) {
 			for ( $i = 0; $i < $entry['objectclasses']['count']; $i++ ) {
 				$oC_str = $entry['objectclasses'][$i];
-				$o = parse_asn_schema( $oC_str );
+				$o = $this->parse_asn_schema( $oC_str );
 				if ( ! empty( $o ) && ! empty($o['NAME']) && ! empty($o['NAME'][0]) ) {
 					$objects[ $o['NAME'][0] ] = $o;
 				}
@@ -356,7 +356,7 @@ class LDAP_Wrapper {
 		foreach ( $schema as $entry ) {
 			for ( $i = 0; $i < $entry['attributetypes']['count']; $i++ ) {
 				$attr_str = $entry['attributetypes'][$i];
-				$a = parse_asn_schema( $attr_str );
+				$a = $this->parse_asn_schema( $attr_str );
 				if ( ! empty( $a ) && ! empty($a['NAME']) ) {
 					foreach ( $a['NAME'] as $name ) {
 						$attrs[ $name ] = $a;
