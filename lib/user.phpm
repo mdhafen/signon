@@ -15,10 +15,12 @@ function user_by_userid( $userid, $module = 'core' ) {
   return array(
 	       'userid' => $row['userid'],
 	       'username' => $row['username'],
+               'fullname' => $row['fullname'],
+               'email' => $row['email'],
 	       'role' => $row['role'],
 	       'salt' => $row['salt'],
 	       'password' => $row['password'],
-	       'locationid' => $row['locationid'],
+	       'locations' => user_locations( $row['locationid'], $module ),
 	       );
 }
 
@@ -35,11 +37,151 @@ function user_by_username( $username, $module = 'core' ) {
   return array(
 	       'userid' => $row['userid'],
 	       'username' => $row['username'],
+               'fullname' => $row['fullname'],
+               'email' => $row['email'],
 	       'role' => $row['role'],
 	       'salt' => $row['salt'],
 	       'password' => $row['password'],
-	       'locationid' => $row['locationid'],
+	       'locations' => user_locations( $row['locationid'], $module ),
 	       );
+}
+
+function user_locations( $userid, $module = 'core' ) {
+  $result = array();
+  $dbh = db_connect( $module );
+  $query = "SELECT * FROM user_location_links CROSS JOIN location USING (locationid) WHERE userid = :uid";
+  $sth = $dbh->prepare( $query );
+  $sth->bindParam( ':uid', $userid );
+  $sth->execute();
+
+  while ( $row = $sth->fetch( PDO::FETCH_ASSOC ) ) {
+    $row = stripslashes_array( $row );
+    $result[ $row['locationid'] ] = $row;
+  }
+
+  return $result;
+}
+
+function all_users( $module = 'core') {
+  $dbh = db_connect( $module );
+
+  $query = "SELECT * FROM user ORDER BY fullname,username";
+  $sth = $dbh->prepare( $query );
+  $sth->execute();
+
+  while ( $row = $sth->fetch() ) {
+    $row = stripslashes_array( $row );
+    $row['locations'] = user_locations( $row['userid'], $module );
+    $result[] = $row;
+  }
+
+  return $result;
+}
+
+function all_locations( $module = 'core') {
+  $dbh = db_connect( $module );
+
+  $query = "SELECT * FROM location ORDER BY name";
+  $sth = $dbh->prepare( $query );
+  $sth->execute();
+
+  while ( $row = $sth->fetch() ) {
+    $result[] = stripslashes_array( $row );
+  }
+
+  return $result;
+}
+
+function update_user( $userid, $update, $module = 'core' ) {
+  $dbh = db_connect( $module );
+
+  if ( $userid ) {
+    $query = "UPDATE user SET ";
+    foreach ( $update as $field => $value ) {
+      $query .= "$field = ?, ";
+    }
+    $query = rtrim( $query, ", " );
+    $query .= "WHERE userid = ". $dbh->quote( $userid );
+  } else {
+    $query = "INSERT INTO user (username,fullname,email,role,password,salt) VALUES (?,?,?,?,?,?)";
+  }
+  $sth = $dbh->prepare( $query );
+  $sth->execute( array_values( $update ) );
+
+  if ( ! $userid ) {
+    $userid = $dbh->lastInsertId();
+  }
+
+  return $userid;
+}
+
+function update_user_locations( $userid, $locations, $module = 'core' ) {
+  $dbh = db_connect( $module );
+
+  if ( !empty($userid) && !empty($locations) ) {
+    $query = "DELETE FROM user_location_links WHERE userid = :uid";
+    $sth = $dbh->prepare( $query );
+    $sth->bindValue( ':uid', $userid );
+    $sth->execute();
+
+    $query = "INSERT INTO user_location_links (userid, locationid) VALUES (:uid, :locid)";
+    $sth = $dbh->prepare( $query );
+    $sth->bindValue( ':uid', $userid );
+    foreach ( $locations as $locid ) {
+      $sth->bindValue( ':locid', $locid );
+      $sth->execute();
+    }
+  }
+}
+
+function update_location( $locationid, $update, $module = 'core' ) {
+  $dbh = db_connect( $module );
+
+  if ( $locationid ) {
+    $query = "UPDATE location SET ";
+    foreach ( $update as $field => $value ) {
+      $query .= "$field = ?, ";
+    }
+    $query = rtrim( $query, ", " );
+    $query .= "WHERE locationid = ". $dbh->quote( $locationid );
+  } else {
+    $query = "INSERT INTO location (locationid,name,mingrade,maxgrade,loc_demo) VALUES (?,?,?,?,?)";
+  }
+  $sth = $dbh->prepare( $query );
+  $sth->execute( array_values( $update ) );
+
+  if ( ! $locationid ) {
+    $locationid = $dbh->lastInsertId();
+  }
+
+  return $locationid;
+}
+
+function delete_user( $userid, $module = 'core' ) {
+  $dbh = db_connect( $module );
+
+  if ( $userid ) {
+    $query = "DELETE FROM user WHERE userid = :uid";
+    $sth = $dbh->prepare( $query );
+    $sth->bindValue( ':uid', $userid );
+    $sth->execute();
+  }
+}
+
+function delete_location( $locationid, $module = 'core' ) {
+  $dbh = db_connect( $module );
+
+  if ( $locationid ) {
+    $query = "DELETE FROM user_location_links WHERE locationid = :lid";
+    $sth = $dbh->prepare( $query );
+    $sth->bindValue( ':lid', $locationid );
+    $sth->execute();
+
+    $query = "DELETE FROM location WHERE locationid = :lid";
+    $sth = $dbh->prepare( $query );
+    $sth->bindValue( ':lid', $locationid );
+    $sth->execute();
+  }
 }
 
 ?>
