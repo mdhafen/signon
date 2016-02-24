@@ -42,7 +42,8 @@ if ( !empty($op) ) {  // force other values here too?
     $set = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
     $object = $set[0];
     $user = $object['uid'][0];
-    if ( $op == 'Register' && !empty($mac) ) {
+    if ( ! in_array( $location, array_column($locations,'id') ) ) { $location = 0; }
+    if ( $op == 'Register' && !empty($mac) && !empty($location) ) {
         $mac = labs_normalize_mac( $mac );
         labs_register_mac( $mac, $location, $description, $user, $ip );
         $output['success'] = true;
@@ -61,9 +62,10 @@ if ( !empty($op) ) {  // force other values here too?
                 }
 
                 $mac = labs_normalize_mac( $row[ $mac_column - 1 ] );
-                $desc = empty($desc_column) && empty($row[ $desc_column - 1 ]) ? $description : $row[ $desc_column - 1 ];
-                $loc = empty($loc_column) && empty($row[ $loc_column - 1 ]) ? $location : $row[ $loc_column - 1 ];
-                if ( !empty($mac) ) {
+                $desc = empty($desc_column) && empty($row[ $desc_column - 1 ]) ? $description : trim($row[ $desc_column - 1 ]);
+                $loc = empty($loc_column) && empty($row[ $loc_column - 1 ]) ? $location : trim($row[ $loc_column - 1 ]);
+                if ( ! in_array( $loc, array_column($locations,'id') ) ) { $loc = 0; }
+                if ( !empty($mac) && !empty($loc) ) {
                     labs_register_mac( $mac, $loc, $desc, $user, $ip );
                     $registered++;
                 }
