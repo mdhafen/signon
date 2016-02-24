@@ -43,10 +43,17 @@ if ( !empty($op) ) {  // force other values here too?
     $object = $set[0];
     $user = $object['uid'][0];
     if ( ! in_array( $location, array_column($locations,'id') ) ) { $location = 0; }
-    if ( $op == 'Register' && !empty($mac) && !empty($location) ) {
-        $mac = labs_normalize_mac( $mac );
-        labs_register_mac( $mac, $location, $description, $user, $ip );
-        $output['success'] = true;
+
+    if ( $op == 'Register' ) {
+        if ( !empty($mac) && !empty($location) ) {
+            $mac = labs_normalize_mac( $mac );
+            labs_register_mac( $mac, $location, $description, $user, $ip );
+            $output['success'] = true;
+        }
+        else {
+            $output['error'] = 1;
+            $output['err_msg'] = 'MAC Address or Location invalid';
+        }
     } else if ( $op == 'Import' && !empty($mac_column) ) {
         if ( isset($_FILES['importfile']['error']) &&
              $_FILES['importfile']['error'] == UPLOAD_ERR_OK &&
@@ -65,9 +72,14 @@ if ( !empty($op) ) {  // force other values here too?
                 $desc = empty($desc_column) && empty($row[ $desc_column - 1 ]) ? $description : trim($row[ $desc_column - 1 ]);
                 $loc = empty($loc_column) && empty($row[ $loc_column - 1 ]) ? $location : trim($row[ $loc_column - 1 ]);
                 if ( ! in_array( $loc, array_column($locations,'id') ) ) { $loc = 0; }
+
                 if ( !empty($mac) && !empty($loc) ) {
                     labs_register_mac( $mac, $loc, $desc, $user, $ip );
                     $registered++;
+                }
+                else {
+                    $output['error'] = 1;
+                    $output['err_msg'] = 'Import file contains lines with invalid MAC Address or Location';
                 }
             }
             $output['registered'] = $registered;
@@ -92,9 +104,8 @@ if ( !empty($op) ) {  // force other values here too?
     else {
         $output['error'] = 1;
         switch ($op) {
-            case 'Register':
             case 'Delete': $err_msg = 'No MAC Address given'; break;
-            case 'Import': empty($output['registered']) ? $err_msg = 'No MAC Addresses found in file' : "";break;
+            case 'Import': $err_msg = 'No column selected for MAC Addresses'; break;
         }
         if ( !empty($err_msg) ) {
             $output['err_msg'] = $err_msg;
