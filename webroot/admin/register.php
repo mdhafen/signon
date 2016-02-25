@@ -64,6 +64,9 @@ if ( !empty($op) ) {  // force other values here too?
             $registered = 0;
             while ( ! feof($h) ) {
                 $row = fgetcsv($h);
+                if ( empty($row) ) {
+                    continue;
+                }
                 $line_number++;
                 if ( !empty($drop_first) ) {
                     $drop_first = '';
