@@ -52,7 +52,7 @@ if ( !empty($op) ) {  // force other values here too?
         }
         else {
             $output['error'] = 1;
-            $output['err_msg'] = 'MAC Address or Location invalid';
+            $output['err_msg'] = "MAC Address ($mac) or Location ($location) invalid";
         }
     } else if ( $op == 'Import' && !empty($mac_column) ) {
         if ( isset($_FILES['importfile']['error']) &&
@@ -79,7 +79,7 @@ if ( !empty($op) ) {  // force other values here too?
                 }
                 else {
                     $output['error'] = 1;
-                    $output['err_msg'] = 'Import file contains lines with invalid MAC Address or Location';
+                    $output['err_msg'] = "Import file contains lines with invalid MAC Address ($mac) or Location ($loc).  Line: ". implode( ',', $row );
                 }
             }
             $output['registered'] = $registered;
