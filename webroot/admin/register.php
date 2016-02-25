@@ -55,6 +55,7 @@ if ( !empty($op) ) {  // force other values here too?
             $output['err_msg'] = "MAC Address ($mac) or Location ($location) invalid";
         }
     } else if ( $op == 'Import' && !empty($mac_column) ) {
+        $line_number = 0;
         if ( isset($_FILES['importfile']['error']) &&
              $_FILES['importfile']['error'] == UPLOAD_ERR_OK &&
              !empty($_FILES['importfile']['size']) ) {
@@ -63,6 +64,7 @@ if ( !empty($op) ) {  // force other values here too?
             $registered = 0;
             while ( ! feof($h) ) {
                 $row = fgetcsv($h);
+                $line_number++;
                 if ( !empty($drop_first) ) {
                     $drop_first = '';
                     continue;
@@ -79,7 +81,7 @@ if ( !empty($op) ) {  // force other values here too?
                 }
                 else {
                     $output['error'] = 1;
-                    $output['err_msg'] = "Import file contains lines with invalid MAC Address ($mac) or Location ($loc).  Line: ". implode( ',', $row );
+                    $output['err_msg'] = "Import file contains lines with invalid MAC Address ($mac) or Location ($loc).  Line $line_number: ". implode( ',', $row );
                 }
             }
             $output['registered'] = $registered;
