@@ -173,9 +173,30 @@ function auth_to_google( $redirect = null ) {
   if ( !empty($redirect) ) {
     $GOOGLE_A_CLIENT->setRedirectUri( $redirect );
   }
+
   if ( !empty($g_code) ) {
+    unset( $_SESSION['google_oauth_token'] );
     $g_oauth = new Google_Service_Oauth2( $GOOGLE_A_CLIENT );
-    $ticket = $GOOGLE_A_CLIENT->authenticate($g_code);
+    $ticket = "";
+    try {
+      $ticket = $GOOGLE_A_CLIENT->authenticate($g_code);
+    }
+    catch ( Google_Auth_Exception $e ) {
+      $msg = $e->getMessage();
+      $restart = 0;
+      if ( stripos($msg,'invalid code') ||
+           stripos($msg,'code was already redeemed') ) {
+        $restart = 1;
+      }
+      if ( $restart && !empty($redirect) ) {
+        $GOOGLE_A_CLIENT->setRedirectUri( $redirect );
+        $auth_url = $GOOGLE_A_CLIENT->createAuthUrl();
+        redirect( $auth_url );
+        exit;
+      }
+      throw $e;
+    }
+
     if ( !empty($ticket) ) {
       $_SESSION['google_oauth_token'] = $ticket;
       $data = $g_oauth->userinfo->get();
