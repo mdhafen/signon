@@ -72,6 +72,7 @@ foreach ( $google_cache as $g_user ) {
       $mod['gidNumber'] = '65534';
       $mod['homeDirectory'] = '/home/'. $thisUser['uid'][0];
       $mod['loginShell'] = '/bin/bash';
+      $mod['objectclass'] = array('top','inetOrgPerson','posixAccount','sambaSamAccount');
     }
 
     if ( !empty($mod) ) {
