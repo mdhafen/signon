@@ -44,8 +44,13 @@ if ( !empty($user) ) {
           if ( !empty($entry['dn']) ) {
             $dn = $entry['dn'];
             unset( $entry['dn'] );
-            $entry['objectClass'] = array('top','inetOrgPerson','sambaSamAccount');
+            $entry['objectClass'] = array('top','inetOrgPerson','posixAccount','sambaSamAccount');
             $entry['sambaSID'] = $ldap->get_next_num('sambaSID');
+            $new_uid = explode('-',$entry['sambaSID']);
+            $entry['uidNumber'] = $new_uid[4];
+            $entry['gidNumber'] = '65534';
+            $entry['loginShell'] = '/bin/bash';
+            $entry['homeDirectory'] = '/home/'. $entry['uid'];
             if ( ! $ldap->do_add( $dn, $entry ) ) {
               $errors[] = 'There was an error creating the account';
             }

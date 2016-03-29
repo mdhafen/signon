@@ -66,6 +66,13 @@ foreach ( $google_cache as $g_user ) {
       $mod['l'] = $entry['l'];
       $mod['description'] = $entry['l'] .'-'. $entry['employeeType'];
     }
+    if ( empty($thisUser['uidNumber'][0]) && !empty($thisUser['sambaSID'][0]) ) {
+      $new_uid = explode('-',$thisUser['sambaSID'][0]);
+      $mod['uidNumber'] = $new_uid[4];
+      $mod['gidNumber'] = '65534';
+      $mod['homeDirectory'] = '/home/'. $thisUser['uid'][0];
+      $mod['loginShell'] = '/bin/bash';
+    }
 
     if ( !empty($mod) ) {
       $ldap->do_attr_del( $dn, array_keys($mod) );
@@ -84,12 +91,17 @@ foreach ( $google_cache as $g_user ) {
     }
   }
   else {
-    $entry['objectclass'] = array('top','inetOrgPerson','sambaSamAccount');
+    $entry['objectclass'] = array('top','inetOrgPerson','posixAccount','sambaSamAccount');
 
     $dn = $entry['dn'];
     unset( $entry['dn'] );
 
     $entry['sambaSID'] = $ldap->get_next_num( 'sambaSID' );
+    $new_uid = explode('-', $entry['sambaSID']);
+    $entry['uidNumber'] = $new_uid[4];
+    $entry['gidNumber'] = '65534';
+    $entry['homeDirectory'] = '/home/'. $entry['uid'];
+    $entry['loginShell'] = '/bin/bash';
 
     $ldap->do_add( $dn, $entry );
     $entry['dn'] = $dn;

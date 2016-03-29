@@ -49,7 +49,7 @@ for ( $i = 1; $i < $count; $i++ ) {
 $input_attrs = array_keys( $input );
 foreach ( $must as $attr ) {
 	if ( ! in_array( $attr, $input_attrs ) ) {
-		if ( $op != 'Add' && $attr != 'sambaSID' ) {
+		if ( $op != 'Add' && ( $attr != 'sambaSID' || $attr != 'uidNumber' ) ) {
 			$errors[] = "EDIT_MISSING_ATTR $attr";
 		}
 	}
@@ -96,6 +96,8 @@ if ( !empty($adds) || !empty($dels) ) {
 		$adds['objectClass'] = $object['objectClass'];
 		if ( in_array( 'sambaSamAccount', $adds['objectClass'] ) ) {
 			$adds['sambaSID'] = $ldap->get_next_num('sambaSID');
+			$new_uid = explode('-',$adds['sambaSID']);
+			$adds['uidNumber'] = $new_uid[4];
 		}
 		if ( $ldap->do_add( $objectdn, $adds ) ) {
 			if ( !empty($password) ) {

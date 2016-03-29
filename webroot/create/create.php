@@ -93,7 +93,10 @@ if ( !empty($submitted) ) {
         }
 
         $entry = google_user_hash_for_ldap( $user );
-        $entry['objectclass'] = array('top','inetOrgPerson','sambaSamAccount');
+        $entry['objectclass'] = array('top','inetOrgPerson','posixAccount','sambaSamAccount');
+        $entry['gidNumber'] = '65534';
+        $entry['loginShell'] = '/bin/bash';
+        $entry['homeDirectory'] = '/home/'. $entry['uid'];
       }
     }
   }
@@ -119,6 +122,10 @@ if ( !empty($submitted) ) {
         unset( $entry['dn'] );
 
         $entry['sambaSID'] = $ldap->get_next_num('sambaSID');
+        if ( $entry['employeeType'] != 'Guest' ) {
+          $new_uid = explode('-',$entry['sambaSID']);
+          $entry['uidNumber'] = $new_uid[4];
+        }
         if ( $ldap->do_add( $dn, $entry ) ) {
           set_password( $ldap, $dn, $password );
           if ( $entry['employeeType'] == 'Guest' ) {
