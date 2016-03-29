@@ -26,17 +26,18 @@ $output = array( 'attributes' => $attrs );
 
 if ( !empty($attrs[$attr]) && !empty($query) ) {
   $query = ldap_escape($query,'',LDAP_ESCAPE_FILTER) .'*';
+  $filter = "($attr=$query)";
   if ( strcasecmp( $attr, 'member' ) == 0 ) {
     $set = $ldap->quick_search( array( 'uid' => $query ), array() );
     if ( !empty($set) ) {
-      $query = $set[0]['dn'];
+      $filter = "(|(memberUid=$query)(member=".$set[0]['dn']."))";
     }
     else {
-      $query = '';
+      $filter = "";
     }
   }
-  if ( !empty($query) ) {
-    $set = $ldap->quick_search( array( $attr => $query ), array() );
+  if ( !empty($filter) ) {
+    $set = $ldap->quick_search( $filter, array() );
     foreach ( $set as $user ) {
       $results[] = $user['dn'];
     }
