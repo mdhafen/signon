@@ -321,10 +321,8 @@ function google_user_hash_for_ldap( $user ) {
           }
         }
       }
-      if ( !empty($entry['title']) ) {
-        if ( in_array( strtolower($entry['title']), array_map('strtolower',$OTHER_TITLES) ) ) {
-          $entry['employeeType'] = 'Other';
-        }
+      if ( empty($entry['title']) || in_array( strtolower($entry['title']), array_map('strtolower',$OTHER_TITLES) ) ) {
+        $entry['employeeType'] = 'Other';
       }
       $entry['l'] = google_org_to_loc( $user['orgUnitPath'] );
       $entry['description'] = $entry['l'] ."-". $entry['employeeType'];
