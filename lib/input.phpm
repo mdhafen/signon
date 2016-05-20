@@ -128,7 +128,7 @@ function input_validation( $output, $type ) {
 		if ( $type == INPUT_HTML_SOME ) {
 			if ( ! is_string( $value ) ) { $error++; }
 			if ( ! $error ) {
-				$parser =& new HTML_Safe();
+				$parser = new HTML_Safe();
 				$value = clean_string( $value );
 				$value = $parser->parse( $value );
 			}
