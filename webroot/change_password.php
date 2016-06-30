@@ -69,7 +69,7 @@ if ( !empty($user) ) {
           $output['success'] = true;
         }
         else {
-          $errors[] = 'PASSWORDS_NO_MATCH';
+          $errors[] = 'PASSWORDS_NO_MATCH_OR_TOO_SHORT';
         }
       }
       else {

@@ -101,7 +101,12 @@ if ( !empty($adds) || !empty($dels) ) {
 		}
 		if ( $ldap->do_add( $objectdn, $adds ) ) {
 			if ( !empty($password) ) {
-				set_password( $ldap, $objectdn, $password );
+				if ( strlen($password) < 8 ) {
+					$errors[] = "The password is to short";
+				}
+				else {
+					set_password( $ldap, $objectdn, $password );
+				}
 			}
 		}
 		else {
@@ -127,7 +132,12 @@ if ( !empty($adds) || !empty($dels) ) {
 		$ldap->do_attr_add( $objectdn, $adds );
 
 		if ( !empty($password) ) {
-			set_password( $ldap, $objectdn, $password );
+			if ( strlen($password) < 8 ) {
+				$errors[] = "The password is to short";
+			}
+			else {
+				set_password( $ldap, $objectdn, $password );
+			}
 		}
 
 		if ( $new_rdn ) {

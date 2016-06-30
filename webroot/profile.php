@@ -31,7 +31,10 @@ else {
 	$password2 = input( 'password2', INPUT_STR );
 
 	if ( !empty($password) && !empty($password2) ) {
-		if ( $password === $password2 ) {
+		if ( strlen($password) < 8 ) {
+			$output['result'] = 'Password is to short';
+		}
+		else if ( $password === $password2 ) {
 			set_password( $ldap, $dn, $password );
                         if ( !empty($object['employeeType'][0]) && $object['employeeType'][0] != 'Guest' ) {
 				google_set_password( $object['mail'][0], $password, false );

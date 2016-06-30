@@ -36,6 +36,11 @@ if ( ! empty($password) ) {
 		output( $output, 'admin/password.tmpl' );
 		exit;
 	}
+	if ( strlen($password) < 8 ) {
+		$output['error'] = 'PASS_TO_SHORT';
+		output( $output, 'admin/password.tmpl' );
+		exit;
+	}
 
 	if ( set_password( $ldap, $objectdn, $password ) ) {
 		if ( !empty($object['employeeType'][0]) && $object['employeeType'][0] != 'Guest' ) {

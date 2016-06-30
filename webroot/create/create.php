@@ -91,6 +91,11 @@ if ( !empty($submitted) ) {
           $error = 1;
           $result = 'Passwords do not match';
         }
+        if ( strlen($password) < 8 ) {
+          unset($password);
+          $error = 1;
+          $result = 'Password to short';
+        }
 
         $entry = google_user_hash_for_ldap( $user );
         $entry['objectclass'] = array('top','inetOrgPerson','posixAccount','sambaSamAccount');
