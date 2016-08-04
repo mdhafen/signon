@@ -23,7 +23,7 @@ include( 'doc-header.php' );
 <a href="create/create.php?op=Employee" class="btn btn-primary btn-lg btn-block"><small>I am a</small><br>WCSD Employee</a>
 </div>
 <div class="col-md-4">
-<a href="create/create.php?op=Guest" class="btn btn-primary btn-lg btn-block"><small>I am a</small><br>Visitor</a>
+<a href="create-guest/create-guest.php?op=Guest" class="btn btn-primary btn-lg btn-block"><small>I am a</small><br>Visitor</a>
 </div>
 </div>
 <br>
