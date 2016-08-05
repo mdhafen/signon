@@ -31,7 +31,7 @@ There was an error! <?= $data['result'] ?>
 
 <div class="panel panel-default panel-body">
   <div class="container-fluid">
-    <form action="create.php" method="post" class="form-horizontal">
+    <form action="create-guest.php" method="post" class="form-horizontal">
     <div class="row form-group">
       <label for="mobile" class="col-sm-4 control-label">Cell Phone Number: </label>
       <div class="col-sm-8"><input id="mobile" name="mobile" value="" class="form-control" type="tel" required="required" placeholder="xxx-xxx-xxxx" pattern="[0-9]{3}-?[0-9]{3}-?[0-9]{4}" title="A cell phone number with the three digit area code, three digit prefix, and four digits.  Dashes optional"></div>
