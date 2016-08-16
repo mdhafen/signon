@@ -59,7 +59,7 @@ Add:
 (Person)
 <?php } else if ( in_array('person',$child['objectClass']) || in_array('simpleSecurityObject',$child['objectClass']) ) { ?>
 (System Account)
-<?php } else if ( in_array('groupOfNames',$child['objectClass']) ) { ?>
+<?php } else if ( in_array('groupOfNames',$child['objectClass']) || in_array('posixGroup',$child['objectClass']) ) { ?>
 (Group)
 <?php } else if ( in_array('organizationalUnit',$child['objectClass']) ) { ?>
 (Folder)
