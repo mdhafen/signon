@@ -28,6 +28,21 @@ foreach ( $dns as $dn => $count ) {
       $ldap->fix_group_memberships( $dn, $user['dn'] );
       print "fixed $dn => ". $user['dn'] ."\n";
     }
+    else {
+      $groups = $ldap->quick_search( '(|(member='. $dn .')(memberUid='. $uid .'))', array() );
+      foreach ( $groups as $group ) {
+        foreach ( $group['objectClass'] as $class ) {
+          if ( strcasecmp($class,'groupofnames') === 0 ) {
+            $ldap->do_attr_del( $group['dn'], array('member'=>$dn) );
+            print "removed $dn from ". $group['dn'] ."\n";
+          }
+          if ( strcasecmp($class,'posixgroup') === 0 ) {
+            $ldap->do_attr_del( $group['dn'], array('memberUid'=>$uid) );
+            print "removed $uid from ". $group['dn'] ."\n";
+          }
+        }
+      }
+    }
   }
 }
 
