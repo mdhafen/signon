@@ -25,7 +25,7 @@ if ( !empty($argv[1]) ) {
 
 $ldap = new LDAP_Wrapper();
 $users = array();
-$users = $ldap->quick_search( '(&(!(employeeType=Guest))(objectClass=inetOrgPerson))' , array() );
+$users = $ldap->quick_search( '(&(|(employeeType=Student)(employeeType=Staff))(objectClass=inetOrgPerson))' , array() );
 $users_lookup = array();
 
 while ( !empty($users) ) {
