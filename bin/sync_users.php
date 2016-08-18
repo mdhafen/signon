@@ -78,7 +78,9 @@ foreach ( $google_cache as $g_user ) {
     if ( !empty($mod) ) {
       $ldap->do_attr_del( $dn, array_keys($mod) );
       $ldap->do_modify( $dn, $mod );
-      $output .= "mod ";
+      $mods = array_keys($mod);
+      sort($mods);
+      $output .= "mod (". implode(',',$mods) .") ";
     }
 
     if ( strcasecmp( $dn, $entry['dn'] ) != 0 ) {
