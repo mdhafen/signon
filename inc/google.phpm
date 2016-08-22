@@ -374,7 +374,7 @@ function google_send_password( $phone, $provider, $password ) {
   return 1;
 }
 
-function google_set_password( $email, $password, $force_change = true ) {
+function google_set_password( $email, $password ) {
   global $GOOGLE_S_CLIENT,$GOOGLE_A_CLIENT;
   $result = 0;
 
@@ -384,7 +384,7 @@ function google_set_password( $email, $password, $force_change = true ) {
 
   $mod = '{
 "password":"'. $password .'",
-"changePasswordAtNextLogin":'. ( $force_change ? "true" : '"0"' ) .'
+"changePasswordAtNextLogin":"0"
 }';
 
   $result = updateUser( $GOOGLE_S_CLIENT, $email, $mod );
