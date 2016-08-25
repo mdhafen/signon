@@ -37,7 +37,7 @@ foreach ( $dns as $dn => $count ) {
               $ldap->do_attr_del( $group['dn'], array('member'=>$dn) );
             }
             else {  // because groupOfNames->member can not be empty
-              $ldap->do_modify( $group['dn'], array('member'=>$ldap->config['userdn']);
+              $ldap->do_modify( $group['dn'], array('member'=>$ldap->config['userdn']) );
             }
             print "removed $dn from ". $group['dn'] ."\n";
           }
