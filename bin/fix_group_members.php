@@ -33,7 +33,12 @@ foreach ( $dns as $dn => $count ) {
       foreach ( $groups as $group ) {
         foreach ( $group['objectClass'] as $class ) {
           if ( strcasecmp($class,'groupofnames') === 0 ) {
-            $ldap->do_attr_del( $group['dn'], array('member'=>$dn) );
+            if ( count($group['groupOfNames']) > 1 ) {
+              $ldap->do_attr_del( $group['dn'], array('member'=>$dn) );
+            }
+            else {  // because groupOfNames->member can not be empty
+              $ldap->do_modify( $group['dn'], array('member'=>$ldap->config['userdn']);
+            }
             print "removed $dn from ". $group['dn'] ."\n";
           }
           if ( strcasecmp($class,'posixgroup') === 0 ) {

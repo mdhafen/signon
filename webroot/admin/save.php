@@ -41,7 +41,7 @@ $input = array();
 for ( $i = 1; $i < $count; $i++ ) {
 	$attr = input( "${i}_attr", INPUT_HTML_NONE );
 	$vals = input( "${i}_val", INPUT_HTML_NONE );
-	$vals = array_filter( $vals );
+	$vals = array_values(array_filter($vals));
 	if ( ! empty($vals) ) {
 		$input[ $attr ] = $vals;
 	}
@@ -63,6 +63,7 @@ foreach ( $input as $attr => $vals ) {
 // compare to object
 $adds = array();
 $dels = array();
+$reps = array();
 $object_attrs = array_keys( $object );
 $all_attrs = array_unique( array_merge( $object_attrs, $input_attrs ) );
 foreach ( $all_attrs as $attr ) {
@@ -73,20 +74,20 @@ foreach ( $all_attrs as $attr ) {
 		$dels[ $attr ] = $object[ $attr ];
 	}
 	else {
-		foreach ( $input[ $attr ] as $val ) {
-			if ( ! in_array( $val, $object[ $attr ] ) ) {
-				$adds[ $attr ][] = $val;
+		foreach ( $input[$attr] as $val ) {
+			if ( ! in_array($val,$object[$attr]) ) {
+				$reps[ $attr ] = $input[ $attr ];
 			}
 		}
-		foreach ( $object[ $attr ] as $val ) {
-			if ( ! in_array( $val, $input[ $attr ] ) ) {
-				$dels[ $attr ][] = $val;
+		foreach ( $object[$attr] as $val ) {
+			if ( ! in_array($val,$input[$attr]) ) {
+				$reps[ $attr ] = $input[ $attr ];
 			}
 		}
 	}
 }
 
-if ( !empty($adds) || !empty($dels) ) {
+if ( !empty($adds) || !empty($dels) || !empty($reps) ) {
 	if ( $op == 'Add' ) {
 		$password = '';
 		if ( in_array( 'userPassword', array_keys($adds) ) ) {
@@ -128,6 +129,7 @@ if ( !empty($adds) || !empty($dels) ) {
 			unset( $adds['userPassword'] );
 		}
 
+		$ldap->do_modify( $objectdn, $reps );
 		$ldap->do_attr_del( $objectdn, $dels );
 		$ldap->do_attr_add( $objectdn, $adds );
 
