@@ -29,6 +29,14 @@ if ( ! ( authorized('reset_password') || ( !empty($_SESSION['loggedin_user']) &&
 
 $password = input( 'password', INPUT_STR );
 $confirm = input( 'confirm', INPUT_STR );
+$default = input( 'default', INPUT_STR );
+
+if ( !empty($default) ) {
+	if ( !empty($object['employeeNumber'][0]) && !empty($object['givenName'][0]) && !empty($object['sn'][0]) ) {
+		$password = strtolower( substr($object['givenName'][0],0,1) . substr($object['sn'][0],0,1) . $object['employeeNumber'][0] );
+		$confirm = $password;
+	}
+}
 
 if ( ! empty($password) ) {
 	if ( $password !== $confirm ) {

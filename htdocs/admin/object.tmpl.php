@@ -43,6 +43,9 @@ Add:
 
 <?php if ( ! empty($data['can_password']) && ! empty($data['is_person']) ) { ?>
 <a class="btn btn-default" href="password.php?dn=<?= urlencode($data['object_dn']) ?>">Reset Password</a>
+<?php   if ( stripos($data['object_dn'],',ou=students,') !== FALSE ) { ?>
+<a class="btn btn-default" href="password.php?default=1&amp;dn=<?= urlencode($data['object_dn']) ?>">Set Password to Default</a>
+<?php   } ?>
 <?php } ?>
 </div>
 
