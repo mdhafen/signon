@@ -7,7 +7,7 @@ function append_log( $message, $file = "error" ) {
 	global $config;
 
 	$filename = $config['base_dir'] .'/logs/'. $file .'.log';
-	if ( ! is_writable($filename) && ! is_writable( $config['base_dir'].'/logs' ) {
+	if ( ! is_writable($filename) && ! is_writable( $config['base_dir'].'/logs' ) ) {
 		error_log( "Could not write to $filename, check file and directory permissions." );
 	}
 	$last = substr( $message, -1 );
