@@ -3,6 +3,20 @@ require_once( 'config.phpm' );
 require_once( 'input.phpm' );
 require_once( 'security.phpm' );
 
+function append_log( $message, $file = "error" ) {
+	global $config;
+
+	$filename = $config['base_dir'] .'/logs/'. $file .'.log';
+	if ( ! is_writable($filename) && ! is_writable( $config['base_dir'].'/logs' ) {
+		error_log( "Could not write to $filename, check file and directory permissions." );
+	}
+	$last = substr( $message, -1 );
+	if ( $last != "\n" && $last != "\r" ) {
+		$message .= "\n";
+	}
+	file_put_contents( $filename, $message, FILE_APPEND | LOCK_EX );
+}
+
 function redirect( $target = "" ) {
 	global $config;
 

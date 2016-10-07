@@ -1,4 +1,6 @@
 <?php
+global $config;
+
 global $GOOGLE_DOMAIN;
 global $GOOGLE_A_CLIENT,$GOOGLE_S_CLIENT;
 $GOOGLE_DOMAIN = 'washk12.org';
@@ -29,7 +31,7 @@ $PROVIDER_MAP = array(
   'Nextel' => 'page.nextel.com',
                       );
 
-set_include_path( get_include_path() . PATH_SEPARATOR . '/var/www/signon/inc/Google_Client' );
+set_include_path( get_include_path() . PATH_SEPARATOR . $config['base_dir'].'/inc/Google_Client' );
 require_once "Google/autoload.php";
 require_once 'XML/Unserializer.php';
 include_once 'google_functions_directory.php';

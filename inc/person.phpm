@@ -1,4 +1,6 @@
 <?php
+global $config;
+include_once( $config['base_dir']. '/lib/input.php' );
 
 function is_person( $o=array() ) {
 	$person = 0;
@@ -44,6 +46,7 @@ function set_password( $ldap, $userdn, $password ) {
 
 		if ( ! empty( $entry ) ) {
 			$result = $ldap->do_modify( $userdn, $entry );
+			append_log( "Password changed by ". $_SESSION['loggedin_user']['username'] ." for ". $userdn, 'auth' );
 		}
 	}
 	return $result;

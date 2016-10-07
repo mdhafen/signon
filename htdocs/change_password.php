@@ -9,7 +9,8 @@ include( 'doc-header.php' );
 <?php if ( !empty($data['success']) ) { ?>
 <div class="alert alert-info alert-dismissible" role="alert">
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-<div>Your password has been changed.</div>
+  Your password has been changed.
+</div>
 <?php } else { ?>
 <h1 class="modal-title" id="password_modal_label">Change Password</h1>
 <form action="change_password.php" method="post" class="form-horizontal">
