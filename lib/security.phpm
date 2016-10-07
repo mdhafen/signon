@@ -126,10 +126,12 @@ function authenticate() {
 				$_SESSION[ 'username' ] = $user[ 'username' ];
 				$_SESSION[ 'loggedin_user' ] = $user;
 				$_SESSION[ 'new_session' ] = 1;
+				append_log( "Valid Login by ".$user['username'], 'auth' );
 			} else {
 				$_SESSION[ 'BADLOGIN' ] = 1;
 				$_SESSION[ 'token' ] = '';
 				$_SESSION[ 'username' ] = $username;
+				append_log( "Invalid Login attempt by $username", 'auth' );
 			}
 		}
 	}
