@@ -9,8 +9,7 @@ include( 'doc-header.php' );
 <?php if ( !empty($data['success']) ) { ?>
 <div class="alert alert-info alert-dismissible" role="alert">
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-Your password has been changed.
-</div>
+<div>Your password has been changed.</div>
 <?php } else { ?>
 <h1 class="modal-title" id="password_modal_label">Change Password</h1>
 <form action="change_password.php" method="post" class="form-horizontal">
@@ -28,6 +27,15 @@ Your password has been changed.
           <input id="verifypassword" name="password2" value="" type="password" class="form-control">
         </div>
       </div>
+    </div>
+    <div>
+      This password will be used on the following services:
+      <ul>
+        <li>Washk12 Mail</li>
+        <li>PowerSchool</li>
+        <li>WCSDAccess Wireless</li>
+        <li>OverDrive</li>
+      </ul>
     </div>
   </div>
   <div class="panel panel-default panel-body">

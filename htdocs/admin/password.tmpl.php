@@ -48,6 +48,15 @@ Success!
 </div>
 </div>
 </form>
+<div>
+  This password will be used on the following services:
+  <ul>
+    <li>Washk12 Mail</li>
+    <li>PowerSchool</li>
+    <li>WCSDAccess Wireless</li>
+    <li>OverDrive</li>
+  </ul>
+</div>
 <?php } ?>
 
 </div>
