@@ -3,7 +3,24 @@ require_once( 'config.phpm' );
 require_once( 'input.phpm' );
 require_once( 'security.phpm' );
 
-function append_log( $message, $file = "error" ) {
+function append_log( $message, $file = "error", $priority = LOG_INFO ) {
+	if ( $file == 'auth' ) {
+		if ( defined(LOG_AUTHPRIV) ) {
+			$file = LOG_AUTHPRIV;
+		}
+		else {
+			$file = LOG_AUTH;
+		}
+	}
+	else {
+		$file = LOG_USER;
+	}
+	openlog( 'SignOn', LOG_NDELAY, $file );
+	$message = trim($message);
+	syslog( $priority, $message );
+	closelog();
+
+	/*
 	global $config;
 
 	$filename = $config['base_dir'] .'/logs/'. $file .'.log';
@@ -15,6 +32,7 @@ function append_log( $message, $file = "error" ) {
 		$message .= "\n";
 	}
 	file_put_contents( $filename, $message, FILE_APPEND | LOCK_EX );
+	 */
 }
 
 function redirect( $target = "" ) {
