@@ -58,7 +58,7 @@ if ( !empty($submitted) ) {
           $error = 1;
           $result = 'Passwords do not match';
         }
-        if ( strlen($password) < 8 ) {
+        if ( empty($password) || strlen($password) < 8 ) {
           unset($password);
           $error = 1;
           $result = 'Password to short';

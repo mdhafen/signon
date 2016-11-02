@@ -43,7 +43,8 @@ function set_password( $ldap, $userdn, $password ) {
 
 		if ( ! empty( $entry ) ) {
 			$result = $ldap->do_modify( $userdn, $entry );
-			append_log( "Password changed by ". $_SESSION['loggedin_user']['username'] ." for ". $userdn, 'auth' );
+			$user = !empty($_SESSION['loggedin_user']['username']) ? $_SESSION['loggedin_user']['username'] : "";
+			append_log( "Password changed by ". $user ." for ". $userdn, 'auth' );
 		}
 	}
 	return $result;
