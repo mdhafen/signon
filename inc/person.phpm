@@ -1,7 +1,4 @@
 <?php
-global $config;
-include_once( $config['base_dir']. '/lib/input.php' );
-
 function is_person( $o=array() ) {
 	$person = 0;
 	if ( ! empty( $o['objectClass'] ) ) {
