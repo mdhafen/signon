@@ -33,12 +33,16 @@ Success!
 
 <div class="row form-group">
 <label for="password" class="col-sm-4 control-label">Password</label>
-<div class="col-sm-8"><input type="password" id="password" name="password" class="form-control" onkeyup="CheckEntropy(this.value,'EntropyMeter')"> Entropy: <span id="EntropyMeter"></span></div>
+<div class="col-sm-8"><input type="password" id="password" name="password" class="form-control" onkeyup="CheckEntropy(this.value,'EntropyMeter')"></div>
 </div>
 
 <div class="row form-group">
 <label for="confirm" class="col-sm-4 control-label">Repeat Password</label>
 <div class="col-sm-8"><input type="password" id="confirm" name="confirm" class="form-control"></div>
+</div>
+
+<div class="row form-group">
+  <div id="entropy_alert" class="alert alert-danger">Your password does <span id="password_doesnt">not </span>meet WCSD Technology guidelines<br>Strength: <span id="EntropyMeter"></span></div>
 </div>
 
 <div class="row form-group">
@@ -49,7 +53,7 @@ Success!
 </div>
 </form>
 <div>
-  Washington County School District recommends passwords have an entropy value of at least 70.
+     Washington County School District recommends passwords have an entropy value (strength) of at least 70.
 </div>
 <div>
   This password will be used on the following services:
@@ -84,10 +88,12 @@ Success!
     while ( el.firstChild ) { el.removeChild(el.firstChild); }
     el.appendChild( document.createTextNode(entropy) );
     if ( entropy >= guideline ) {
-        $(el).removeClass("bg-warning").addClass("bg-success");
+        $("#entropy_alert").removeClass("alert-danger").addClass("alert-success");
+        $("#password_doesnt").hide();
     }
     else {
-        $(el).removeClass("bg-success").addClass("bg-warning");
+        $("#entropy_alert").removeClass("alert-success").addClass("alert-danger");
+        $("#password_doesnt").show();
     }
   }
 </script>

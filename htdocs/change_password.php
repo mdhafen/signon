@@ -20,8 +20,10 @@ include( 'doc-header.php' );
         <label for="newpassword" class="control-label col-sm-4">New Password: </label>
         <div class="col-sm-8">
           <input id="newpassword" name="password" value="" type="password" class="form-control" onkeyup="CheckEntropy(this.value,'EntropyMeter')">
-          Entropy: <span id="EntropyMeter"></span>
         </div>
+      </div>
+      <div class="row form-group">
+        <div id="entropy_alert" class="alert alert-danger">Your password does <span id="password_doesnt">not </span>meet WCSD Technology guidelines<br>Strength: <span id="EntropyMeter"></span></div>
       </div>
       <div class="row form-group">
         <label for="verifypassword" class="control-label col-sm-4">Verify Password: </label>
@@ -72,10 +74,12 @@ include( 'doc-header.php' );
     while ( el.firstChild ) { el.removeChild(el.firstChild); }
     el.appendChild( document.createTextNode(entropy) );
     if ( entropy >= guideline ) {
-        $(el).removeClass("bg-warning").addClass("bg-success");
+        $("#entropy_alert").removeClass("alert-danger").addClass("alert-success");
+        $("#password_doesnt").hide();
     }
     else {
-        $(el).removeClass("bg-success").addClass("bg-warning");
+        $("#entropy_alert").removeClass("alert-success").addClass("alert-danger");
+        $("#password_doesnt").show();
     }
   }
 </script>
