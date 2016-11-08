@@ -23,19 +23,19 @@ include( 'doc-header.php' );
         </div>
       </div>
       <div class="row form-group">
-        <div id="entropy_alert" class="alert alert-danger">Your password does <span id="password_doesnt">not </span>meet WCSD Technology guidelines<br>Strength: <span id="EntropyMeter"></span></div>
-      </div>
-      <div class="row form-group">
         <label for="verifypassword" class="control-label col-sm-4">Verify Password: </label>
         <div class="col-sm-8">
           <input id="verifypassword" name="password2" value="" type="password" class="form-control">
         </div>
       </div>
+      <div class="row form-group">
+        <div id="entropy_alert" class="alert alert-danger">Your password does <span id="password_doesnt">not </span>meet WCSD Technology guidelines<br>Strength: <span id="EntropyMeter"></span></div>
+      </div>
     </div>
-    <div>
+    <div class="text-left">
       Washington County School District recommends passwords have an entropy value of at least 70.
     </div>
-    <div>
+    <div class="text-left">
       This password will be used on the following services:
       <ul>
         <li>Washk12 Mail</li>
