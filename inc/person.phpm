@@ -12,6 +12,7 @@ function is_person( $o=array() ) {
 
 function set_password( $ldap, $userdn, $password ) {
 	$result = 0;
+	$entropy = get_entropy( $password );
 	if ( ! empty($userdn) && ! empty($password) ) {
 		$set = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $userdn );
 		if ( !empty($set) ) {
@@ -44,10 +45,42 @@ function set_password( $ldap, $userdn, $password ) {
 		if ( ! empty( $entry ) ) {
 			$result = $ldap->do_modify( $userdn, $entry );
 			$user = !empty($_SESSION['loggedin_user']['username']) ? $_SESSION['loggedin_user']['username'] : "";
-			append_log( "Password changed by ". $user ." for ". $userdn, 'auth' );
+			append_log( "Password changed by $user with entropy value $entropy for $userdn", 'auth' );
 		}
 	}
 	return $result;
+}
+
+function get_entropy( $password ) {
+	$entropy = 0;
+	$length = strlen($password);
+
+	if ( preg_match("/[a-z]/",$password) ) {
+		$entropy += 26;
+		$password = preg_replace("/[a-z]/g", "", $password );
+	}
+	if ( preg_match("/[A-Z]/",$password) ) {
+		$entropy += 26;
+		$password = preg_replace("/[A-Z]/g", "", $password );
+	}
+	if ( preg_match("/[0-9]/",$password) ) {
+		$entropy += 10;
+		$password = preg_replace("/[0-9]/g", "", $password );
+	}
+	if ( preg_match("/[,\.\?'";:!@#\$%\^&\*\-_]]/",$password) ) {
+		$entropy += 17;
+		$password = preg_replace("/[,\.\?'";:!@#\$%\^&\*\-_]]/g", "", $password );
+	}
+	if ( preg_match("/[`~\(\)+=\{\}\|\[\]\\/<>]/",$password) ) {
+		$entropy += 15;
+		$password = preg_replace("/[`~\(\)+=\{\}\|\[\]\\/<>]/g", "", $password );
+	}
+
+	if ( $entropy ) {
+		$entropy = ( (int) log($entropy,2) ) * $length;
+	}
+
+	return $entropy;
 }
 
 function remove_from_groups( $ldap, $userdn ) {
