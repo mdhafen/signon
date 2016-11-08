@@ -49,7 +49,7 @@ include( 'doc-header.php' );
 </form>
 
 <script>
-  Math.log2 = Math.log2 || function(x) Math.log(x)*Math.LOG2E;};
+  Math.log2 = Math.log2 || function(x){ Math.log(x)*Math.LOG2E; };
   function CheckEntropy(value,report_el_id) {
     var guideline = 70;
     var char_sets = {
