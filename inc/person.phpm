@@ -67,9 +67,9 @@ function get_entropy( $password ) {
 		$entropy += 10;
 		$password = preg_replace("/[0-9]/g", "", $password );
 	}
-	if ( preg_match("/[,\.\?'";:!@#\$%\^&\*\-_]]/",$password) ) {
+	if ( preg_match("/[,\.\?'\";:!@#\$%\^&\*\-_]]/",$password) ) {
 		$entropy += 17;
-		$password = preg_replace("/[,\.\?'";:!@#\$%\^&\*\-_]]/g", "", $password );
+		$password = preg_replace("/[,\.\?'\";:!@#\$%\^&\*\-_]]/g", "", $password );
 	}
 	if ( preg_match("/[`~\(\)+=\{\}\|\[\]\\/<>]/",$password) ) {
 		$entropy += 15;
