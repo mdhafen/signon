@@ -1,13 +1,11 @@
 <?php
-// Make sure all class definitions are loaded before this!
-session_name( 'SAMSESSID' );
-session_start();
 $config = array(
 	'site_title'        => 'WCSDsignon System',
 	'base_dir'          => '/var/www/',  // sane defaults
 	'base_url'	    => '/', // these are set below
 	'secure_phrase'     => 'Time4RedPill',
 	'cookie_token_name' => 'SAMSESS',
+	'secure_only'       => false,
 	'authen_modules'      => array(
 		'db'       => 0,
 		'external' => 0,
@@ -95,13 +93,13 @@ while ( strripos( $dir, substr( $config['this_url'], 0, $count ) ) > 0 ) {
  */
 if ( ! empty($config['trusted_proxies']) && array_search($_SERVER['REMOTE_ADDR'],$config['trusted_proxies']) !== false ) {
 	if ( isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' || isset($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on' ) {
-		$host = "https://". $_SERVER['HTTP_X_FORWAREDED_SERVER'];
+		$host = "https://". $_SERVER['HTTP_X_FORWARDED_SERVER'];
 		if ( isset($_SERVER['HTTP_X_FORWARDED_PORT']) && $_SERVER['HTTP_X_FORWARDED_PORT'] != '443' ) {
 			$host .= ':'. $_SERVER['HTTP_X_FORWARDED_PORT'];
 		}
 	}
 	else if ( isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'http' ) {
-		$host = "http://". $_SERVER['HTTP_X_FORWAREDED_SERVER'];
+		$host = "http://". $_SERVER['HTTP_X_FORWARDED_SERVER'];
 		if ( isset($_SERVER['HTTP_X_FORWARDED_PORT']) && $_SERVER['HTTP_X_FORWARDED_PORT'] != '80' ) {
 			$host .= ':'. $_SERVER['HTTP_X_FORWARDED_PORT'];
 		}
@@ -123,4 +121,19 @@ $config['base_url'] = $host . $lcs;
 if ( substr( $config['base_url'], -1, 1 ) != '/' ) {
 	$config['base_url'] .= '/';
 }
+
+// Make sure all class definitions are loaded before this!
+session_name( $config['cookie_token_name'] );
+if ( !empty($config['secure_only']) ) {
+  $timeout = empty($config['session_expiration']) ? 0 : $config['session_expiration'];
+  $start = strpos( $config['base_url'], '/' ) + 2;
+  $host = substr( $config['base_url'], $start, strpos($config['base_url'],'/',$start+1)-$start );
+  if ( !isset( $_SERVER['HTTPS'] ) || $_SERVER['HTTPS'] == 'off' ) {
+    include_once( $config['base_dir'] .'/lib/output.phpm' );
+    redirect( 'https://'. $host .'/'. $lcs );
+    exit;
+  }
+  session_set_cookie_params( $timeout, '/', $host, true, true );
+}
+session_start();
 ?>
