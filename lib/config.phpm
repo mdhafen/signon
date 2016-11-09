@@ -2,11 +2,11 @@
 $config = array(
 	'site_title'        => 'WCSDsignon System',
 	'base_dir'          => '/var/www/',  // sane defaults
-	'base_url'	    => '/', // these are set below
+	'base_url'          => '/', // these are set below
 	'secure_phrase'     => 'Time4RedPill',
-	'cookie_token_name' => 'SAMSESS',
+	'session_cookie'    => 'SAMSESS',
 	'secure_only'       => false,
-	'authen_modules'      => array(
+	'authen_modules'    => array(
 		'db'       => 0,
 		'external' => 0,
 		'ldap'     => 'core',
@@ -123,7 +123,7 @@ if ( substr( $config['base_url'], -1, 1 ) != '/' ) {
 }
 
 // Make sure all class definitions are loaded before this!
-session_name( $config['cookie_token_name'] );
+session_name( $config['session_cookie'] );
 if ( !empty($config['secure_only']) ) {
   $timeout = empty($config['session_expiration']) ? 0 : $config['session_expiration'];
   $start = strpos( $config['base_url'], '/' ) + 2;
