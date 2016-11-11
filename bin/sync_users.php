@@ -64,7 +64,11 @@ foreach ( $google_cache as $g_user ) {
     }
     if ( $thisUser['l'][0] != $entry['l'] ) {
       $mod['l'] = $entry['l'];
+      $mod['departmentNumber'] = $entry['departmentNumber'];
       $mod['description'] = $entry['l'] .'-'. $entry['employeeType'];
+    }
+    if ( !empty($entry['departmentNumber']) && ( empty($thisUser['departmentNumber']) || $thisUser['departmentNumber'][0] != $entry['departmentNumber'] ) ) {
+      $mod['departmentNumber'] = $entry['departmentNumber'];
     }
     if ( empty($thisUser['uidNumber'][0]) && !empty($thisUser['sambaSID'][0]) ) {
       $new_uid = explode('-',$thisUser['sambaSID'][0]);

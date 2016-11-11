@@ -82,58 +82,271 @@ $OTHER_TITLES = array(
 );
 
 $LOCATIONS = array(
-  'AES' => 'ou=Arrowhead Elementary,ou=Elementaries,ou=Snow Cone,'.$LDAP_BASE,
-  'BES' => 'ou=Bloomington Elementary,ou=Elementaries,ou=Dixie Cone,'.$LDAP_BASE,
-  'BHES' => 'ou=Bloomington Hills Elementary,ou=Elementaries,ou=Desert Hills Cone,'.$LDAP_BASE,
-  'CLF' => 'ou=Coral Cliffs Elementary,ou=Elementaries,ou=Snow Cone,'.$LDAP_BASE,
-  'CVES' => 'ou=Crimson View Elementary,ou=Elementaries,ou=Desert Hills Cone,'.$LDAP_BASE,
-  'CYN' => 'ou=Coral Canyon Elementary,ou=Elementaries,ou=Hurricane Cone,'.$LDAP_BASE,
-  'DHHS' => 'ou=Desert Hills High,ou=Desert Hills Cone,'.$LDAP_BASE,
-  'DHMS' => 'ou=Desert Hills Middle,ou=Desert Hills Cone,'.$LDAP_BASE,
-  'DSES' => 'ou=Dixie Sun Elementary,ou=Elementaries,ou=Snow Cone,'.$LDAP_BASE,
-  'DVES' => 'ou=Diamond Valley Elementary,ou=Elementaries,ou=Dixie Cone,'.$LDAP_BASE,
-  'DHS' => 'ou=Dixie High,ou=Dixie Cone,'.$LDAP_BASE,
-  'DMS' => 'ou=Dixie Middle,ou=Dixie Cone,'.$LDAP_BASE,
-  'EAST' => 'ou=East Elementary,ou=Elementaries,ou=Dixie Cone,'.$LDAP_BASE,
-  'EES' => 'ou=Enterprise Elementary,ou=Enterprise Cone,'.$LDAP_BASE,
-  'EHS' => 'ou=Enterprise High,ou=Enterprise Cone,'.$LDAP_BASE,
-  'FRIS' => 'ou=Fossil Ridge Intermediate,ou=Pine Cone,'.$LDAP_BASE,
-  'HES' => 'ou=Hurricane Elementary,ou=Elementaries,ou=Hurricane Cone,'.$LDAP_BASE,
-  'HRZ' => 'ou=Horizon Elementary,ou=Elementaries,ou=Pine Cone,'.$LDAP_BASE,
-  'HTES' => 'ou=Heritage Elementary,ou=Elementaries,ou=Dixie Cone,'.$LDAP_BASE,
-  'HHS' => 'ou=Hurricane High,ou=Hurricane Cone,'.$LDAP_BASE,
-  'HIS' => 'ou=Hurricane Intermediate,ou=Hurricane Cone,'.$LDAP_BASE,
-  'HMS' => 'ou=Hurricane Middle,ou=Hurricane Cone,'.$LDAP_BASE,
-  'LRIS' => 'ou=Lava Ridge Intermediate,ou=Snow Cone,'.$LDAP_BASE,
-  'LTV' => 'ou=Little Valley Elementary,ou=Elementaries,ou=Desert Hills Cone,'.$LDAP_BASE,
-  'LVK' => 'ou=La Verkin Elementary,ou=Elementaries,ou=Hurricane Cone,'.$LDAP_BASE,
-  'MHS' => 'ou=Millcreek High,ou=Pine Cone,'.$LDAP_BASE,
-  'PES' => 'ou=Panorama Elementary,ou=Elementaries,ou=Pine Cone,'.$LDAP_BASE,
-  'POST' => 'ou=Post High,'.$LDAP_BASE,
-  'PVHS' => 'ou=Pine View High,ou=Pine Cone,'.$LDAP_BASE,
-  'PVMS' => 'ou=Pine View Middle,ou=Pine Cone,'.$LDAP_BASE,
-  'RES' => 'ou=Riverside Elementary,ou=Elementaries,ou=Desert Hills Cone,'.$LDAP_BASE,
-  'RMES' => 'ou=Red Mountain Elementary,ou=Elementaries,ou=Snow Cone,'.$LDAP_BASE,
-  'SCES' => 'ou=Santa Clara Elementary,ou=Elementaries,ou=Snow Cone,'.$LDAP_BASE,
-  'SES' => 'ou=Springdale Elementary,ou=Elementaries,ou=Hurricane Cone,'.$LDAP_BASE,
-  'SCHS' => 'ou=Snow Canyon High,ou=Snow Cone,'.$LDAP_BASE,
-  'SCMS' => 'ou=Snow Canyon Middle,ou=Snow Cone,'.$LDAP_BASE,
-  'SHS' => 'ou=SouthWest,ou=Dixie Cone,'.$LDAP_BASE,
-  'SNDS' => 'ou=Sandstone Elementary,ou=Elementaries,ou=Pine Cone,'.$LDAP_BASE,
-  'SRIS' => 'ou=Sunrise Ridge Intermediate,ou=Desert Hills Cone,'.$LDAP_BASE,
-  'SSES' => 'ou=Sunset Elementary,ou=Elementaries,ou=Snow Cone,'.$LDAP_BASE,
-  'TFES' => 'ou=Three Falls Elementary,ou=Elementaries,ou=Hurricane Cone,'.$LDAP_BASE,
-  'TIS' => 'ou=Tonaquint Intermediate,ou=Dixie Cone,'.$LDAP_BASE,
-  'WES' => 'ou=Washington Elementary,ou=Elementaries,ou=Pine Cone,'.$LDAP_BASE,
-  'WCS' => 'ou=Water Canyon School,ou=Hurricane Cone,'.$LDAP_BASE,
-  'WOS' => 'ou=Washington Online,ou=District Departments,'.$LDAP_BASE,
-  'UOHS' => 'ou=Utah Online High School,ou=District Departments,'.$LDAP_BASE,
-  'ZMD' => 'ou=Maintenance,ou=District Departments,'.$LDAP_BASE,
-  'ZTD' => 'ou=Transportation,ou=District Departments,'.$LDAP_BASE,
-  'ZTECH' => 'ou=Technology,'.$LDAP_BASE,
-  'ZWCN' => 'ou=Food Services,ou=District Departments,'.$LDAP_BASE,
-  'ZSpEd' => 'ou=Special Education,ou=District Departments,'.$LDAP_BASE,
-  'washk12' => 'ou=District Departments,'.$LDAP_BASE,
+  array(
+    'init' => 'AES',
+    'ou'   => 'ou=Arrowhead Elementary,ou=Elementaries,ou=Snow Cone,'.$LDAP_BASE,
+    'num'  => 111,
+  ),
+  array(
+    'init' => 'BES',
+    'ou'   => 'ou=Bloomington Elementary,ou=Elementaries,ou=Dixie Cone,'.$LDAP_BASE,
+    'num'  => 102,
+  ),
+  array(
+    'init' => 'BHES',
+    'ou'   => 'ou=Bloomington Hills Elementary,ou=Elementaries,ou=Desert Hills Cone,'.$LDAP_BASE,
+    'num'  => 105,
+  ),
+  array(
+    'init' => 'CLF',
+    'ou'   => 'ou=Coral Cliffs Elementary,ou=Elementaries,ou=Snow Cone,'.$LDAP_BASE,
+    'num'  => 110,
+  ),
+  array(
+    'init' => 'CYN',
+    'ou'   => 'ou=Coral Canyon Elementary,ou=Elementaries,ou=Hurricane Cone,'.$LDAP_BASE,
+    'num'  => 107,
+  ),
+  array(
+    'init' => 'CVES',
+    'ou'   => 'ou=Crimson View Elementary,ou=Elementaries,ou=Desert Hills Cone,'.$LDAP_BASE,
+    'num'  => 147,
+  ),
+  array(
+    'init' => 'DHHS',
+    'ou'   => 'ou=Desert Hills High,ou=Desert Hills Cone,'.$LDAP_BASE,
+    'num'  => 703,
+  ),
+  array(
+    'init' => 'DHMS',
+    'ou'   => 'ou=Desert Hills Middle,ou=Desert Hills Cone,'.$LDAP_BASE,
+    'num'  => 403,
+  ),
+  array(
+    'init' => 'DVES',
+    'ou'   => 'ou=Diamond Valley Elementary,ou=Elementaries,ou=Dixie Cone,'.$LDAP_BASE,
+    'num'  => 108,
+  ),
+  array(
+    'init' => 'DHS',
+    'ou'   => 'ou=Dixie High,ou=Dixie Cone,'.$LDAP_BASE,
+    'num'  => 704,
+  ),
+  array(
+    'init' => 'DMS',
+    'ou'   => 'ou=Dixie Middle,ou=Dixie Cone,'.$LDAP_BASE,
+    'num'  => 404,
+  ),
+  array(
+    'init' => 'DSES',
+    'ou'   => 'ou=Dixie Sun Elementary,ou=Elementaries,ou=Snow Cone,'.$LDAP_BASE,
+    'num'  => 103,
+  ),
+  array(
+    'init' => 'EAST',
+    'ou'   => 'ou=East Elementary,ou=Elementaries,ou=Dixie Cone,'.$LDAP_BASE,
+    'num'  => 116,
+  ),
+  array(
+    'init' => 'EES',
+    'ou'   => 'ou=Enterprise Elementary,ou=Enterprise Cone,'.$LDAP_BASE,
+    'num'  => 104,
+  ),
+  array(
+    'init' => 'EHS',
+    'ou'   => 'ou=Enterprise High,ou=Enterprise Cone,'.$LDAP_BASE,
+    'num'  => 712,
+  ),
+  array(
+    'init' => 'FRIS',
+    'ou'   => 'ou=Fossil Ridge Intermediate,ou=Pine Cone,'.$LDAP_BASE,
+    'num'  => 320,
+  ),
+  array(
+    'init' => 'HTES',
+    'ou'   => 'ou=Heritage Elementary,ou=Elementaries,ou=Dixie Cone,'.$LDAP_BASE,
+    'num'  => 120,
+  ),
+  array(
+    'init' => 'HRZ',
+    'ou'   => 'ou=Horizon Elementary,ou=Elementaries,ou=Pine Cone,'.$LDAP_BASE,
+    'num'  => 145,
+  ),
+  array(
+    'init' => 'HES',
+    'ou'   => 'ou=Hurricane Elementary,ou=Elementaries,ou=Hurricane Cone,'.$LDAP_BASE,
+    'num'  => 112,
+  ),
+  array(
+    'init' => 'HHS',
+    'ou'   => 'ou=Hurricane High,ou=Hurricane Cone,'.$LDAP_BASE,
+    'num'  => 716,
+  ),
+  array(
+    'init' => 'HIS',
+    'ou'   => 'ou=Hurricane Intermediate,ou=Hurricane Cone,'.$LDAP_BASE,
+    'num'  => 308,
+  ),
+  array(
+    'init' => 'HMS',
+    'ou'   => 'ou=Hurricane Middle,ou=Hurricane Cone,'.$LDAP_BASE,
+    'num'  => 408,
+  ),
+  array(
+    'init' => 'LVK',
+    'ou'   => 'ou=La Verkin Elementary,ou=Elementaries,ou=Hurricane Cone,'.$LDAP_BASE,
+    'num'  => 114,
+  ),
+  array(
+    'init' => 'LRIS',
+    'ou'   => 'ou=Lava Ridge Intermediate,ou=Snow Cone,'.$LDAP_BASE,
+    'num'  => 325,
+  ),
+  array(
+    'init' => 'LTV',
+    'ou'   => 'ou=Little Valley Elementary,ou=Elementaries,ou=Desert Hills Cone,'.$LDAP_BASE,
+    'num'  => 146,
+  ),
+  array(
+    'init' => 'MHS',
+    'ou'   => 'ou=Millcreek High,ou=Pine Cone,'.$LDAP_BASE,
+    'num'  => 718,
+  ),
+  array(
+    'init' => 'PES',
+    'ou'   => 'ou=Panorama Elementary,ou=Elementaries,ou=Pine Cone,'.$LDAP_BASE,
+    'num'  => 121,
+  ),
+  array(
+    'init' => 'PVHS',
+    'ou'   => 'ou=Pine View High,ou=Pine Cone,'.$LDAP_BASE,
+    'num'  => 720,
+  ),
+  array(
+    'init' => 'PVMS',
+    'ou'   => 'ou=Pine View Middle,ou=Pine Cone,'.$LDAP_BASE,
+    'num'  => 420,
+  ),
+  array(
+    'init' => 'POST',
+    'ou'   => 'ou=Post High,'.$LDAP_BASE,
+    'num'  => 940,
+  ),
+  array(
+    'init' => 'RMES',
+    'ou'   => 'ou=Red Mountain Elementary,ou=Elementaries,ou=Snow Cone,'.$LDAP_BASE,
+    'num'  => 123,
+  ),
+  array(
+    'init' => 'RES',
+    'ou'   => 'ou=Riverside Elementary,ou=Elementaries,ou=Desert Hills Cone,'.$LDAP_BASE,
+    'num'  => 144,
+  ),
+  array(
+    'init' => 'SNDS',
+    'ou'   => 'ou=Sandstone Elementary,ou=Elementaries,ou=Pine Cone,'.$LDAP_BASE,
+    'num'  => 122,
+  ),
+  array(
+    'init' => 'SCES',
+    'ou'   => 'ou=Santa Clara Elementary,ou=Elementaries,ou=Snow Cone,'.$LDAP_BASE,
+    'num'  => 124,
+  ),
+  array(
+    'init' => 'SCHS',
+    'ou'   => 'ou=Snow Canyon High,ou=Snow Cone,'.$LDAP_BASE,
+    'num'  => 725,
+  ),
+  array(
+    'init' => 'SCMS',
+    'ou'   => 'ou=Snow Canyon Middle,ou=Snow Cone,'.$LDAP_BASE,
+    'num'  => 425,
+  ),
+  array(
+    'init' => 'SHS',
+    'ou'   => 'ou=SouthWest,ou=Dixie Cone,'.$LDAP_BASE,
+    'num'  => 850,
+  ),
+  array(
+    'init' => 'SES',
+    'ou'   => 'ou=Springdale Elementary,ou=Elementaries,ou=Hurricane Cone,'.$LDAP_BASE,
+    'num'  => 128,
+  ),
+  array(
+    'init' => 'SRIS',
+    'ou'   => 'ou=Sunrise Ridge Intermediate,ou=Desert Hills Cone,'.$LDAP_BASE,
+    'num'  => 303,
+  ),
+  array(
+    'init' => 'SSES',
+    'ou'   => 'ou=Sunset Elementary,ou=Elementaries,ou=Snow Cone,'.$LDAP_BASE,
+    'num'  => 130,
+  ),
+  array(
+    'init' => 'TFES',
+    'ou'   => 'ou=Three Falls Elementary,ou=Elementaries,ou=Hurricane Cone,'.$LDAP_BASE,
+    'num'  => 134,
+  ),
+  array(
+    'init' => 'TIS',
+    'ou'   => 'ou=Tonaquint Intermediate,ou=Dixie Cone,'.$LDAP_BASE,
+    'num'  => 304,
+  ),
+  array(
+    'init' => 'WES',
+    'ou'   => 'ou=Washington Elementary,ou=Elementaries,ou=Pine Cone,'.$LDAP_BASE,
+    'num'  => 140,
+  ),
+  array(
+    'init' => 'WCS',
+    'ou'   => 'ou=Water Canyon School,ou=Hurricane Cone,'.$LDAP_BASE,
+    'num'  => 118,
+  ),
+  array(
+    'init' => 'WCHS',
+    'ou'   => 'ou=Water Canyon High School,ou=Hurricane Cone,'.$LDAP_BASE,
+    'num'  => 518,
+  ),
+  array(
+    'init' => 'WOS',
+    'ou'   => 'ou=Washington Online,ou=District Departments,'.$LDAP_BASE,
+    'num'  => 200,
+  ),
+  array(
+    'init' => 'UOHS',
+    'ou'   => 'ou=Utah Online High School,ou=District Departments,'.$LDAP_BASE,
+    'num'  => 500
+  ),
+  array(
+    'init' => 'ZMD',
+    'ou'   => 'ou=Maintenance,ou=District Departments,'.$LDAP_BASE,
+    'num'  => 810,
+  ),
+  array(
+    'init' => 'ZTD',
+    'ou'   => 'ou=Transportation,ou=District Departments,'.$LDAP_BASE,
+    'num'  => 800,
+  ),
+  array(
+    'init' => 'ZTECH',
+    'ou'   => 'ou=Technology,'.$LDAP_BASE,
+    'num'  => 820,
+  ),
+  array(
+    'init' => 'ZWCN',
+    'ou'   => 'ou=Food Services,ou=District Departments,'.$LDAP_BASE,
+    'num'  => 960,
+  ),
+  array(
+    'init' => 'ZSpEd',
+    'ou'   => 'ou=Special Education,ou=District Departments,'.$LDAP_BASE,
+    'num'  => 920
+  ),
+  array(
+    'init' => 'washk12',
+    'ou'   => 'ou=District Departments,'.$LDAP_BASE,
+    'num'  => 950,
+  ),
 		   );
 
 function google_oauth_signout() {
@@ -265,9 +478,9 @@ function google_org_to_loc( $path ) {
   $ous = array_reverse( $ous );
 
   foreach ( $ous as $ou ) {
-    foreach ( $LOCATIONS as $loc => $location ) {
-      if ( stripos($location,$ou) == 3 ) {
-        return $loc;
+    foreach ( $LOCATIONS as $location ) {
+      if ( stripos($location['ou'],$ou) == 3 ) {
+        return $location;
       }
     }
   }
@@ -326,7 +539,9 @@ function google_user_hash_for_ldap( $user ) {
       if ( empty($entry['title']) || in_array( strtolower($entry['title']), array_map('strtolower',$OTHER_TITLES) ) ) {
         $entry['employeeType'] = 'Other';
       }
-      $entry['l'] = google_org_to_loc( $user['orgUnitPath'] );
+      $loc = google_org_to_loc( $user['orgUnitPath'] );
+      $entry['l'] = $loc['init'];
+      $entry['departmentNumber'] = $loc['num'];
       $entry['description'] = $entry['l'] ."-". $entry['employeeType'];
       $ou = google_org_to_ou( $user['orgUnitPath'] );
       if ( !empty($ou) && !empty($entry['uid']) ) {
