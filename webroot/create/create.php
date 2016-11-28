@@ -68,7 +68,7 @@ if ( !empty($submitted) ) {
         $entry['objectclass'] = array('top','inetOrgPerson','posixAccount','sambaSamAccount');
         $entry['gidNumber'] = '65534';
         $entry['loginShell'] = '/bin/bash';
-        $entry['homeDirectory'] = '/home/'. $entry['uid'];
+        $entry['homeDirectory'] = '/Users/'. $entry['uid'];
       }
     }
   }

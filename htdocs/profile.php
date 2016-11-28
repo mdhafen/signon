@@ -77,7 +77,7 @@ include( 'doc-header.php' );
     </div>
     <div class="row">
       <div class="col-sm-4 text-right">Location: </div>
-      <div class="col-sm-8 text-left"><?= empty($data['object']['l'][0]) ? "" : $data['object']['l'][0] ?></div>
+      <div class="col-sm-8 text-left"><?= empty($data['object']['o'][0]) ? "" : $data['object']['o'][0] ?></div>
     </div>
   </div>
 </div>

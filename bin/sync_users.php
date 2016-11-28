@@ -60,21 +60,27 @@ foreach ( $google_cache as $g_user ) {
       $mod['employeeNumber'] = $entry['employeeNumber'];
     }
     if ( empty($thisUser['description'][0]) ) {
-      $mod['description'] = $thisUser['l'][0] .'-'. $entry['employeeType'];
+      $mod['description'] = $thisUser['o'][0] .'-'. $entry['employeeType'];
     }
-    if ( $thisUser['l'][0] != $entry['l'] ) {
-      $mod['l'] = $entry['l'];
+    if ( $thisUser['o'][0] != $entry['o'] ) {
+      $mod['o'] = $entry['o'];
       $mod['departmentNumber'] = $entry['departmentNumber'];
-      $mod['description'] = $entry['l'] .'-'. $entry['employeeType'];
+      $mod['description'] = $entry['o'] .'-'. $entry['employeeType'];
     }
     if ( !empty($entry['departmentNumber']) && ( empty($thisUser['departmentNumber']) || $thisUser['departmentNumber'][0] != $entry['departmentNumber'] ) ) {
       $mod['departmentNumber'] = $entry['departmentNumber'];
+    }
+    if ( !empty($entry['street']) && ( empty($thisUser['street'][0]) || $thisUser['street'][0] != $entry['street'] ) ) {
+      $mod['street'] = $entry['street'];
+      $mod['l'] = $entry['l'];
+      $mod['st'] = $entry['st'];
+      $mod['postalCode'] = $entry['postalCode'];
     }
     if ( empty($thisUser['uidNumber'][0]) && !empty($thisUser['sambaSID'][0]) ) {
       $new_uid = explode('-',$thisUser['sambaSID'][0]);
       $mod['uidNumber'] = $new_uid[4];
       $mod['gidNumber'] = '65534';
-      $mod['homeDirectory'] = '/home/'. $thisUser['uid'][0];
+      $mod['homeDirectory'] = '/Users/'. $thisUser['uid'][0];
       $mod['loginShell'] = '/bin/bash';
       $mod['objectclass'] = array('top','inetOrgPerson','posixAccount','sambaSamAccount');
     }
@@ -107,7 +113,7 @@ foreach ( $google_cache as $g_user ) {
     $new_uid = explode('-', $entry['sambaSID']);
     $entry['uidNumber'] = $new_uid[4];
     $entry['gidNumber'] = '65534';
-    $entry['homeDirectory'] = '/home/'. $entry['uid'];
+    $entry['homeDirectory'] = '/Users/'. $entry['uid'];
     $entry['loginShell'] = '/bin/bash';
 
     $ldap->do_add( $dn, $entry );

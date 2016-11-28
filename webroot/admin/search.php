@@ -16,7 +16,7 @@ $attrs = array(
 	       'sn' => 'Last Name',
 	       'givenName' => 'First Name',
 	       'member' => 'Group memberships by Username',
-	       'l' => 'Building Abbreviation',
+	       'o' => 'Building Abbreviation',
 );
 if ( !empty($attr) && empty($attrs[$attr]) ) {
     error( array('BAD_ATTRIBUTE') );

@@ -50,7 +50,7 @@ if ( !empty($user) ) {
             $entry['uidNumber'] = $new_uid[4];
             $entry['gidNumber'] = '65534';
             $entry['loginShell'] = '/bin/bash';
-            $entry['homeDirectory'] = '/home/'. $entry['uid'];
+            $entry['homeDirectory'] = '/Users/'. $entry['uid'];
             if ( ! $ldap->do_add( $dn, $entry ) ) {
               $errors[] = 'There was an error creating the account';
             }

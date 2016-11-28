@@ -18,7 +18,7 @@ $may = array();
 $defaults = array(
   'gidNumber' => '65534',
   'loginShell' => '/bin/bash',
-  'homeDirectory' => '/home/[uid]',
+  'homeDirectory' => '/Users/[uid]',
 );
 
 switch ( $class ) {
