@@ -45,7 +45,7 @@ There was an error! <?= $data['result'] ?>
 <?php foreach ( $data['providers'] as $provider ) { ?>
           <option value="<?= $provider ?>"><?= $provider ?></option>
 <?php } ?>
-          <option value="other">Other</option>
+<!--          <option value="other">Other</option> -->
         </select>
       </div>
     </div>
