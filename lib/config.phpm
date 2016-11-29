@@ -11,6 +11,20 @@ $config = array(
 		'external' => 0,
 		'ldap'     => 'core',
 	),
+	'authen_external_login_html' => , //'<a class="external_auth_button" href="https://openid.localdomain/oidredirection?pluginName=FIXME">External Login</a>',
+	'user_external_module' => '',
+	'PS_API' => array(
+		'url' => '',
+		'id' => '',
+		'secret' => '',
+		'StaffStatus_to_role_map' => array(
+			1 => 2, // Teacher is PLC Member
+			4 => 3, // School Admin is Principal
+			6 => 4, // DO Staff is District Personel
+			7 => 6, // DO Admin is Site Supervisor
+			8 => 6, // Tech Office is Site Supervisor
+		),
+    ),
 	'trusted_proxies'   => array(),
 	'database'          => array(
 		'core' => array(),

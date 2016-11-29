@@ -1,0 +1,535 @@
+<?php
+require_once( 'config.phpm' );
+require_once( 'user.phpm' );
+require_once( 'input.phpm' );
+
+class PS_Access {
+  private $token = '';
+  private $url = '';
+  private $school_cache = array();
+
+  function __construct() {
+  }
+
+  public function authen_external( $username=null, $password=null ) {
+    global $config;
+    $ps_userid = 0;
+    $user = null;
+    $o_id = input( 'openid_identifier', INPUT_STR );
+    $o_mode = input( 'openid_mode', INPUT_STR );
+
+    require_once "Auth/OpenID/Consumer.php";
+    require_once "Auth/OpenID/FileStore.php";
+    require_once "Auth/OpenID/AX.php";
+
+    $store_path = (function_exists('sys_get_temp_dir') ? sys_get_temp_dir() . '' : '/tmp') . DIRECTORY_SEPARATOR . 'csip_openid_info_store';
+    $consumer = new Auth_OpenID_Consumer( new Auth_OpenID_FileStore($store_path) );
+    if ( !empty($o_id) ) {
+        $auth_request = $consumer->begin( $o_id );
+        if ( !$auth_request ) {
+            error_log( 'PowerSchool API: Auth - invalid OpenID identifier' );
+            return $user;
+        }
+        $ax_request = new Auth_OpenID_AX_FetchRequest();
+        // FIXME newer versions of OpenID use build() here
+        $ax_request->add( Auth_OpenID_AX_AttrInfo::make('http://powerschool.com/entity/id',1,true,'dcid') );
+        $auth_request->addExtension($ax_request);
+        $redirect_url = $auth_request->redirectURL($config['base_url'],$config['base_url']);
+        if ( Auth_OpenID::isFailure($redirect_url) ) {
+            error_log( 'PowerSchool API: Auth - could not redirect: '. $redirect_url->message );
+            return $user;
+        }
+        else {
+            redirect($redirect_url);
+            exit;
+        }
+    }
+    else if ( !empty($o_mode) ) {
+        $response = $consumer->complete($config['base_url']);
+        if ( $response->status == Auth_OpenID_SUCCESS ) {
+            $ax_response = Auth_OpenID_AX_FetchResponse::fromSuccessResponse($response);
+            $eid = $ax_response->getSingle('http://powerschool.com/entity/id');
+            if ( !empty($eid) ) {
+                $ps_userid = $eid;
+            }
+            else {
+                error_log( 'PowerSchool API: Auth: No user dcid in response' );
+                return $user;
+            }
+        }
+        else {
+            if ( $response->status == Auth_OpenID_FAILURE ) {
+                $message = ': '. $response->message;
+            }
+            error_log( 'PowerSchool API: Auth Failed'. $message );
+            return $user;
+        }
+    }
+
+    if ( $ps_userid ) {
+        $user = user_by_externalid( $ps_userid );
+        if ( $config['user_external_module'] == 'PS' ) {
+            $this->do_sync( $ps_userid, $user );
+            $user = user_by_externalid( $ps_userid );
+        }
+    }
+
+    return $user;
+  }
+
+  private function get_access_token() {
+    global $config;
+    $url = $config['PS_API']['url'];
+    $id = $config['PS_API']['id'];
+    $secret = $config['PS_API']['secret'];
+
+    $credentials = base64_encode( $id .':'. $secret );
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_TIMEOUT, 10);
+    curl_setopt($curl, CURLOPT_URL, $url.'/oauth/access_token');
+    curl_setopt($curl, CURLOPT_POST, 1);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    $headers = array();
+    $headers[] = 'Authorization: Basic ' . $credentials;
+    $headers[] = 'Content-Type: application/x-www-form-urlencoded;charset=UTF-8';
+    curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($curl, CURLOPT_POSTFIELDS, 'grant_type=client_credentials');
+    $output = curl_exec($curl);
+    curl_close($curl);
+    $result = json_decode($output);
+    if ( !empty($result->access_token) ) {
+      $this->token = $result->access_token;
+      $this->url = $url;
+    }
+    else {
+      error( array('AUTHEN_EXTERNAL_NO_CONNECTION'=>'Failed to get Access Token from PowerSchool API') );
+      //error_log('PowerSchool API: Failed to get Access Token');
+    }
+  }
+
+  private function get_data( $URI ) {
+    if ( empty($this->token) ) {
+      $this->get_access_token();
+    }
+
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_TIMEOUT, 10);
+    $URL = $this->url . $URI;
+    curl_setopt($curl, CURLOPT_URL, $URL);
+    curl_setopt($curl, CURLOPT_HTTPGET, 1);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    $headers = array();
+    $headers[] = 'Accept: application/json';
+    $headers[] = 'Authorization: Bearer ' . $this->token;
+    curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+    $output = curl_exec($curl);
+    curl_close($curl);
+    $result = json_decode($output);
+    return $result;
+  }
+
+  public function get_locations() {
+    $locations = array();
+
+    $page = 1;
+    $schools = $this->get_data('/ws/v1/district/school?page='.$page);
+    while ( !empty($schools->schools->school) ) {
+      foreach ($schools->schools->school as $school) {
+        if ( empty($locations[$school->id]) ) {
+          $locations[$school->id] = $this->school_to_location( $school );
+        }
+      }
+      $page++;
+      $schools = $this->get_data('/ws/v1/district/school?page='.$page);
+    }
+    return $locations;
+  }
+
+  public function get_staff() {
+    $users = array();
+
+    $page = 1;
+    $schools = $this->get_data('/ws/v1/district/school?page='.$page);
+    while ( !empty($schools->schools->school) ) {
+      foreach ($schools->schools->school as $school) {
+        $stf_page = 1;
+        $ps_staff = $this->get_data('/ws/v1/school/'. $school->id .'/staff?expansions=school_affiliations,emails&page='.$stf_page);
+        while ( !empty($ps_staff->staffs->staff) ) {
+          foreach ( $ps_staff->staffs->staff as $stf ) {
+            if ( !empty($stf->id) && empty($users[$stf->id]) ) {
+              $users[$stf->id] = $this->staff_to_user( $stf );
+            }
+          }
+          $stf_page++;
+          $ps_staff = $this->get_data('/ws/v1/school/'. $school->id .'/staff?page='.$stf_page);
+        }
+      }
+
+      $page++;
+      $schools = $this->get_data('/ws/v1/district/school?page='.$page);
+    }
+
+    return $users;
+  }
+
+  public function get_staff_user( $staffid ) {
+    $user = null;
+
+    $entry = $this->get_data('/ws/v1/staff/'. $staffid .'?expansions=school_affiliations,emails');
+    $staff = $entry->staff;
+    if ( !empty($staff->id) ) {
+        $user = $this->staff_to_user($staff);
+    }
+
+    return $user;
+  }
+
+
+  public function get_staff_locations( $userid ) {
+    $teacher = $this->get_data('/ws/v1/staff/'. $userid .'?expansions=addresses,emails,phones,school_affiliations&extensions=u_schoolstaffuserfields');
+    $affiliations = array();
+    $locations = array();
+    if ( count($teacher->staff->school_affiliations->school_affiliation) > 1 ) {
+      foreach ( $teacher->staff->school_affiliations->school_affiliation as $aff ) {
+	$affiliations[] = $aff;
+      }
+    }
+    else if ( !empty($teacher->staff->school_affiliations->school_affiliation->school_id) ) {
+      $affiliations[] = $teacher->staff->school_affiliations->school_affiliation;
+    }
+    foreach ( $affiliations as $school ) {
+      if ( $school->status == 2 ) {
+        continue;
+      }
+      $a_school = $this->get_data( '/ws/v1/school/'. $school->school_id );
+      $loc = $this->school_to_location( $a_school->school );
+      $locations[] = $loc;
+    }
+    return $locations;
+  }
+
+  public function get_student_user( $studentid ) {
+    $user = null;
+
+    $entry = $this->get_data('/ws/v1/student/'. $studentid .'?expansions=addresses,contact,contact_info,demographics,school_enrollment');
+    $student = $entry->student;
+    if ( !empty($student->id) ) {
+        $user = $this->student_to_user($student);
+    }
+
+    return $user;
+  }
+
+  public function get_student_locations( $userid, $student ) {
+    $locations = array();
+    if ( empty($student->school_enrollment) ) {
+      $entry = $this->get_data('/ws/v1/student/'. $userid .'?expansions=school_enrollment');
+      $student = $entry->student;
+    }
+    if ( $student->school_enrollment->enroll_status_code <= 0 ) {
+      $a_school = $this->get_data( '/ws/v1/school/'. $student->school_enrollment->school_id );
+      $loc = $this->school_to_location( $a_school->school );
+      $locations[] = $loc;
+    }
+
+    return $locations;
+  }
+  
+  private function get_staff_username( $userid, $staff = null ) {
+    $username = null;
+    if ( empty($staff) ) {
+      $user = $this->get_data('/ws/v1/staff/'. $userid);
+      $staff = $user->staff;
+    }
+    if ( !empty($staff) ) {
+      $username = !empty($staff->teacher_username) ? $staff->teacher_username : ( !empty($staff->admin_username) ? $staff->admin_username : "[No Name]" );
+    }
+
+    return $username;
+  }
+
+  private function get_staff_fullname( $userid, $staff = null ) {
+    $name = null;
+    if ( empty($staff) ) {
+      $user = $this->get_data('/ws/v1/staff/'. $userid);
+      $staff = $user->staff;
+    }
+    if ( !empty($staff) ) {
+      $name = !empty($staff->name->first_name) ? $staff->name->first_name : "";
+      if ( empty($name) ) {
+        $name = !empty($staff->name->middle_name) ? $staff->name->middle_name : "";
+      }
+      if ( !empty($staff->name->last_name) ) {
+        if ( !empty($name) ) {
+          $name .= " ";
+        }
+        $name .= $staff->name->last_name;
+      }
+    }
+    if ( empty($name) ) {
+      $name .= "[No Name] ";
+    }
+
+    return $name;
+  }
+
+  public function student_number_to_id( $number ) {
+    $userid = null;
+    if ( !empty($number) ) {
+      $entry = $this->get_data('/ws/v1/district/student?q=school_enrollment.enroll_status==(A,P);local_id=='.$number);
+      if ( !empty($entry->students->student) ) {
+        foreach ( $entry->students->student as $std ) {
+          $student = $std->id;
+        }
+      }
+    }
+
+    return $userid;
+  }
+
+  private function get_student_fullname( $userid, $student = null ) {
+    $name = null;
+    if ( empty($student) ) {
+      $user = $this->get_data('/ws/v1/student/'. $userid);
+      $student = $user->student;
+    }
+    if ( !empty($student) ) {
+      $name = !empty($student->name->first_name) ? $student->name->first_name : "";
+      if ( empty($name) ) {
+        $name = !empty($student->name->middle_name) ? $student->name->middle_name : "";
+      }
+      if ( !empty($student->name->last_name) ) {
+        if ( !empty($name) ) {
+          $name .= " ";
+        }
+        $name .= $student->name->last_name;
+      }
+    }
+    if ( empty($name) ) {
+      $name .= "[No Name] ";
+    }
+
+    return $name;
+  }
+
+  private function userid_to_role( $userid, $staff = null ) {
+    global $config;
+    $map = $config['PS_API']['StaffStatus_to_role_map'];
+
+    $role = 0;
+    if ( empty($staff) ) {
+      $user = $this->get_data('/ws/v1/staff/'. $userid);
+      $staff = $user->staff;
+    }
+
+    $affiliations = array();
+    if ( !empty($staff->school_affiliations->school_affiliation) ) {
+
+        if ( count($staff->school_affiliations->school_affiliation) > 1 ) {
+            foreach ( $staff->school_affiliations->school_affiliation as $aff ) {
+                $affiliations[] = $aff;
+            }
+        }
+        else {
+            $affiliations[] = $staff->school_affiliations->school_affiliation;
+        }
+        foreach ( $affiliations as $school ) {
+            if ( empty($school) ) { continue; }
+            if ( $school->status == 2 ) {
+                continue;
+            }
+            if ( $role === 0 || $school->type < $role ) {
+                $role = $school->type;
+            }
+        }
+    }
+
+    if ( $role > 0 ) {
+      if ( !empty($map[$role]) ) {
+        $role = $map[$role];
+      }
+      else {
+        $role = 0;
+      }
+    }
+
+    return $role;
+  }
+
+  private function do_sync( $userid, $old_user ) {
+    $teacher = $this->get_data('/ws/v1/staff/'. $userid .'?expansions=addresses,emails,phones,school_affiliations&extensions=u_schoolstaffuserfields');
+
+    $user = array();
+    $db_userid = 0;
+    $new_user = $this->staff_to_user( $teacher->staff );
+
+    if ( !empty($old_user['userid']) ) {
+      $db_userid = $old_user['userid'];
+      if ( empty($old_user['username']) || $old_user['username'] != $new_user['username'] ) {
+        $check_dup = user_by_username( $new_user['username'] );
+        if ( !empty($check_dup) ) {
+          error_log('PowerSchool API: duplicate username on sync ('. $username .')');
+        }
+        else {
+          $user['username'] = $new_user['username'];
+        }
+      }
+      if ( empty($old_user['fullname']) || $old_user['fullname'] != $new_user['fullname'] ) {
+        $user['fullname'] = $new_user['fullname'];
+      }
+      if ( empty($old_user['email']) || $old_user['email'] != $new_user['email'] ) {
+        $user['email'] = $new_user['email'];
+      }
+      if ( empty($old_user['role']) || $old_user['role'] != $new_user['role'] ) {
+        $user['role'] = $new_user['role'];
+      }
+    }
+    else {
+      $check_dup = user_by_username( $new_user['username'] );
+      if ( !empty($check_dup) ) {
+        error_log('PowerSchool API: duplicate username on sync ('. $new_user['username'] .')');
+        return;
+      }
+      else {
+        $user = $new_user;
+      }
+    }
+    if ( !empty($user) ) {
+      $new_userid = update_user($db_userid, $user);
+      $user = user_by_externalid( $userid );
+      $old_user = $user;
+    }
+
+    $schools = array();
+    $affiliations = array();
+    if ( count($teacher->staff->school_affiliations->school_affiliation) > 1 ) {
+      foreach ( $teacher->staff->school_affiliations->school_affiliation as $aff ) {
+	$affiliations[] = $aff;
+      }
+    }
+    else if ( !empty($teacher->staff->school_affiliations->school_affiliation->school_id) ) {
+      $affiliations[] = $teacher->staff->school_affiliations->school_affiliation;
+    }
+    foreach ( $affiliations as $school ) {
+      if ( $school->status == 2 ) {
+        continue;
+      }
+      if ( empty($this->school_cache[$school->school_id]) ) {
+        $a_school = $this->get_data( '/ws/v1/school/'. $school->school_id );
+        $this->school_cache[$school->school_id] = $a_school;
+      }
+      else {
+        $a_school = $this->school_cache[$school->school_id];
+      }
+      $ps_loc_id = $a_school->school->id;
+      $old_loc = location_by_externalid( $ps_loc_id );
+      if ( empty($old_loc) && !empty($ps_loc_id) ) {
+        $this->new_location($ps_loc_id, $a_school);
+        $old_loc = location_by_externalid( $ps_loc_id );
+      }
+      if ( !empty($old_loc) ) {
+        $schools[ $old_loc['locationid'] ] = $a_school;
+      }
+    }
+    if ( !empty($old_user['locations']) ) {
+      $diff1 = array_diff( array_keys($schools), array_keys($old_user['locations']) );
+      $diff2 = array_diff( array_keys($old_user['locations']), array_keys($schools) );
+    }
+    else {
+      $diff1 = 1;
+    }
+    if ( !empty($diff1) || !empty($diff2) ) {
+      update_user_locations( $old_user['userid'], array_keys($schools) );
+    }
+  }
+
+  private function new_location( $ps_loc_id, $school = null ) {
+    if ( empty($school) ) {
+      if ( empty($this->school_cache[$ps_loc_id]) ) {
+        $school = $this->get_data('/ws/v1/school/'. $ps_loc_id);
+        $this->school_cache[$ps_loc_id] = $school;
+      }
+      else {
+        $school = $this->school_cache[$ps_loc_id];
+      }
+    }
+    $new_loc = $this->school_to_location( $school->school );
+    update_location( 0, $new_loc );
+    error_log('PowerSchool API: added location '. $new_loc['locationid'] .' ('. $new_loc['name'] .') some settings will need to be adjusted.');
+    return $locationid;
+  }
+
+  private function staff_to_user( $staff ) {
+    $username = $this->get_staff_username( $staff->id, $staff );
+    $fullname = $this->get_staff_fullname( $staff->id, $staff );
+    $email = empty($staff->emails->work_email) ? "" : $staff->emails->work_email;
+    $role = $this->userid_to_role( $staff->id, $staff );
+    $externalid = $staff->id;
+
+    $user = array(
+        'username' => $username,
+        'fullname' => $fullname,
+        'email' => $email,
+        'role' => $role,
+        'password' => '',
+        'salt' => '',
+        'externalid' => $externalid,
+    );
+    return $user;
+  }
+
+  private function student_to_user( $student ) {
+    $user = null;
+    if ( empty($student->addresses) || empty($student->contact) || empty($student->contact_info) || empty($student->demographics) ) {
+      $entry = $this->get_data('/ws/v1/student/'. $student->id .'?expansions=addresses,contact,contact_info,demographics,school_enrollment');
+      $student = $entry->student;
+    }
+    $username = $student->student_username;
+    $fullname = $this->get_student_fullname( $student->id, $student );
+    $email = empty($student->contact_info->email) ? "" : $student->contact_info->email;
+    $alt_email = empty($student->contact->guardian_email) ? "" : $student->contact->guardian_email;
+    $role = 0; // FIXME hard coded to no role
+    $externalid = $student->id;
+    $street = $student->addresses->physical->street;
+    $city = $student->addresses->physical->city;
+    $state = $student->addresses->physical->state_province;
+    $postalcode = $student->addresses->physical->postal_code;
+    $gender = $student->demographics->gender;
+    $dob = $student->demographics->birth_date;
+    if ( $student->school_enrollment->enroll_status_code <= 0 ) {
+      $user = array(
+        'username' => $username,
+        'fullname' => $fullname,
+        'email' => $email,
+        'role' => $role,
+        'password' => '',
+        'salt' => '',
+        'externalid' => $externalid,
+        /* FIXME there are here in case I need them later
+        'street' => $street,
+        'city' => $city,
+        'state' => $state,
+        'postalcode' => $postalcode,
+        'alt_email' => $alt_email,
+        'gender' => $gender,
+        'dob' => $dob,
+        */
+      );
+    }
+    return $user;
+  }
+
+  private function school_to_location( $school ) {
+    $ps_loc_id = $school->id;
+    $locationid = $school->school_number;
+    $location_name = $school->name;
+
+    $location = array(
+        'locationid' => $locationid,
+        'name' => $location_name,
+        'externalid' => $ps_loc_id,
+    );
+    return $location;
+  }
+}
+?>
