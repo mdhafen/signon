@@ -510,9 +510,9 @@ class PS_Access {
         'city' => $city,
         'state' => $state,
         'postalcode' => $postalcode,
-        'alt_email' => $alt_email, // stuff in ldap attr labeledURI or homePostalAddress
-        'gender' => $gender, // stuff in businessCategory
-        'dob' => $dob, // stuff in destinationIndicator
+        'alt_email' => $alt_email,
+        'gender' => $gender,
+        'dob' => $dob,
         */
       );
     }

@@ -72,9 +72,15 @@ foreach ( $google_cache as $g_user ) {
     }
     if ( !empty($entry['street']) && ( empty($thisUser['street'][0]) || $thisUser['street'][0] != $entry['street'] ) ) {
       $mod['street'] = $entry['street'];
-      $mod['l'] = $entry['l'];
-      $mod['st'] = $entry['st'];
-      $mod['postalCode'] = $entry['postalCode'];
+      !empty($entry['l']) && $mod['l'] = $entry['l'];
+      !empty($entry['st']) && $mod['st'] = $entry['st'];
+      !empty($entry['postalCode']) && $mod['postalCode'] = $entry['postalCode'];
+    }
+    if ( !empty($entry['labeledURI']) && ( empty($thisUser['labeledURI'][0]) || $thisUser['labeledURI'][0] != $entry['labeledURI'] ) ) {
+      $mod['labeledURI'] = $entry['labeledURI'];
+    }
+    if ( !empty($entry['destinationIndicator']) && ( empty($thisUser['destinationIndicator'][0]) || $thisUser['destinationIndicator'][0] != $entry['destinationIndicator'] ) ) {
+      $mod['destinationIndicator'] = $entry['destinationIndicator'];
     }
     if ( empty($thisUser['uidNumber'][0]) && !empty($thisUser['sambaSID'][0]) ) {
       $new_uid = explode('-',$thisUser['sambaSID'][0]);

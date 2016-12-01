@@ -540,6 +540,33 @@ function google_user_hash_for_ldap( $user ) {
           }
         }
       }
+      if ( !empty($user['customSchemas']['Contact_Information']) ) {
+        $ci=$user['customSchemas']['Contact_Information'];
+        if ( !empty($ci['Street_Address'] )) {
+          $entry['street'] = $ci['Street_Address'];
+        }
+        if ( !empty($ci['Zipcode'] )) {
+          $entry['postalCode'] = $ci['Zipcode'];
+        }
+        if ( !empty($ci['DOB'] )) {
+          $entry['destinationIndicator'] = $ci['DOB'];
+        }
+        if ( !empty($ci['School_Number'] )) {
+          $entry['departmentNumber'] = $ci['School_Number'];
+        }
+        if ( !empty($ci['School_Abbreviation'] )) {
+          $entry['o'] = $ci['School_Abbreviation'];
+        }
+        if ( !empty($ci['Guardian_Email'] )) {
+          $entry['labeledURI'] = $ci['Guardian_Email'];
+        }
+        if ( !empty($ci['City'] )) {
+          $entry['l'] = $ci['City'];
+        }
+        if ( !empty($ci['State'] )) {
+          $entry['st'] = $ci['State'];
+        }
+      }
       if ( empty($entry['title']) || in_array( strtolower($entry['title']), array_map('strtolower',$OTHER_TITLES) ) ) {
         $entry['employeeType'] = 'Other';
       }
