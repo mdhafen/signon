@@ -11,7 +11,7 @@ $config = array(
 		'external' => 0,
 		'ldap'     => 'core',
 	),
-	'authen_external_login_html' => , //'<a class="external_auth_button" href="https://openid.localdomain/oidredirection?pluginName=FIXME">External Login</a>',
+	'authen_external_login_html' => '', //'<a class="external_auth_button" href="https://openid.localdomain/oidredirection?pluginName=FIXME">External Login</a>',
 	'user_external_module' => '',
 	'PS_API' => array(
 		'url' => '',
