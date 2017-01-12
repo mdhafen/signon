@@ -10,6 +10,9 @@ foreach ( $users as $user ) {
     $home = str_ireplace('/home/','/Users/',$user['homeDirectory'][0]);
     $ldap->do_modify( $user['dn'], array('homeDirectory'=>$home) );
   }
+  if ( !empty($user['employeeType'][0]) && $user['employeeType'][0] == 'Other' && stripos($user['dn'],'students') !== false ) {
+    $ldap->do_modify( $user['dn'], array('employeeType'=>'Student','businessCategory'=>'Student') );
+  }
   if ( empty($user['businessCategory'][0]) ) {
     switch ( $user['employeeType'][0] ) {
       case 'Staff':
