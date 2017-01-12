@@ -10,5 +10,19 @@ foreach ( $users as $user ) {
     $home = str_ireplace('/home/','/Users/',$user['homeDirectory'][0]);
     $ldap->do_modify( $user['dn'], array('homeDirectory'=>$home) );
   }
+  if ( empty($user['businessCategory'][0]) ) {
+    switch ( $user['employeeType'][0] ) {
+      case 'Staff':
+      case 'Student':
+      case 'Guest':
+      case 'Trusted':
+      case 'Other':
+// Confinement
+        $ldap->do_modify( $user['dn'], array('businessCategory'=>$user['employeeType'][0]) );
+        break;
+      default:
+        $ldap->do_modify( $user['dn'], array('businessCategory'=>'Other') );
+    }
+  }
 }
 ?>
