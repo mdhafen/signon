@@ -56,11 +56,14 @@ foreach ( $google_cache as $g_user ) {
     if ( !empty($entry['employeeType']) && ( empty($thisUser['employeeType']) || $thisUser['employeeType'][0] != $entry['employeeType'] ) ) {
       $mod['employeeType'] = $entry['employeeType'];
     }
+    if ( empty($thisUser['businessCategory'][0]) ) {
+      $mod['businessCategory'] = $entry['businessCategory'];
+    }
     if ( !empty($entry['employeeNumber']) && ( empty($thisUser['employeeNumber']) || $thisUser['employeeNumber'][0] != $entry['employeeNumber'] ) ) {
       $mod['employeeNumber'] = $entry['employeeNumber'];
     }
     if ( empty($thisUser['description'][0]) ) {
-      $mod['description'] = $thisUser['o'][0] .'-'. $entry['employeeType'];
+      $mod['description'] = $entry['o'] .'-'. $entry['employeeType'];
     }
     if ( $thisUser['o'][0] != $entry['o'] ) {
       $mod['o'] = $entry['o'];

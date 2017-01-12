@@ -25,6 +25,7 @@ if ( !empty($submitted) ) {
     'objectclass' => array('top','inetOrgPerson','sambaSamAccount'),
     'uid' => '',
     'employeeType' => '',
+    'businessCategory' => '',
     'sn' => '',
     'givenName' => '',
     'cn' => '',
@@ -47,6 +48,7 @@ if ( !empty($submitted) ) {
   $entry['st'] = input( 'state', INPUT_HTML_NONE );
   $entry['postalCode'] = input( 'zip', INPUT_HTML_NONE );
   $entry['employeeType'] = 'Guest';
+  $entry['BusinessCategory'] = 'Guest';
   $entry['dn'] = 'uid='. ldap_escape($entry['uid'],'',LDAP_ESCAPE_DN) .',ou=Guest,dc=wcsd';
   $provider = input( 'provider', INPUT_HTML_NONE );
 

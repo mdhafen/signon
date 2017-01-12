@@ -515,9 +515,11 @@ function google_user_hash_for_ldap( $user ) {
   if ( !empty($user) ) {
     if ( stripos($user['orgUnitPath'],'student') !== FALSE ) {
       $entry['employeeType'] = 'Student';
+      $entry['businessCategory'] = 'Student';
     }
     else {
       $entry['employeeType'] = 'Staff';
+      $entry['businessCategory'] = 'Staff';
     }
 
     if ( !empty($entry['employeeType']) ) {
