@@ -30,6 +30,10 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 <input type="submit" value="Search" class="btn">
 </div>
 
+<div class="row form-group help-block">
+    <p>Wifi Categories: Staff, Student, Guest, Trusted, Other, Confinement</p>
+</div>
+
 </form>
 </div>
 </div>

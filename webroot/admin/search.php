@@ -10,37 +10,43 @@ authorize( 'reset_password' );
 
 $attr = input( 'attrib', INPUT_STR );
 $query = input( 'query', INPUT_STR );
+$query = ldap_escape($query,'',LDAP_ESCAPE_FILTER) .'*';
 $results = array();
+$filter = "";
 $attrs = array(
-	       'uid' => 'Username',
-	       'sn' => 'Last Name',
-	       'givenName' => 'First Name',
-	       'member' => 'Group memberships by Username',
-	       'o' => 'Building Abbreviation',
+    'uid' => 'Username',
+    'member' => 'Group memberships by Username',
+    'businessCategory' => 'WiFi Category',
+    'sn' => 'Last Name',
+    'givenName' => 'First Name',
+    'o' => 'Building Abbreviation',
 );
-if ( !empty($attr) && empty($attrs[$attr]) ) {
-    error( array('BAD_ATTRIBUTE') );
+
+if ( !empty($attr) ) {
+  switch ($attr) {
+    case 'uid':
+    case 'sn':
+    case 'givenName':
+    case 'o':
+    case 'businessCategory': $filter = "($attr=$query)"; break;
+    case 'member':
+      $set = $ldap->quick_search( array( 'uid' => $query ), array() );
+      if ( !empty($set) ) {
+        $filter = "(|(memberUid=$query)(member=".$set[0]['dn']."))";
+      }
+      else {
+        $filter = "";
+      }
+      break;
+
+    default: error( array('BAD_ATTRIBUTE') );
+  }
 }
 
-$output = array( 'attributes' => $attrs );
-
-if ( !empty($attrs[$attr]) && !empty($query) ) {
-  $query = ldap_escape($query,'',LDAP_ESCAPE_FILTER) .'*';
-  $filter = "($attr=$query)";
-  if ( strcasecmp( $attr, 'member' ) == 0 ) {
-    $set = $ldap->quick_search( array( 'uid' => $query ), array() );
-    if ( !empty($set) ) {
-      $filter = "(|(memberUid=$query)(member=".$set[0]['dn']."))";
-    }
-    else {
-      $filter = "";
-    }
-  }
-  if ( !empty($filter) ) {
-    $set = $ldap->quick_search( $filter, array() );
-    foreach ( $set as $user ) {
-      $results[] = $user['dn'];
-    }
+if ( !empty($filter) ) {
+  $set = $ldap->quick_search( $filter, array() );
+  foreach ( $set as $user ) {
+    $results[] = $user['dn'];
   }
   if ( ! empty($results) ) {
     sort( $results );
@@ -50,6 +56,8 @@ if ( !empty($attrs[$attr]) && !empty($query) ) {
     $output['no_results'] = 1;
   }
 }
+
+$output['attributes'] = $attrs;
 
 output( $output, 'admin/search.tmpl' );
 ?>
