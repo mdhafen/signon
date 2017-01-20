@@ -4,7 +4,6 @@ $config = array(
 	'base_dir'          => '/var/www/',  // sane defaults
 	'base_url'          => '/', // these are set below
 	'secure_phrase'     => 'Time4RedPill',
-	'session_cookie'    => 'SAMSESS',
 	'secure_only'       => false,
 	'authen_modules'    => array(
 		'db'       => 0,
@@ -83,7 +82,20 @@ $config = array(
 );
 
 $config['base_dir'] = realpath( dirname( __FILE__ ) . '/..' );
-$config['this_url'] = $_SERVER['REQUEST_URI'];
+if ( empty($_SERVER['REQUEST_URI']) ) {
+	if ( !empty($_SERVER['SCRIPT_NAME']) && isset($_SERVER['PATH_INFO']) ) {
+		$config['this_url'] = $_SERVER['SCRIPT_NAME'] . $_SERVER['PATH_INFO'];
+	}
+	else {
+		$config['this_url'] = '/';
+	}
+}
+elseif ( strpos($_SERVER['REQUEST_URI'],'?') !== false ) {
+	$config['this_url'] = substr( $_SERVER['REQUEST_URI'], 0, strpos($_SERVER['REQUEST_URI'],'?') );
+}
+else {
+	$config['this_url'] = $_SERVER['REQUEST_URI'];
+}
 
 $dir = $config['base_dir'] . '/webroot/';
 $count = 1;
@@ -105,30 +117,32 @@ while ( strripos( $dir, substr( $config['this_url'], 0, $count ) ) > 0 ) {
  except from certain trusted clients (the load balancers)
   (anything from the client, like these, can be easily spoofed
  */
-if ( ! empty($config['trusted_proxies']) && array_search($_SERVER['REMOTE_ADDR'],$config['trusted_proxies']) !== false ) {
-	if ( isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' || isset($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on' ) {
-		$host = "https://". $_SERVER['HTTP_X_FORWARDED_SERVER'];
-		if ( isset($_SERVER['HTTP_X_FORWARDED_PORT']) && $_SERVER['HTTP_X_FORWARDED_PORT'] != '443' ) {
-			$host .= ':'. $_SERVER['HTTP_X_FORWARDED_PORT'];
+if ( !empty($_SERVER['REMOTE_ADDR']) && !empty($_SERVER['SERVER_NAME']) && !empty($_SERVER['SERVER_PORT') ) {
+	if ( ! empty($config['trusted_proxies']) && array_search($_SERVER['REMOTE_ADDR'],$config['trusted_proxies']) !== false ) {
+		if ( isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' || isset($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on' ) {
+			$host = "https://". $_SERVER['HTTP_X_FORWARDED_SERVER'];
+			if ( isset($_SERVER['HTTP_X_FORWARDED_PORT']) && $_SERVER['HTTP_X_FORWARDED_PORT'] != '443' ) {
+				$host .= ':'. $_SERVER['HTTP_X_FORWARDED_PORT'];
+			}
+		}
+		else if ( isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'http' ) {
+			$host = "http://". $_SERVER['HTTP_X_FORWARDED_SERVER'];
+			if ( isset($_SERVER['HTTP_X_FORWARDED_PORT']) && $_SERVER['HTTP_X_FORWARDED_PORT'] != '80' ) {
+				$host .= ':'. $_SERVER['HTTP_X_FORWARDED_PORT'];
+			}
 		}
 	}
-	else if ( isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'http' ) {
-		$host = "http://". $_SERVER['HTTP_X_FORWARDED_SERVER'];
-		if ( isset($_SERVER['HTTP_X_FORWARDED_PORT']) && $_SERVER['HTTP_X_FORWARDED_PORT'] != '80' ) {
-			$host .= ':'. $_SERVER['HTTP_X_FORWARDED_PORT'];
+	else if ( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] != 'off' ) {
+		$host = "https://". $_SERVER['SERVER_NAME'];
+		if ( $_SERVER['SERVER_PORT'] != '443' ) {
+			$host .= ':'. $_SERVER['SERVER_PORT'];
 		}
 	}
-}
-else if ( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] != 'off' ) {
-	$host = "https://". $_SERVER['SERVER_NAME'];
-	if ( $_SERVER['SERVER_PORT'] != '443' ) {
-		$host .= ':'. $_SERVER['SERVER_PORT'];
-	}
-}
-else {
-	$host = "http://". $_SERVER['SERVER_NAME'];
-	if ( $_SERVER['SERVER_PORT'] != '80' ) {
-		$host .= ':'. $_SERVER['SERVER_PORT'];
+	else {
+		$host = "http://". $_SERVER['SERVER_NAME'];
+		if ( $_SERVER['SERVER_PORT'] != '80' ) {
+			$host .= ':'. $_SERVER['SERVER_PORT'];
+		}
 	}
 }
 $config['base_url'] = $host . $lcs;
@@ -137,7 +151,7 @@ if ( substr( $config['base_url'], -1, 1 ) != '/' ) {
 }
 
 // Make sure all class definitions are loaded before this!
-session_name( $config['session_cookie'] );
+session_name( 'SAMSESS' );
 if ( !empty($config['secure_only']) ) {
   $timeout = empty($config['session_expiration']) ? 0 : $config['session_expiration'];
   $start = strpos( $config['base_url'], '/' ) + 2;

@@ -1,9 +1,4 @@
 <?php
-// spoof these for lib/config.phpm
-$_SERVER['REQUEST_URI'] = '';
-$_SERVER['SERVER_NAME'] = '';
-$_SERVER['SERVER_PORT'] = '';
-
 include_once( '../lib/data.phpm' );
 include_once( '../inc/person.phpm' );
 include_once( '../inc/google.phpm' );
