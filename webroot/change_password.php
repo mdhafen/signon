@@ -46,8 +46,10 @@ if ( !empty($user) ) {
             unset( $entry['dn'] );
             $entry['objectClass'] = array('top','inetOrgPerson','posixAccount','sambaSamAccount');
             $entry['sambaSID'] = $ldap->get_next_num('sambaSID');
+            $entry['sambaPwdLastSet'] = time();
+            $entry['sambaAcctFlags'] = '[U ]';
             $new_uid = explode('-',$entry['sambaSID']);
-            $entry['uidNumber'] = $new_uid[4];
+            $entry['uidNumber'] = end($new_uid);
             $entry['gidNumber'] = '65534';
             $entry['loginShell'] = '/bin/bash';
             $entry['homeDirectory'] = '/Users/'. $entry['uid'];

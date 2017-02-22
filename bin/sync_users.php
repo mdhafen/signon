@@ -82,7 +82,7 @@ foreach ( $google_cache as $g_user ) {
     }
     if ( empty($thisUser['uidNumber'][0]) && !empty($thisUser['sambaSID'][0]) ) {
       $new_uid = explode('-',$thisUser['sambaSID'][0]);
-      $mod['uidNumber'] = $new_uid[4];
+      $mod['uidNumber'] = end($new_uid);
       $mod['gidNumber'] = '65534';
       $mod['homeDirectory'] = '/Users/'. $thisUser['uid'][0];
       $mod['loginShell'] = '/bin/bash';
@@ -114,8 +114,10 @@ foreach ( $google_cache as $g_user ) {
     unset( $entry['dn'] );
 
     $entry['sambaSID'] = $ldap->get_next_num( 'sambaSID' );
+    $entry['sambaPwdLastSet'] = time();
+    $entry['sambaAcctFlags'] = '[U ]';
     $new_uid = explode('-', $entry['sambaSID']);
-    $entry['uidNumber'] = $new_uid[4];
+    $entry['uidNumber'] = end($new_uid);
     $entry['gidNumber'] = '65534';
     $entry['homeDirectory'] = '/Users/'. $entry['uid'];
     $entry['loginShell'] = '/bin/bash';

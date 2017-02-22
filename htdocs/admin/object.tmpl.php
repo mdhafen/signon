@@ -57,7 +57,7 @@ Add:
 <div class="panel panel-default panel-body">
 <?php foreach ( $data['children'] as $child ) { ?>
 <p>
-<a href="object.php?dn=<?= urlencode($child['dn']) ?>"><?= empty($child['cn']) ? (empty($child['uid'][0])) ? $child['ou'][0] : $child['uid'][0] : $child['cn'][0] ?></a> <span class="badge">
+<a href="object.php?dn=<?= urlencode($child['dn']) ?>"><?php $rdn_attr = substr( $child['dn'], 0, strpos($child['dn'],'=') ); print $child[$rdn_attr][0]; ?></a> <span class="badge">
 <?php if ( in_array('inetOrgPerson',$child['objectClass']) ) { ?>
 (Person)
 <?php } else if ( in_array('person',$child['objectClass']) || in_array('simpleSecurityObject',$child['objectClass']) ) { ?>
@@ -66,6 +66,8 @@ Add:
 (Group)
 <?php } else if ( in_array('organizationalUnit',$child['objectClass']) ) { ?>
 (Folder)
+<?php } else { ?>
+(Object)
 <?php } ?>
 </span></p>
 <?php } ?>

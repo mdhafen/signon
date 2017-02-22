@@ -97,8 +97,10 @@ if ( !empty($adds) || !empty($dels) || !empty($reps) ) {
 		$adds['objectClass'] = $object['objectClass'];
 		if ( in_array( 'sambaSamAccount', $adds['objectClass'] ) ) {
 			$adds['sambaSID'] = $ldap->get_next_num('sambaSID');
+			$adds['sambaPwdLastSet'] = time();
+			$adds['sambaAcctFlags'] = '[U ]';
 			$new_uid = explode('-',$adds['sambaSID']);
-			$adds['uidNumber'] = $new_uid[4];
+			$adds['uidNumber'] = end($new_uid);
 		}
 		if ( $ldap->do_add( $objectdn, $adds ) ) {
 			if ( !empty($password) ) {

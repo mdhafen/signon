@@ -31,6 +31,9 @@ switch ( $class ) {
   case 'group': $class = array('groupOfNames');
     $rid = 'cn';
     break;
+  case 'group2': $class = array('posixGroup');
+    $rid = 'cn';
+    break;
   case 'folder': $class = array('organizationalUnit');
     $rid = 'ou';
     break;

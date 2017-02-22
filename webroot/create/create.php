@@ -91,8 +91,10 @@ if ( !empty($submitted) ) {
         unset( $entry['dn'] );
 
         $entry['sambaSID'] = $ldap->get_next_num('sambaSID');
+        $entry['sambaPwdLastSet'] = time();
+        $entry['sambaAcctFlags'] = '[U ]';
         $new_uid = explode('-',$entry['sambaSID']);
-        $entry['uidNumber'] = $new_uid[4];
+        $entry['uidNumber'] = end($new_uid);
         if ( $ldap->do_add( $dn, $entry ) ) {
           set_password( $ldap, $dn, $password );
           $result = 'Account created';
