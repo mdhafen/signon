@@ -86,11 +86,28 @@ function get_entropy( $password ) {
 function remove_from_groups( $ldap, $userdn ) {
 	$result = 0;
 	if ( !empty($userdn) ) {
+		$set = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $userdn );
+		if ( !empty($set) ) {
+			$object = $set[0];
+		}
+		if ( empty($object) ) {
+			return 0;
+		}
+
 		$groups = $ldap->quick_search( array( 'member' => "$userdn" ) );
 		foreach ( $groups as $group ) {
 			$group_dn = $group['dn'];
 			$ldap->do_attr_del( $group_dn, array('member' => $userdn) );
+			$result++;
+		}
+
+		$groups = $ldap->quick_search( array( 'memberUid' => $object['uid'][0] ) );
+		foreach ( $groups as $group ) {
+			$group_dn = $group['dn'];
+			$ldap->do_attr_del( $group_dn, array('memberUid' => $object['uid'][0]) );
+			$result++;
 		}
 	}
+	return $result;
 }
 ?>
