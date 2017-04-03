@@ -74,6 +74,10 @@ foreach ( $google_cache as $g_user ) {
       !empty($entry['st']) && $mod['st'] = $entry['st'];
       !empty($entry['postalCode']) && $mod['postalCode'] = $entry['postalCode'];
     }
+    if ( !empty($entry['pager']) && ( empty($thisUser['pager'][0]) || $thisUser['pager'][0] != $entry['pager'] ) ) {
+      $mod['pager'] = $entry['pager'];
+      !empty($entry['telephoneNumber']) && $mod['telephoneNumber'] = $entry['telephoneNumber'];
+    }
     if ( !empty($entry['labeledURI']) && ( empty($thisUser['labeledURI'][0]) || $thisUser['labeledURI'][0] != $entry['labeledURI'] ) ) {
       $mod['labeledURI'] = $entry['labeledURI'];
     }
