@@ -14,6 +14,27 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 <div class="container">
 <div class="main-page">
 
+<h1>Search</h1>
+
+<div class="panel panel-default panel-body">
+<div class="container-fluid">
+<form method="post" action="register.php?op=List" class="form-horizontal">
+
+<div class="row form-group">
+<div class="col-sm-4">
+  <label for="query" class="control-label sr-only">Enter a search term:</label>
+</div>
+	<div class="col-sm-8"><input type="query" id="search_term" name="search_term" class="form-control"></div>
+</div>
+
+<div class="row form-group">
+<input type="submit" value="Search" class="btn">
+</div>
+
+</form>
+</div>
+</div>
+
 <h1>List Of Registered Lab Device</h1>
 
 <?php if ( ! empty($data['deleted']) ) { ?>
