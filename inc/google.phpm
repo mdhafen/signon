@@ -568,6 +568,12 @@ function google_user_hash_for_ldap( $user ) {
         if ( !empty($ci['State'] )) {
           $entry['st'] = $ci['State'];
         }
+        if ( !empty($ci['Home_Room'] )) {
+          $entry['pager'] = $ci['Home_Room'];
+        }
+        if ( !empty($ci['GradYear'] )) {
+          $entry['telephoneNumber'] = $ci['GradYear'];
+        }
       }
       if ( empty($entry['title']) || in_array( strtolower($entry['title']), array_map('strtolower',$OTHER_TITLES) ) ) {
         $entry['employeeType'] = 'Other';
