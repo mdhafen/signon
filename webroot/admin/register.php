@@ -18,6 +18,7 @@ $mac_column = input( 'mac_column', INPUT_PINT );
 $loc_column = input( 'loc_column', INPUT_PINT );
 $desc_column = input( 'desc_column', INPUT_PINT );
 $op = input( 'op', INPUT_STR );
+$search_term = input( 'search_term', INPUT_HTML_NONE );
 
 if ( empty($mac) && !empty($_SESSION['client_mac']) ) {
     $mac = $_SESSION['client_mac'];
@@ -99,11 +100,11 @@ if ( !empty($op) ) {  // force other values here too?
         $mac = labs_normalize_mac( $mac );
         labs_unregister_mac( $mac );
         $output['deleted'] = true;
-        $output['mac_list'] = labs_get_macs();
+        $output['mac_list'] = labs_get_macs($search_term);
 	$template = 'admin/mac_list.tmpl';
     }
     else if ( $op == 'List' ) {
-        $output['mac_list'] = labs_get_macs();
+        $output['mac_list'] = labs_get_macs($search_term);
 	$template = 'admin/mac_list.tmpl';
     }
     else {

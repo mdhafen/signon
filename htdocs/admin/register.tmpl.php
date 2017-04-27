@@ -9,7 +9,7 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 <div class="main-page">
 
 <h1>Register Lab Device</h1>
-<h3><a href="register.php?op=List">See registered M.A.C.&apos;s</a></h3>
+<h3><a href="register.php?op=List">Search registered M.A.C.&apos;s</a></h3>
 
 <?php if ( ! empty($data['error']) ) { ?>
 <div class="alert alert-danger" role="alert">
