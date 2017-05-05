@@ -43,14 +43,23 @@ foreach ( $data['must'] as $attr ) {
 <div class="col-sm-8">
 <?php   if ( ! empty($data['object'][$attr]) ) { ?>
 <?php       foreach ( $data['object'][$attr] as $val ) { ?>
-<input type="text" name="<?= $count ?>_val[]" value="<?= $val ?>" class="form-control">
+<input type="text" name="<?= $count ?>_val[]" value="<?= $val ?>" class="form-control"<?= ($attr == 'businessCategory')? " list='WiFi-Categories'" : "" ?>>
 <?php       }
         }
 	else { ?>
-<input type="text" name="<?= $count ?>_val[]" value="" class="form-control">
+<input type="text" name="<?= $count ?>_val[]" value="" class="form-control"<?= ($attr == 'businessCategory')? " list='WiFi-Categories'" : "" ?>>
 <?php   }
         if ( empty($data['attrs'][$attr]['SINGLE-VALUE']) ) { ?>
 <input type="button" class="btn btn-default" value="+" onclick="add_field(this,'<?= $count ?>')">
+<?php   } ?>
+<?php   if ( $attr == 'businessCategory' ) { ?>
+<datalist id='WiFi-Categories'>
+    <option value="Staff">
+    <option value="Trusted">
+    <option value="Student">
+    <option value="Guest">
+    <option value="Confinement">
+</datalist>
 <?php   } ?>
 </div>
 </div>
