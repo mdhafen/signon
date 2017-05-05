@@ -53,6 +53,7 @@ foreach ( $data['must'] as $attr ) {
 <input type="button" class="btn btn-default" value="+" onclick="add_field(this,'<?= $count ?>')">
 <?php   } ?>
 <?php   if ( $attr == 'businessCategory' ) { ?>
+<span class="text-muted" style="padding-left:15px">Wifi Category</span>
 <datalist id='WiFi-Categories'>
     <option value="Staff">
     <option value="Trusted">
