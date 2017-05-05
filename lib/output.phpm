@@ -81,7 +81,7 @@ function output_build( $data, $filename ) {
 	}
 
 	if ( $filename ) {
-		$filename = $config['base_dir'] .'/htdocs/'. $filename;
+		$filename = $config['base_dir'] .'/view/'. $filename;
 
 		if ( ! file_exists( $filename ) ) {
 			foreach ( array( 'php', 'tmpl', 'html', 'htm' ) as $ext ) {

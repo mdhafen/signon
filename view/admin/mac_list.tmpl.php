@@ -1,4 +1,4 @@
-<?php include($data['_config']['base_dir'] .'/htdocs/doc-open.php'); ?>
+<?php include($data['_config']['base_dir'] .'/view/doc-open.php'); ?>
 <title><?= $data['_config']['site_title'] ?> - Register Lab Device</title>
 <link rel="stylesheet" type="text/css" href="<?= $data['_config']['base_url'] ?>css/datatables.min.css"/>
 <script type="text/javascript">
@@ -7,8 +7,8 @@ $(document).ready(function() {
 });
 </script>
 <?php
-include( $data['_config']['base_dir'] .'/htdocs/doc-head-close.php' );
-include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
+include( $data['_config']['base_dir'] .'/view/doc-head-close.php' );
+include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 ?>
 
 <div class="container">
@@ -61,4 +61,4 @@ include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
 </div>
 </div>
 
-<?php include( $data['_config']['base_dir'] .'/htdocs/doc-close.php' ); ?>
+<?php include( $data['_config']['base_dir'] .'/view/doc-close.php' ); ?>

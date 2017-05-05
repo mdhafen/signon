@@ -1,8 +1,8 @@
-<?php include( $data['_config']['base_dir'] .'/htdocs/doc-open.php' ); ?>
+<?php include( $data['_config']['base_dir'] .'/view/doc-open.php' ); ?>
 <title><?= $data['_config']['site_title'] ?> - Edit</title>
 <?php
-include( $data['_config']['base_dir'] .'/htdocs/doc-head-close.php' );
-include( $data['_config']['base_dir'] .'/htdocs/doc-header.php' );
+include( $data['_config']['base_dir'] .'/view/doc-head-close.php' );
+include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 ?>
 
 <div class="container">
@@ -81,4 +81,4 @@ function add_field( btn, attr_num ) {
 }
 </script>
 
-<?php include( $data['_config']['base_dir'] .'/htdocs/doc-close.php' ); ?>
+<?php include( $data['_config']['base_dir'] .'/view/doc-close.php' ); ?>
