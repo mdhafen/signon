@@ -38,9 +38,9 @@ $output = array(
 output( $output, 'admin/object.tmpl' );
 
 function sorter( $a, $b ) {
-	$av = empty($a['cn']) ? $a['ou'][0] : $a['cn'][0];
-	$bv = empty($b['cn']) ? $b['ou'][0] : $b['cn'][0];
+	$aa = substr( $a['dn'], 0, strpos($a['dn'],'=') );
+	$ba = substr( $b['dn'], 0, strpos($b['dn'],'=') );
 
-	return strcasecmp( $av, $bv );
+	return strcasecmp( $a[$aa][0], $b[$ba][0] );
 }
 ?>
