@@ -16,6 +16,7 @@ $filter = "";
 $attrs = array(
     'uid' => 'Username',
     'member' => 'Group memberships by Username',
+    'employeeNumber' => 'Staff/Student Number',
     'businessCategory' => 'WiFi Category',
     'sn' => 'Last Name',
     'givenName' => 'First Name',
@@ -28,6 +29,7 @@ if ( !empty($attr) ) {
     case 'sn':
     case 'givenName':
     case 'o':
+    case 'employeeNumber':
     case 'businessCategory': $filter = "($attr=$query)"; break;
     case 'member':
       $set = $ldap->quick_search( array( 'uid' => $query ), array() );
