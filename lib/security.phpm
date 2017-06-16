@@ -203,23 +203,23 @@ function authen_ldap( $module, $username, $password ) {
 	}
 
 	if ( $userdn ) {
-		if ( $ldap->do_connect( $module, $userdn, $password ) ) {
-			$role = 1;
-			if ( ! empty($ldap->config['roles']) ) {
-				foreach ( $ldap->config['roles'] as $role_id => $group_dn ) {
-					$group = $ldap->quick_search( array('objectClass'=>'groupOfNames'), array(), 0, $group_dn );
-					if ( ! empty($group[0]) && ! empty($group[0]['member']) ) {
-						foreach ( $group[0]['member'] as $member_dn ) {
-							if ( strcasecmp($member_dn,$userdn) == 0 ) {
-								if ( $role_id > $role ) {
-									$role = $role_id;
-								}
+		$role = 1;
+		if ( ! empty($ldap->config['roles']) ) {
+			foreach ( $ldap->config['roles'] as $role_id => $group_dn ) {
+				$group = $ldap->quick_search( array('objectClass'=>'groupOfNames'), array(), 0, $group_dn );
+				if ( ! empty($group[0]) && ! empty($group[0]['member']) ) {
+					foreach ( $group[0]['member'] as $member_dn ) {
+						if ( strcasecmp($member_dn,$userdn) == 0 ) {
+							if ( $role_id > $role ) {
+								$role = $role_id;
 							}
 						}
 					}
 				}
 			}
+		}
 
+		if ( $ldap->do_connect( $module, $userdn, $password ) ) {
 			$user = array(
 				'userid' => $userdn,
 				'username' => $username,
