@@ -22,7 +22,7 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 
 <div class="row form-group">
 <div class="col-sm-4">
-  <label for="query" class="control-label sr-only">Enter a search term:</label>
+  <label for="query" class="control-label">Enter a search term:</label>
 </div>
 	<div class="col-sm-8"><input type="query" id="search_term" name="search_term" class="form-control"></div>
 </div>
