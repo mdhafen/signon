@@ -44,59 +44,81 @@ foreach ( $google_cache as $g_user ) {
       unset($users_lookup[ $entry['employeeNumber'] ]);
     }
     $dn = $thisUser['dn'];
-    $mod = array();
+    $mod_add = array();
+    $mod_del = array();
+
     if ( !empty($entry['title']) && ( empty($thisUser['title']) || $thisUser['title'][0] != $entry['title'] ) ) {
-      $mod['title'] = $entry['title'];
+      $mod_add['title'] = $entry['title'];
+
+      !empty($thisUser['title']) && $mod_del['title'] = $thisUser['title'];
     }
     if ( !empty($entry['employeeType']) && ( empty($thisUser['employeeType']) || $thisUser['employeeType'][0] != $entry['employeeType'] ) ) {
-      $mod['employeeType'] = $entry['employeeType'];
+      $mod_add['employeeType'] = $entry['employeeType'];
+
+      !empty($thisUser['employeeType']) && $mod_del['employeeType'] = $thisUser['employeeType'];
     }
     if ( empty($thisUser['businessCategory'][0]) ) {
-      $mod['businessCategory'] = $entry['businessCategory'];
+      $mod_add['businessCategory'] = $entry['businessCategory'];
     }
     if ( !empty($entry['employeeNumber']) && ( empty($thisUser['employeeNumber']) || $thisUser['employeeNumber'][0] != $entry['employeeNumber'] ) ) {
-      $mod['employeeNumber'] = $entry['employeeNumber'];
+      $mod_add['employeeNumber'] = $entry['employeeNumber'];
+
+      !empty($thisUser['employeeNumber']) && $mod_del['employeeNumber'] = $thisUser['employeeNumber'];
     }
     if ( empty($thisUser['description'][0]) ) {
-      $mod['description'] = $entry['o'] .'-'. $entry['employeeType'];
+      $mod_add['description'] = $entry['o'] .'-'. $entry['employeeType'];
     }
     if ( $thisUser['o'][0] != $entry['o'] ) {
-      $mod['o'] = $entry['o'];
-      $mod['departmentNumber'] = $entry['departmentNumber'];
-      $mod['description'] = $entry['o'] .'-'. $entry['employeeType'];
+      $mod_add['o'] = $entry['o'];
+      $mod_add['departmentNumber'] = $entry['departmentNumber'];
+      $mod_add['description'] = $entry['o'] .'-'. $entry['employeeType'];
+
+      $mod_del['o'] = $thisUser['o'];
+      $mod_del['departmentNumber'] = $thisUser['departmentNumber'];
+      $mod_del['description'] = $thisUser['description'];
     }
     if ( !empty($entry['departmentNumber']) && ( empty($thisUser['departmentNumber']) || $thisUser['departmentNumber'][0] != $entry['departmentNumber'] ) ) {
-      $mod['departmentNumber'] = $entry['departmentNumber'];
+      $mod_add['departmentNumber'] = $entry['departmentNumber'];
     }
-    if ( !empty($entry['street']) && ( empty($thisUser['street'][0]) || $thisUser['street'][0] != $entry['street'] ) ) {
-      $mod['street'] = $entry['street'];
-      !empty($entry['l']) && $mod['l'] = $entry['l'];
-      !empty($entry['st']) && $mod['st'] = $entry['st'];
-      !empty($entry['postalCode']) && $mod['postalCode'] = $entry['postalCode'];
+    if ( !empty($entry['street']) && ( empty($thisUser['street']) || $thisUser['street'][0] != $entry['street'] ) ) {
+      $mod_add['street'] = $entry['street'];
+      !empty($entry['l']) && $mod_add['l'] = $entry['l'];
+      !empty($entry['st']) && $mod_add['st'] = $entry['st'];
+      !empty($entry['postalCode']) && $mod_add['postalCode'] = $entry['postalCode'];
+
+      !empty($thisUser['street']) && $mod_del['street'] = $thisUser['street'];
+      !empty($thisUser['l']) && $mod_del['l'] = $thisUser['l'];
+      !empty($thisUser['st']) && $mod_del['st'] = $thisUser['st'];
+      !empty($thisUser['postalCode']) && $mod_del['postalCode'] = $thisUser['postalCode'];
     }
     if ( !empty($entry['pager']) && ( empty($thisUser['pager'][0]) || $thisUser['pager'][0] != $entry['pager'] ) ) {
-      $mod['pager'] = $entry['pager'];
-      !empty($entry['telephoneNumber']) && $mod['telephoneNumber'] = $entry['telephoneNumber'];
+      $mod_add['pager'] = $entry['pager'];
+      !empty($entry['telephoneNumber']) && $mod_add['telephoneNumber'] = $entry['telephoneNumber'];
+
+      !empty($thisUser['pager']) && $mod_del['pager'] = $thisUser['pager'];
+      !empty($thisUser['telephoneNumber']) && $mod_del['telephoneNumber'] = $thisUser['telephoneNumber'];
     }
     if ( !empty($entry['labeledURI']) && ( empty($thisUser['labeledURI'][0]) || $thisUser['labeledURI'][0] != $entry['labeledURI'] ) ) {
-      $mod['labeledURI'] = $entry['labeledURI'];
+      $mod_add['labeledURI'] = $entry['labeledURI'];
+
+      !empty($thisUser['labeledURI']) && $mod_del['labeledURI'] = $thisUser['labeledURI'];
     }
     if ( !empty($entry['destinationIndicator']) && ( empty($thisUser['destinationIndicator'][0]) || $thisUser['destinationIndicator'][0] != $entry['destinationIndicator'] ) ) {
-      $mod['destinationIndicator'] = $entry['destinationIndicator'];
+      $mod_add['destinationIndicator'] = $entry['destinationIndicator'];
     }
     if ( empty($thisUser['uidNumber'][0]) && !empty($thisUser['sambaSID'][0]) ) {
       $new_uid = explode('-',$thisUser['sambaSID'][0]);
-      $mod['uidNumber'] = end($new_uid);
-      $mod['gidNumber'] = '65534';
-      $mod['homeDirectory'] = '/Users/'. $thisUser['uid'][0];
-      $mod['loginShell'] = '/bin/bash';
-      $mod['objectclass'] = array('top','inetOrgPerson','posixAccount','sambaSamAccount');
+      $mod_add['uidNumber'] = end($new_uid);
+      $mod_add['gidNumber'] = '65534';
+      $mod_add['homeDirectory'] = '/Users/'. $thisUser['uid'][0];
+      $mod_add['loginShell'] = '/bin/bash';
+      $mod_add['objectclass'] = array('top','inetOrgPerson','posixAccount','sambaSamAccount');
     }
 
-    if ( !empty($mod) ) {
-      $ldap->do_attr_del( $dn, array_keys($mod) );
-      $ldap->do_modify( $dn, $mod );
-      $mods = array_keys($mod);
+    if ( !empty($mod_add) || !empty($mod_del) ) {
+      $ldap->do_attr_del( $dn, array_keys($mod_del) );
+      $ldap->do_modify( $dn, $mod_add );
+      $mods = array_keys(array_merge($mod_del,$mod_add));
       sort($mods);
       $output .= "mod (". implode(',',$mods) .") ";
     }
