@@ -53,8 +53,8 @@ $config = array(
 			'userdn' => 'cn=root,dc=wcsd',
 			'passwd' => 'r@@t1dm0n',
 			'roles' => array(
-				2 => 'cn=TechnologyStaff,dc=wcsd',
-				3 => 'cn=DistrictManagers,dc=wcsd',
+				2 => 'cn=TechnologyStaff,ou=ACLGroups,dc=wcsd',
+				3 => 'cn=DistrictManagers,ou=ACLGroups,dc=wcsd',
 			),
 		),
 	),
