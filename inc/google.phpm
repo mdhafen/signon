@@ -370,7 +370,7 @@ function google_set_password( $email, $password ) {
   }
 
   $mod = '{
-"password":"'. $password .'",
+"password":"'. utf8_encode($password) .'",
 "changePasswordAtNextLogin":"0"
 }';
 
