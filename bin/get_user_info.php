@@ -26,7 +26,11 @@ $entry['sambaPwdLastSet'] = time();
 $entry['sambaAcctFlags'] = '[U ]';
 
 $ldap = new LDAP_Wrapper();
-$dup = $ldap->quick_search( array( 'uid' => $entry['uid'] ), array() );
+$filter = array( 'uid' => $entry['uid'] );
+if ( empty($entry['uid']) ) {
+	$filter = array( 'mail' => $email );
+}
+$dup = $ldap->quick_search( $filter, array() );
 
 if ( empty($dup[0]['sambaSID'][0]) ) {
         $entry['sambaSID'] = $ldap->get_next_num('sambaSID');
