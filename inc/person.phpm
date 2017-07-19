@@ -57,23 +57,23 @@ function get_entropy( $password ) {
 
 	if ( preg_match("/[a-z]/",$password) ) {
 		$entropy += 26;
-		$password = preg_replace("/[a-z]/g", "", $password );
+		$password = preg_replace("/[a-z]/", "", $password );
 	}
 	if ( preg_match("/[A-Z]/",$password) ) {
 		$entropy += 26;
-		$password = preg_replace("/[A-Z]/g", "", $password );
+		$password = preg_replace("/[A-Z]/", "", $password );
 	}
 	if ( preg_match("/[0-9]/",$password) ) {
 		$entropy += 10;
-		$password = preg_replace("/[0-9]/g", "", $password );
+		$password = preg_replace("/[0-9]/", "", $password );
 	}
 	if ( preg_match("/[,\.\?'\";:!@#\$%\^&\*\-_]]/",$password) ) {
 		$entropy += 17;
-		$password = preg_replace("/[,\.\?'\";:!@#\$%\^&\*\-_]]/g", "", $password );
+		$password = preg_replace("/[,\.\?'\";:!@#\$%\^&\*\-_]]/", "", $password );
 	}
 	if ( preg_match("/[`~\(\)+=\{\}\|\[\]\\/<>]/",$password) ) {
 		$entropy += 15;
-		$password = preg_replace("/[`~\(\)+=\{\}\|\[\]\\/<>]/g", "", $password );
+		$password = preg_replace("/[`~\(\)+=\{\}\|\[\]\\/<>]/", "", $password );
 	}
 
 	if ( $entropy ) {
