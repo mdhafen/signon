@@ -1,5 +1,6 @@
 <?php
 global $config;
+include_once( '../lib/output' );
 
 global $GOOGLE_DOMAIN;
 global $GOOGLE_A_CLIENT,$GOOGLE_S_CLIENT;
@@ -178,6 +179,10 @@ function get_user_google( $email ) {
 
   $user = getUser( $GOOGLE_S_CLIENT, $email );
   $user = json_decode($user, true);
+
+  if ( !empty($user['error']['errors']) ) {
+    error( array('GOOGLE_CLIENT_ERROR'=>$user['error']['errors'][0]['reason']) );
+  }
 
   return $user;
 }
