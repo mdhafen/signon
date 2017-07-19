@@ -241,7 +241,7 @@ function google_org_to_ou( $path ) {
 }
 
 function google_user_hash_for_ldap( $user ) {
-  global $OTHER_TITLES;
+  global $OTHER_TITLES,$DEFAULT_LOCATION;
   $entry = array();
 
   if ( !empty($user) ) {
