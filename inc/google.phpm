@@ -1,6 +1,6 @@
 <?php
 global $config;
-include_once( '../lib/output.phpm' );
+include_once( $config['base_dir'].'/lib/output.phpm' );
 
 global $GOOGLE_DOMAIN;
 global $GOOGLE_A_CLIENT,$GOOGLE_S_CLIENT;
