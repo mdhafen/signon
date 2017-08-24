@@ -44,7 +44,7 @@ foreach ( $google_cache as $g_user ) {
       unset($users_lookup[ $entry['employeeNumber'] ]);
     }
 
-    $entry['objectclass'] = array('top','inetOrgPerson','posixAccount','sambaSamAccount');
+    $entry['objectClass'] = array('top','inetOrgPerson','posixAccount','sambaSamAccount');
     $entry['gidNumber'] = '65534';
     $entry['homeDirectory'] = '/Users/'. $entry['uid'];
     $entry['loginShell'] = '/bin/bash';
@@ -56,22 +56,31 @@ foreach ( $google_cache as $g_user ) {
 
     $dn = $thisUser['dn'];
     $rdn_attr = substr( $dn, 0, strpos($dn,'=') );
+    $ignored_fields = array($rdn_attr,'dn','objectClass','userPassword','sambaNTPassword');
+    $dynamic_fields = array('sambaSID','sambaPwdLastSet','uidNumber');
     $mod_add = array();
     $mod_del = array();
     foreach ( $entry as $field => $value ) {
-        if ( $field == $rdn_attr ) { continue; }
+        if ( array_search($field,$ignored_fields) !== false ) { continue; }
+        if ( array_search($field,$dynamic_fields) !== false ) { continue; }
         if ( empty($thisUser[$field]) ) {
             $mod_add[$field] = $value;
         }
         else if ( $thisUser[$field][0] != $value ) {
-            $mod_del[$field] = $value;
+            $mod_del[$field] = array();
             $mod_add[$field] = $value;
         }
     }
+    foreach ( $dynamic_fields as $field ) {
+        if ( empty($thisUser[$field]) && !empty($entry[$field]) ) {
+            $mod_add[$field] = $entry[$field];
+        }
+    }
     foreach ( $thisUser as $field => $values ) {
-        if ( $field == $rdn_attr ) { continue; }
+        if ( array_search($field,$ignored_fields) !== false ) { continue; }
+        if ( array_search($field,$dynamic_fields) !== false ) { continue; }
         if ( empty($entry[$field]) ) {
-            $mod_del[$field] = $values[0];
+            $mod_del[$field] = array();
         }
     }
 
@@ -94,7 +103,7 @@ foreach ( $google_cache as $g_user ) {
     }
   }
   else {
-    $entry['objectclass'] = array('top','inetOrgPerson','posixAccount','sambaSamAccount');
+    $entry['objectClass'] = array('top','inetOrgPerson','posixAccount','sambaSamAccount');
 
     $dn = $entry['dn'];
     unset( $entry['dn'] );
