@@ -152,7 +152,7 @@ function addOrgUnit($client,$postBody){
 function getUser($client,$email){
 	//echo 'Trying getUser' . "\r\n";
 	$requestBody = $email;
-	$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/users/$email");
+	$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/users/$email?projection=full");
 	$req->setRequestMethod('get');
 	$headers = array('GData-Version'=>'3.0',
 	'Content-type'=>'application/atom+xml');
@@ -200,9 +200,9 @@ function getAllUsers($client,$email,$pageToken=null){
 		try{
 			$max=500;
 			if($pageToken){
-				$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/users/?customer=my_customer&pageToken=$pageToken&maxResults=$max&orderBy=email&sortOrder=descending");
+				$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/users/?customer=my_customer&pageToken=$pageToken&maxResults=$max&orderBy=email&sortOrder=descending&projection=full");
 			}else{
-				$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/users/?customer=my_customer&maxResults=$max&orderBy=email&sortOrder=descending");
+				$req = new Google_Http_Request("https://www.googleapis.com/admin/directory/v1/users/?customer=my_customer&maxResults=$max&orderBy=email&sortOrder=descending&projection=full");
 			}
 			$req->setRequestMethod('get');
 			$headers	= array('GData-Version'=>'3.0',
