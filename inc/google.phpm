@@ -79,11 +79,67 @@ $OTHER_TITLES = array(
 
 global $LDAP_BASE,$LOCATIONS,$OTHER_TITLES,$DEFAULT_LOCATION,$DEFAULT_OU;
 $LDAP_BASE = 'dc=wcsd';
-$DEFAULT_OU = 'ou=District Departments,'.$LDAP_BASE;
+$DEFAULT_OU = 'ou=zz find home,'.$LDAP_BASE;
 $DEFAULT_LOCATION =   array(
-    'init' => 'washk12',
-    'ou'   => 'ou=District Departments,'.$LDAP_BASE,
+    'initials' => 'washk12',
+    'ou'   => 'ou=District Office,ou=Staff,'.$LDAP_BASE,
     'num'  => 950,
+  );
+$LOCATIONS = array(
+    array('initials'=>'AES','num'=>111,'name'=>'Arrowhead'),
+    array('initials'=>'BES','num'=>102,'name'=>'Bloomington Elementary'),
+    array('initials'=>'BHES','num'=>105,'name'=>'Bloomington Hills'),
+    array('initials'=>'CYN','num'=>107,'name'=>'Coral Canyon'),
+    array('initials'=>'CLF','num'=>110,'name'=>'Coral Cliffs'),
+    array('initials'=>'CVES','num'=>147,'name'=>'Crimson View'),
+    array('initials'=>'DVES','num'=>108,'name'=>'Diamond Valley'),
+    array('initials'=>'DSES','num'=>103,'name'=>'Dixie Sun'),
+    array('initials'=>'EES','num'=>104,'name'=>'Enterprise Elementary'),
+    array('initials'=>'HTES','num'=>120,'name'=>'Heritage'),
+    array('initials'=>'HRZ','num'=>145,'name'=>'Horizon'),
+    array('initials'=>'HES','num'=>112,'name'=>'Hurricane Elementary'),
+    array('initials'=>'LVK','num'=>114,'name'=>'La Verkin'),
+    array('initials'=>'LGES','num'=>116,'name'=>'Legacy'),
+    array('initials'=>'LTV','num'=>146,'name'=>'Little Valley'),
+    array('initials'=>'MFES','num'=>143,'name'=>'Majestic Fields'),
+    array('initials'=>'PES','num'=>121,'name'=>'Panorama'),
+    array('initials'=>'RMES','num'=>123,'name'=>'Red Mountain'),
+    array('initials'=>'RES','num'=>144,'name'=>'Riverside'),
+    array('initials'=>'SNDS','num'=>122,'name'=>'Sandstone'),
+    array('initials'=>'SCES','num'=>124,'name'=>'Santa Clara'),
+    array('initials'=>'SES','num'=>128,'name'=>'Springdale'),
+    array('initials'=>'SSES','num'=>130,'name'=>'Sunset'),
+    array('initials'=>'TFES','num'=>134,'name'=>'Three Falls'),
+    array('initials'=>'WES','num'=>140,'name'=>'Washington Elementary'),
+    array('initials'=>'WCS','num'=>118,'name'=>'Water Canyon Elementary'),
+    array('initials'=>'POST','num'=>240,'name'=>'Post High'),
+    array('initials'=>'PRE','num'=>220,'name'=>'Early Childhood'),
+    array('initials'=>'WOS','num'=>200,'name'=>'Online K-8'),
+    array('initials'=>'DHHS','num'=>703,'name'=>'Desert Hills High'),
+    array('initials'=>'DHMS','num'=>403,'name'=>'Desert Hills Middle'),
+    array('initials'=>'DHS','num'=>704,'name'=>'Dixie High'),
+    array('initials'=>'DMS','num'=>404,'name'=>'Dixie Middle'),
+    array('initials'=>'EHS','num'=>712,'name'=>'Enterprise High'),
+    array('initials'=>'FRIS','num'=>320,'name'=>'Fossil Ridge'),
+    array('initials'=>'HHS','num'=>716,'name'=>'Hurricane High'),
+    array('initials'=>'HIS','num'=>308,'name'=>'Hurricane Intermediate'),
+    array('initials'=>'HMS','num'=>408,'name'=>'Hurricane Middle'),
+    array('initials'=>'LRIS','num'=>325,'name'=>'Lava Ridge'),
+    array('initials'=>'MHS','num'=>718,'name'=>'Millcreek'),
+    array('initials'=>'PVHS','num'=>720,'name'=>'Pine View High'),
+    array('initials'=>'PVMS','num'=>420,'name'=>'Pine View Middle'),
+    array('initials'=>'SCHS','num'=>725,'name'=>'Snow Canyon High'),
+    array('initials'=>'SCMS','num'=>425,'name'=>'Snow Canyon Middle'),
+    array('initials'=>'SRIS','num'=>303,'name'=>'Sunrise Ridge'),
+    array('initials'=>'TIS','num'=>304,'name'=>'Tinaquint'),
+    array('initials'=>'WCHS','num'=>518,'name'=>'Water Canyon High'),
+    array('initials'=>'UOHS','num'=>500,'name'=>'Online 9-12'),
+    array('initials'=>'SHS','num'=>850,'name'=>'Southwest High'),
+    array('initials'=>'ZTD','num'=>800,'name'=>'Transportation'),
+    array('initials'=>'ZMD','num'=>801,'name'=>'Maintenance'),
+    array('initials'=>'ZTECH','num'=>820,'name'=>'Technology'),
+    array('initials'=>'ZDO','num'=>950,'name'=>'District Office'),
+    array('initials'=>'ZWCN','num'=>960,'name'=>'Warehouse'),
   );
 
 function google_oauth_signout() {
@@ -211,6 +267,25 @@ function google_get_all_users() {
     return $google_cache;
 }
 
+function guess_location( $user, $field ) {
+  global $LOCATIONS,$DEFAULT_LOCATION;
+
+  $path = $user['orgUnitPath'];
+  $ous = explode( '/', $path );
+  $ous = array_filter( $ous );
+  $ous = array_reverse( $ous );
+
+  foreach ( $ous as $ou ) {
+    foreach ( $LOCATIONS as $location ) {
+      if ( stripos($ou,$location['name']) !== false ) {
+        return $location[$field];
+      }
+    }
+  }
+
+  return $DEFAULT_LOCATION[$field];
+}
+
 function google_org_to_loc( $path ) {
   global $LOCATIONS,$DEFAULT_LOCATION;
 
@@ -246,7 +321,7 @@ function google_org_to_ou( $path ) {
 }
 
 function google_user_hash_for_ldap( $user ) {
-  global $OTHER_TITLES,$DEFAULT_LOCATION;
+  global $OTHER_TITLES;
   $entry = array();
 
   if ( !empty($user) ) {
@@ -315,8 +390,8 @@ function google_user_hash_for_ldap( $user ) {
       if ( empty($entry['title']) || in_array( strtolower($entry['title']), array_map('strtolower',$OTHER_TITLES) ) ) {
         $entry['employeeType'] = 'Other';
       }
-      if ( empty($entry['o']) ) { $entry['o'] = $DEFAULT_LOCATION['init']; }
-      if ( empty($entry['departmentNumber']) ) { $entry['departmentNumber'] = $DEFAULT_LOCATION['num']; }
+      if ( empty($entry['o']) ) { $entry['o'] = guess_location($user,'initials'); }
+      if ( empty($entry['departmentNumber']) ) { $entry['departmentNumber'] = guess_location($user,'num'); }
       $entry['description'] = $entry['o'] ."-". $entry['employeeType'];
       $ou = google_org_to_ou( $user['orgUnitPath'] );
       if ( !empty($ou) && !empty($entry['uid']) ) {
