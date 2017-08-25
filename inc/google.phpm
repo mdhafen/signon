@@ -387,7 +387,7 @@ function google_user_hash_for_ldap( $user ) {
           $entry['telephoneNumber'] = $ci['GradYear'];
         }
       }
-      if ( empty($entry['title']) || in_array( strtolower($entry['title']), array_map('strtolower',$OTHER_TITLES) ) ) {
+      if ( $entry['employeeType'] != 'Student' && ( empty($entry['title']) || in_array( strtolower($entry['title']), array_map('strtolower',$OTHER_TITLES) ) ) ) {
         $entry['employeeType'] = 'Other';
       }
       if ( empty($entry['o']) ) { $entry['o'] = guess_location($user,'initials'); }
