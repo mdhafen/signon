@@ -9,7 +9,7 @@ if ( !empty($dom_sid[0]['sambaSID'][0]) ) {
 else {
     $dom_sid = '';
 }
-$users = $ldap->quick_search( '(objectClass=inetOrgPerson)', array() );
+$users = $ldap->quick_search( '(&(objectClass=inetOrgPerson)(!(employeeType=Guest)))', array() );
 $dns = array();
 
 foreach ( $users as $user ) {

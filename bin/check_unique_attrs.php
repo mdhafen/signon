@@ -6,7 +6,7 @@ $matches = array();
 
 $ldap = new LDAP_Wrapper();
 
-$attrs = $ldap->quick_search( '(objectClass=sambaSamAccount)', $unique_attrs );
+$attrs = $ldap->quick_search( '(&(objectClass=sambaSamAccount)(!(employeeType=Guest)))', $unique_attrs );
 foreach ( $attrs as $user ) {
     foreach ( $unique_attrs as $attr ) {
         $matches[$attr][ $user[$attr][0] ]++;
