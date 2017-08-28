@@ -34,7 +34,8 @@ if ( !empty($argv[2]) ) {
 $ldap = new LDAP_Wrapper();
 $users = array();
 if ( !empty($argv[1]) ) {
-  $users = $ldap->quick_search( "(mail=$email)" , array() );
+  $uid = substr($email,0,strpos($email,'@'));
+  $users = $ldap->quick_search( "(|(mail=$email)(uid=$uid))" , array() );
 } else {
   $users = $ldap->quick_search( '(&(!(|(employeeType=Guest)(employeeType=Trusted)))(objectClass=inetOrgPerson))' , array() );
 }
