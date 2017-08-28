@@ -3,12 +3,25 @@ include_once( '../lib/data.phpm' );
 include_once( '../inc/person.phpm' );
 include_once( '../inc/google.phpm' );
 
-$google_cache = google_get_all_users();
+$email = "";
+if ( !empty($argv[1]) ) {
+  if ( !empty($argv[1]) ) {
+    $email = $argv[1];
+    if ( stripos($email,'@washk12') === false ) {
+      $email .= '@washk12.org';
+    }
+  }
+
+  $google_cache = array( get_user_google( $email ) );
+}
+else {
+  $google_cache = google_get_all_users();
+}
 
 $students = array();
 //$in_file = 'PowerSchool_QuickInfo_Export_Students-to-Google-Apps.csv';
-if ( !empty($argv[1]) ) {
-  $in_file = $argv[1];
+if ( !empty($argv[2]) ) {
+  $in_file = $argv[2];
   $h = fopen( $in_file, 'r' );
   while ( ! feof($h) ) {
     $row = fgetcsv($h);
@@ -20,7 +33,11 @@ if ( !empty($argv[1]) ) {
 
 $ldap = new LDAP_Wrapper();
 $users = array();
-$users = $ldap->quick_search( '(&(!(|(employeeType=Guest)(employeeType=Trusted)))(objectClass=inetOrgPerson))' , array() );
+if ( !empty($argv[1]) ) {
+  $users = $ldap->quick_search( "(mail=$email)" , array() );
+} else {
+  $users = $ldap->quick_search( '(&(!(|(employeeType=Guest)(employeeType=Trusted)))(objectClass=inetOrgPerson))' , array() );
+}
 $users_lookup = array();
 
 while ( !empty($users) ) {
