@@ -182,11 +182,13 @@ function authen_ldap( $module, $username, $password ) {
 	$userdn = 0;
 	$name = '';
 	$email = '';
+	$role = 1;
 
 	$ldap = new LDAP_Wrapper( $module );
 	if ( strcasecmp( $username, $ldap->config['userdn'] ) == 0 ) {
 		$set = array();
 		$set[] = array( 'dn' => $username, 'cn' => array($username) );
+		$role = 3;
 	}
 	else if ( strripos( $username, $ldap->config['base'] ) > 0 ) {
 		$set = $ldap->quick_search( array('objectClass'=>'*'), array(), 0, $username );
@@ -203,7 +205,6 @@ function authen_ldap( $module, $username, $password ) {
 	}
 
 	if ( $userdn ) {
-		$role = 1;
 		if ( ! empty($ldap->config['roles']) ) {
 			foreach ( $ldap->config['roles'] as $role_id => $group_dn ) {
 				$group = $ldap->quick_search( array('objectClass'=>'groupOfNames'), array(), 0, $group_dn );
