@@ -66,11 +66,7 @@ foreach ( $google_cache as $g_user ) {
     $entry['gidNumber'] = '65534';
     $entry['homeDirectory'] = '/Users/'. $entry['uid'];
     $entry['loginShell'] = '/bin/bash';
-    $entry['sambaSID'] = $ldap->get_next_num('sambaSID');
-    $entry['sambaPwdLastSet'] = time();
     $entry['sambaAcctFlags'] = '[U ]';
-    $new_uid = explode('-',$entry['sambaSID']);
-    $entry['uidNumber'] = end($new_uid);
 
     $dn = $thisUser['dn'];
     $rdn_attr = substr( $dn, 0, strpos($dn,'=') );
@@ -89,9 +85,19 @@ foreach ( $google_cache as $g_user ) {
             $mod_add[$field] = $value;
         }
     }
+    $dynamic_generated = false;
     foreach ( $dynamic_fields as $field ) {
-        if ( empty($thisUser[$field]) && !empty($entry[$field]) ) {
-            $mod_add[$field] = $entry[$field];
+        if ( empty($thisUser[$field]) ) {
+            if ( empty($dynamic_generated) ) {
+                $entry['sambaSID'] = $ldap->get_next_num('sambaSID');
+                $entry['sambaPwdLastSet'] = time();
+                $new_uid = explode('-',$entry['sambaSID']);
+                $entry['uidNumber'] = end($new_uid);
+                $dynamic_generated = 1;
+            }
+            if ( !empty($entry[$field]) ) {
+                $mod_add[$field] = $entry[$field];
+            }
         }
     }
     foreach ( $thisUser as $field => $values ) {
