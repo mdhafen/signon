@@ -10,13 +10,14 @@ authorize( 'reset_password' );
 
 $attr = input( 'attrib', INPUT_STR );
 $query = input( 'query', INPUT_STR );
-$query = ldap_escape($query,'',LDAP_ESCAPE_FILTER) .'*';
+$query = ldap_escape($query,'',LDAP_ESCAPE_FILTER);
 $results = array();
 $filter = "";
 $attrs = array(
     'uid' => 'Username',
     'member' => 'Group memberships by Username',
     'employeeNumber' => 'Staff/Student Number',
+    'uidNumber' => 'Unix User Number',
     'businessCategory' => 'WiFi Category',
     'sn' => 'Last Name',
     'givenName' => 'First Name',
@@ -30,7 +31,8 @@ if ( !empty($attr) ) {
     case 'givenName':
     case 'o':
     case 'employeeNumber':
-    case 'businessCategory': $filter = "($attr=$query)"; break;
+    case 'businessCategory': $filter = "($attr=$query*)"; break;
+    case 'uidNumber': $filter = "($attr=$query)"; break;
     case 'member':
       $set = $ldap->quick_search( array( 'uid' => $query ), array() );
       if ( !empty($set) ) {
