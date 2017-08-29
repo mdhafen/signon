@@ -50,10 +50,11 @@ if ( ! empty($password) ) {
 		exit;
 	}
 
-	if ( set_password( $ldap, $objectdn, $password ) ) {
-		if ( !empty($object['employeeType'][0]) && $object['employeeType'][0] != 'Guest' ) {
-			google_set_password( $object['mail'][0], $password );
-		}
+	if ( !empty($object['employeeType'][0]) ) {
+		$result = google_set_password( $object['mail'][0], $password );
+	}
+	$result = set_password( $ldap, $objectdn, $password );
+	if ( $result ) {
 		$output['success'] = 1;
 		output( $output, 'admin/password.tmpl' );
 	}

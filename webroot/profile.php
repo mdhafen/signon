@@ -35,10 +35,10 @@ else {
 			$output['result'] = 'Password is to short';
 		}
 		else if ( $password === $password2 ) {
-			set_password( $ldap, $dn, $password );
                         if ( !empty($object['employeeType'][0]) && $object['employeeType'][0] != 'Guest' ) {
 				google_set_password( $object['mail'][0], $password );
 			}
+			set_password( $ldap, $dn, $password );
 			$output['result'] = 'Password Set';
 		}
 		else {

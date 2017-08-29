@@ -456,6 +456,9 @@ function google_set_password( $email, $password ) {
 }';
 
   $result = updateUser( $GOOGLE_S_CLIENT, $email, $mod );
+  if ( !empty($result['error']['errors']) ) {
+    error( array('GOOGLE_CLIENT_ERROR'=>$result['error']['errors'][0]['reason']) );
+  }
 
   return $result;
 }

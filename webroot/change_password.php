@@ -66,8 +66,8 @@ if ( !empty($user) ) {
 
       if ( ! empty($dn) ) {
         if ( $password === $password2 && strlen($password) >=8 ) {
-          set_password( $ldap, $dn, $password );
           $result = google_set_password( $email, $password );
+          set_password( $ldap, $dn, $password );
           $output['success'] = true;
         }
         else {
