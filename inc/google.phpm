@@ -140,6 +140,7 @@ $LOCATIONS = array(
     array('initials'=>'ZTECH','num'=>820,'name'=>'Technology'),
     array('initials'=>'ZDO','num'=>950,'name'=>'District Office'),
     array('initials'=>'ZWCN','num'=>960,'name'=>'Warehouse'),
+    array('initials'=>'SchBrd','num'=>950,'name'=>'School Board'),
   );
 
 function google_oauth_signout() {
