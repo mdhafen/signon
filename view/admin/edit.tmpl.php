@@ -42,25 +42,37 @@ foreach ( $data['must'] as $attr ) {
 <input name="<?= $count ?>_attr" type="hidden" value="<?= $attr ?>">
 <div class="col-sm-8">
 <?php   if ( ! empty($data['object'][$attr]) ) { ?>
-<?php       foreach ( $data['object'][$attr] as $val ) { ?>
-<input type="text" name="<?= $count ?>_val[]" value="<?= $val ?>" class="form-control"<?= ($attr == 'businessCategory')? " list='WiFi-Categories'" : "" ?>>
-<?php       }
+<?php     foreach ( $data['object'][$attr] as $val ) { ?>
+<?php       if ( $attr == 'businessCategory' ) { ?>
+<select name="<?= $count ?>_val[]">
+  <option value="Staff"<?= $val == 'Staff' ? " selected":"" ?>>Staff</option>
+  <option value="Student"<?= $val == 'Student' ? " selected":"" ?>>Student</option>
+  <option value="Guest"<?= $val == 'Guest' ? " selected":"" ?>>Guest</option>
+  <option value="Trusted"<?= $val == 'Trusted' ? " selected":"" ?>>Trusted</option>
+  <option value="Other"<?= $val == 'Other' ? " selected":"" ?>>Other</option>
+  <option value="Confinement"<?= $val == 'Confinement' ? " selected":"" ?>>Confinement</option>
+</select>
+<?php       } else { ?>
+<input type="text" name="<?= $count ?>_val[]" value="<?= $val ?>" class="form-control">
+<?php       } ?>
+<?php     }
         }
-	else { ?>
-<input type="text" name="<?= $count ?>_val[]" value="" class="form-control"<?= ($attr == 'businessCategory')? " list='WiFi-Categories'" : "" ?>>
+        else { ?>
+<?php     if ( $attr == 'businessCategory' ) { ?>
+<select name="<?= $count ?>_val[]">
+  <option value="Staff"<?= $val == 'Staff' ? " selected":"" ?>>Staff</option>
+  <option value="Student"<?= $val == 'Student' ? " selected":"" ?>>Student</option>
+  <option value="Guest"<?= $val == 'Guest' ? " selected":"" ?>>Guest</option>
+  <option value="Trusted"<?= $val == 'Trusted' ? " selected":"" ?>>Trusted</option>
+  <option value="Other"<?= $val == 'Other' ? " selected":"" ?>>Other</option>
+  <option value="Confinement"<?= $val == 'Confinement' ? " selected":"" ?>>Confinement</option>
+</select>
+<?php     } else { ?>
+<input type="text" name="<?= $count ?>_val[]" value="" class="form-control">
+<?php     } ?>
 <?php   }
         if ( empty($data['attrs'][$attr]['SINGLE-VALUE']) ) { ?>
 <input type="button" class="btn btn-default" value="+" onclick="add_field(this,'<?= $count ?>')">
-<?php   } ?>
-<?php   if ( $attr == 'businessCategory' ) { ?>
-<span class="text-muted" style="padding-left:15px">Wifi Category</span>
-<datalist id='WiFi-Categories'>
-    <option value="Staff">
-    <option value="Trusted">
-    <option value="Student">
-    <option value="Guest">
-    <option value="Confinement">
-</datalist>
 <?php   } ?>
 </div>
 </div>
