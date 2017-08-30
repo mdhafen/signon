@@ -103,6 +103,10 @@ class LDAP_Wrapper {
 		return $result;
 	}
 
+    public function get_error() {
+        return ldap_error( $this->ldap );
+    }
+
 	public function quick_search( $filter = array('objectclass' => '*'), $attrs = array('cn'), $scope = 2, $base = '' ) {
 		$results = array();
 
