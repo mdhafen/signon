@@ -20,7 +20,9 @@ foreach ( $users as $user ) {
   }
   if ( !empty($user['employeeType'][0]) && $user['employeeType'][0] == 'Other' && stripos($user['dn'],'students') !== false ) {
     $mods['employeeType'] = 'Student';
-    $mods['businessCategory'] = 'Student';
+    if ( empty($user['businessCategory'][0]) || $user['businessCategory'][0] != 'Confinement' ) {
+      $mods['businessCategory'] = 'Student';
+    }
   }
   if ( empty($user['businessCategory'][0]) ) {
     switch ( $user['employeeType'][0] ) {
@@ -55,6 +57,20 @@ foreach ( $users as $user ) {
         $mods['sambaSID'] = $new_sid;
       }
     }
+  }
+  if ( ! in_array('posixAccount',$user['objectClass']) ) {
+    $mods['objectClass'] = $user['objectClass'];
+    $mods['objectClass'][] = 'posixAccount';
+    $mods['gidNumber'] = '65534';
+    $mods['loginShell'] = '/bin/bash/';
+    if ( !empty($user['uid'][0]) ) {
+      $mods['homeDirectory'] = '/Users/'. $user['uid'][0];
+    }
+    if ( empty($user['sambaSID'][0]) ) {
+      $user['sambaSID'][0] = $mods['sambaSID'] = $ldap->get_next_num('sambaSID');
+    }
+    $new_uid = explode('-',$user['sambaSID'][0]);
+    $mods['uidNumber'] = end($new_uid);
   }
   if ( !empty($mods) ) {
     $ldap->do_modify( $user['dn'], $mods );
