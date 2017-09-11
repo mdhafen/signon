@@ -74,6 +74,7 @@ foreach ( $users as $user ) {
   }
   if ( !empty($mods) ) {
     $ldap->do_modify( $user['dn'], $mods );
+    print $user['uid'][0] .":". implode(',', array_keys($mods) ) ."\n";
   }
 }
 ?>
