@@ -62,7 +62,7 @@ foreach ( $users as $user ) {
     $mods['objectClass'] = $user['objectClass'];
     $mods['objectClass'][] = 'posixAccount';
     $mods['gidNumber'] = '65534';
-    $mods['loginShell'] = '/bin/bash/';
+    $mods['loginShell'] = '/bin/bash';
     if ( !empty($user['uid'][0]) ) {
       $mods['homeDirectory'] = '/Users/'. $user['uid'][0];
     }
