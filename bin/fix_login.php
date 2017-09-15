@@ -17,6 +17,11 @@ foreach ( $users as $user ) {
   if ( !empty($user['homeDirectory'][0]) && stripos($user['homeDirectory'][0],'/home') === 0 ) {
     $home = str_ireplace('/home/','/Users/',$user['homeDirectory'][0]);
     $mods['homeDirectory'] = $home;
+    $user['homeDirectory'][0] = $home;
+  }
+  if ( !empty($user['loginShell'][0]) && $user['loginShell'][0] == '/bin/bash/' ) {
+    $mods['loginShell'] = '/bin/bash';
+    $user['homeDirectory'][0] = '/bin/bash';
   }
   if ( !empty($user['employeeType'][0]) && $user['employeeType'][0] == 'Other' && stripos($user['dn'],'students') !== false ) {
     $mods['employeeType'] = 'Student';
@@ -55,15 +60,24 @@ foreach ( $users as $user ) {
       }
       if ( !empty($new_sid) ) {
         $mods['sambaSID'] = $new_sid;
+        $user['sambaSID'][0] = $new_sid;
       }
     }
+  }
+  else if ( $user['employeeType'][0] == 'Student' || $user['employeeType'][0] == 'Staff' ) {
+    $mods['objectClass'] = $user['objectClass'];
+    $mods['objectClass'][] = 'sambaSamAccount';
+    $user['objectClass'] = $mods['objectClass'];
+    $mods['sambaAcctFlags'] = '[U ]';
+    $user['sambaPwdLastSet'][0] = $mods['sambaPwdLastSet'] = time();
+    $user['sambaSID'][0] = $mods['sambaSID'] = $ldap->get_next_num('sambaSID');
   }
   if ( ! in_array('posixAccount',$user['objectClass']) ) {
     $mods['objectClass'] = $user['objectClass'];
     $mods['objectClass'][] = 'posixAccount';
     $mods['gidNumber'] = '65534';
     $mods['loginShell'] = '/bin/bash';
-    if ( !empty($user['uid'][0]) ) {
+    if ( !empty($user['uid'][0]) && empty($user['homeDirectory'][0]) ) {
       $mods['homeDirectory'] = '/Users/'. $user['uid'][0];
     }
     if ( empty($user['sambaSID'][0]) ) {
