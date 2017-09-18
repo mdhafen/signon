@@ -89,7 +89,12 @@ foreach ( $google_cache as $g_user ) {
     foreach ( $dynamic_fields as $field ) {
         if ( empty($thisUser[$field]) ) {
             if ( empty($dynamic_generated) ) {
-                $entry['sambaSID'] = $ldap->get_next_num('sambaSID');
+                if ( empty($thisUser['sambaSID']) ) {
+                    $entry['sambaSID'] = $ldap->get_next_num('sambaSID');
+                }
+                else {
+                    $entry['sambaSID'] = $thisUser['sambaSID'][0];
+                }
                 $entry['sambaPwdLastSet'] = time();
                 $new_uid = explode('-',$entry['sambaSID']);
                 $entry['uidNumber'] = end($new_uid);
