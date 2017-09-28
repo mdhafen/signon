@@ -46,7 +46,8 @@ Add:
 <?php   if ( stripos($data['object_dn'],',ou=students,') !== FALSE ) { ?>
 <a class="btn btn-default" href="password.php?default=1&amp;dn=<?= urlencode($data['object_dn']) ?>">Set Password to Default</a>
 <?php   } ?>
-<span>User is <?= ($data['object']['businessCategory'][0] != 'Confinement' ? 'Not' : '' ) ?> WiFi Confined <a class="btn btn-default" href="../api/confine.php?dn=<?= urlencode($data['object_dn']) ?>&amp;return=1&amp;toggle=<?= ($data['object']['businessCategory'][0] != 'Confinement' ? 'on' : 'off') ?>">Toggle</a></span>
+<span>User is <?= ($data['object']['businessCategory'][0] != 'Confinement' && $data['object']['businessCategory'][0] != 'Banned' ? 'Not' : '' ) ?> WiFi Confined <?php if ($data['object']['businessCategory'][0] != 'Banned') { ?><a class="btn btn-default" href="../api/confine.php?dn=<?= urlencode($data['object_dn']) ?>&amp;return=1&amp;toggle=<?= ($data['object']['businessCategory'][0] != 'Confinement' ? 'on' : 'off') ?>">Toggle</a><?php } ?></span>
+<span>User is <?= ($data['object']['businessCategory'][0] != 'Banned' ? 'Not' : '' ) ?> Banned from gina Access <a class="btn btn-default" href="../api/confine.php?dn=<?= urlencode($data['object_dn']) ?>&amp;return=1&amp;class=Banned&amp;toggle=<?= ($data['object']['businessCategory'][0] != 'Banned' ? 'on' : 'off') ?>">Toggle</a></span>
 <?php } ?>
 </div>
 

@@ -26,13 +26,22 @@ $output = '<?xml version="1.0"?>
 <confine>';
 
 $input = input( 'toggle', INPUT_STR );
+( $class = input( 'class', INPUT_STR ) ) || ( $class = 'Confinement' );
 $return = input( 'return', INPUT_STR );
 
 if ( ! empty($input) ) {
     if ( $input == 'off' ) {
-        $state = !empty($object['employeeType'][0])?$object['employeeType'][0]:'Other';
+	if ( $class == 'Confinement' && $object['businessCategory'][0] == 'Confinement' ) {
+          $state = !empty($object['employeeType'][0])?$object['employeeType'][0]:'Other';
+        } else if ( $class == 'Banned' && $object['businessCategory'][0] == 'Banned' ) {
+          $state = !empty($object['employeeType'][0])?$object['employeeType'][0]:'Other';
+        }
     } else {
-        $state = 'Confinement';
+	if ( $class == 'Confinement' ) {
+            $state = 'Confinement';
+        } else if ( $class == 'Banned' ) {
+            $state = 'Banned';
+        }
     }
 
     if ( empty($object['businessCategory'][0]) || $state != $object['businessCategory'][0] ) {
