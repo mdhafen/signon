@@ -25,7 +25,7 @@ foreach ( $users as $user ) {
   }
   if ( !empty($user['employeeType'][0]) && $user['employeeType'][0] == 'Other' && stripos($user['dn'],'students') !== false ) {
     $mods['employeeType'] = 'Student';
-    if ( empty($user['businessCategory'][0]) || $user['businessCategory'][0] != 'Confinement' ) {
+    if ( empty($user['businessCategory'][0]) || $user['businessCategory'][0] != 'Confinement' || $user['businessCategory'][0] != 'Banned' ) {
       $mods['businessCategory'] = 'Student';
     }
   }
@@ -37,6 +37,7 @@ foreach ( $users as $user ) {
       case 'Trusted':
       case 'Other':
 // Confinement
+// Banned
         $mods['businessCategory'] = $user['employeeType'][0];
         break;
       default:

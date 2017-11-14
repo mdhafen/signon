@@ -51,7 +51,7 @@ foreach ( $data['must'] as $attr ) {
   <option value="Trusted"<?= $val == 'Trusted' ? " selected":"" ?>>Trusted</option>
   <option value="Other"<?= $val == 'Other' ? " selected":"" ?>>Other</option>
   <option value="Confinement"<?= $val == 'Confinement' ? " selected":"" ?>>Confinement</option>
-  <option value="Banned"<?= $val == 'Confinement' ? " selected":"" ?>>Banned</option>
+  <option value="Banned"<?= $val == 'Banned' ? " selected":"" ?>>Banned</option>
 </select>
 <?php       } else { ?>
 <input type="text" name="<?= $count ?>_val[]" value="<?= $val ?>" class="form-control">
@@ -67,6 +67,7 @@ foreach ( $data['must'] as $attr ) {
   <option value="Trusted"<?= $val == 'Trusted' ? " selected":"" ?>>Trusted</option>
   <option value="Other"<?= $val == 'Other' ? " selected":"" ?>>Other</option>
   <option value="Confinement"<?= $val == 'Confinement' ? " selected":"" ?>>Confinement</option>
+  <option value="Banned"<?= $val == 'Banned' ? " selected":"" ?>>Banned</option>
 </select>
 <?php     } else { ?>
 <input type="text" name="<?= $count ?>_val[]" value="" class="form-control">
