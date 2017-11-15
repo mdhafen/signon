@@ -162,6 +162,7 @@ function input_validation( $output, $type ) {
 }
 
 function get_remote_ip() {
+	global $config;
 	$ip = '';
 	if ( !empty($config['trusted_proxies']) && array_search($_SERVER['REMOTE_ADDR'],$config['trusted_proxies']) !== false && !empty($_SERVER['HTTP_X_FORWARDED_FOR']) ) {
 		$remotes = array_values(array_filter(explode(',',$_SERVER['HTTP_X_FORWARDED_FOR'])));
