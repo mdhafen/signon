@@ -48,6 +48,10 @@ function labs_register_mac( $mac, $location = '', $desc = '', $user, $ip ) {
   $sth->bindValue( ':ip', ip_to_decimal( $ip ) );
 
   $sth->execute();
+  if ( $sth->errorCode() !== '00000' ) {
+    $db_error = $sth->errorInfo();
+    return $db_error[2];
+  }
 }
 
 function labs_unregister_mac( $mac ) {

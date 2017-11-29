@@ -48,8 +48,14 @@ if ( !empty($op) ) {  // force other values here too?
     if ( $op == 'Register' ) {
         if ( !empty($mac) && !empty($location) ) {
             $mac = labs_normalize_mac( $mac );
-            labs_register_mac( $mac, $location, $description, $user, $ip );
-            $output['success'] = true;
+            $error = labs_register_mac( $mac, $location, $description, $user, $ip );
+            if ( !$error ) {
+                $output['success'] = true;
+            }
+            else {
+                $output['error'] = 1;
+                $output['err_msg'] = "Database Error: $error";
+            }
         }
         else {
             $output['error'] = 1;
