@@ -215,6 +215,15 @@ class LDAP_Wrapper {
 		return $result;
 	}
 
+	public function do_attr_replace( $dn, $attrs ) {
+		$result = 0;
+		if ( empty($dn) || empty($attrs) || !is_array($attrs) ) {
+			return 0;
+		}
+		$result = @ldap_mod_replace( $this->ldap, $dn, $attrs );
+		return $result;
+	}
+
 	public function do_attr_del( $dn, $attrs ) {
 		$result = 0;
 		if ( empty($dn) || empty($attrs) || !is_array($attrs) ) {

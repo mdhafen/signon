@@ -74,6 +74,7 @@ foreach ( $google_cache as $g_user ) {
     $dynamic_fields = array('sambaSID','sambaPwdLastSet','uidNumber');
     $mod_add = array();
     $mod_del = array();
+    $mod_rep = array();
     foreach ( $entry as $field => $value ) {
         if ( array_search($field,$ignored_fields) !== false ) { continue; }
         if ( array_search($field,$dynamic_fields) !== false ) { continue; }
@@ -81,8 +82,7 @@ foreach ( $google_cache as $g_user ) {
             $mod_add[$field] = $value;
         }
         else if ( $thisUser[$field][0] != $value ) {
-            $mod_del[$field] = array();
-            $mod_add[$field] = $value;
+            $mod_rep[$field] = $value;
         }
     }
     $dynamic_generated = false;
@@ -113,16 +113,17 @@ foreach ( $google_cache as $g_user ) {
         }
     }
 
-    if ( !empty($mod_add) || !empty($mod_del) ) {
+    if ( !empty($mod_add) || !empty($mod_del) || !empty($mod_rep) ) {
       $ldap->do_attr_del( $dn, $mod_del );
       $ldap->do_modify( $dn, $mod_add );
-      $mods = array_keys(array_merge($mod_del,$mod_add));
+      $ldap->do_attr_replace( $dn, $mod_rep );
+      $mods = array_keys(array_merge($mod_del,$mod_add,$mod_rep));
       sort($mods);
       $output .= "mod (". implode(',',$mods) .") ";
     }
 
     if ( strcasecmp( $dn, $entry['dn'] ) != 0 ) {
-      $ldap->do_rename( $dn, "uid=". ldap_escape($entry['uid'],'',LDAP_ESCAPE_DN), $ldap->dn_get_parent($entry['dn']) );
+      $ldap->do_rename( $dn, "$rdn_attr=". ldap_escape($entry[$rdn_attr],'',LDAP_ESCAPE_DN), $ldap->dn_get_parent($entry['dn']) );
       $output .= "move ";
     }
 
@@ -156,11 +157,11 @@ foreach ( $google_cache as $g_user ) {
     }
   }
   if ( !empty($output) ) {
-    print "Working ". $entry['mail'] ." : ". $output ."\n";
+    print "Update ". $entry['mail'] ." : ". $output ."\n";
   }
 }
 foreach ( $users_lookup as $lookup => $thisUser ) {
-  print "Working ". $thisUser['mail'][0] ." : isn't in google! ";
+  print "Update ". $thisUser['mail'][0] ." : isn't in google! ";
   $dn = $thisUser['dn'];
   $ldap->do_delete( $dn );
   print "Deleted\n";

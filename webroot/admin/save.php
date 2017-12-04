@@ -124,6 +124,10 @@ if ( !empty($adds) || !empty($dels) || !empty($reps) ) {
 			unset( $adds[ $rdn_attr ] );
 			unset( $dels[ $rdn_attr ] );
 		}
+		if ( in_array( $rdn_attr, array_keys($reps) ) ) {
+			$new_rdn = $reps[ $rdn_attr ][0];
+			unset( $reps[ $rdn_attr ] );
+		}
 
 		$password = '';
 		if ( in_array( 'userPassword', array_keys($adds) ) ) {
@@ -131,7 +135,7 @@ if ( !empty($adds) || !empty($dels) || !empty($reps) ) {
 			unset( $adds['userPassword'] );
 		}
 
-		$ldap->do_modify( $objectdn, $reps );
+		$ldap->do_attr_replace( $objectdn, $reps );
 		$ldap->do_attr_del( $objectdn, $dels );
 		$ldap->do_attr_add( $objectdn, $adds );
 
