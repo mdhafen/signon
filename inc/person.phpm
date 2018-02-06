@@ -129,4 +129,19 @@ function log_attr_change( $userdn, $changes ) {
 		$sth->execute();
 	}
 }
+
+function get_attr_changes( $userdn ) {
+	$changes = array();
+	$dbh = db_connect('core');
+	$sth = $dbh->prepare('SELECT * FROM attribute_changes WHERE dn = :dn');
+	$sth->bindValue( ':dn', $userdn );
+	$sth->execute();
+
+	while ( $row = $sth->fetch() ) {
+		$row = stripslashes_array( $row );
+		$changes[ $row['attr'] ] = $row;
+	}
+
+	return $changes;
+}
 ?>

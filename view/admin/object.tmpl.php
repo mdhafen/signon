@@ -18,6 +18,9 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 <?php   foreach ( $vals as $val ) { ?>
   <div><?= $val ?></div>
 <?php   } ?>
+<?php   if ( !empty($data['attr_changes'][$key]) ) { ?>
+  <div class="text-muted">Last changed <?= $data['attr_changes'][$key]['timestamp'] ?> by <?= $data['attr_changes'][$key]['user'] ?></div>
+<?php   } ?>
 </div>
 </div>
 <?php } ?>

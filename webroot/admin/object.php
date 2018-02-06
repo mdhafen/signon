@@ -17,6 +17,8 @@ unset( $object['dn'] );
 
 ksort( $object, SORT_STRING | SORT_FLAG_CASE );
 
+$attr_changes = get_attr_changes( $objectdn );
+
 $parentdn = $ldap->dn_get_parent( $objectdn );
 if ( $parentdn == $ldap->config['base'] ) {
 	$parentdn = '';
@@ -30,6 +32,7 @@ $output = array(
 	'object' => $object,
 	'is_person' => is_person( $object ),
 	'parentdn' => $parentdn,
+	'attr_changes' => $attr_changes,
 	'children' => $children,
 	'can_edit' => authorized('manage_objects'),
 	'can_password' => authorized('reset_password') || ($objectdn == $_SESSION['userid']),
