@@ -246,7 +246,9 @@ class LDAP_Wrapper {
 	}
 
 	function ensure_ous( $dn ) {
-		$work = preg_split( '/(?<!\\\\),/', $dn );
+		$work = ldap_explode_dn($dn,0);
+		unset( $work['count'] );
+		array_walk($work, function(&$val,$key){$val = ldap_unescape($val);});
 		$result = 1;
 		$base = '';
 		$dn = '';
@@ -276,9 +278,8 @@ class LDAP_Wrapper {
 	function create_ou( $dn ) {
 		$result = 0;
 
-		$work = preg_split( '/(?<!\\\\),/', $dn );
-		$work = explode( '=', $work[0] );
-		$ou = $work[1];
+		$work = ldap_explode_dn($dn,1);
+		$ou = ldap_unescape($work[0]);
 		if ( !empty($ou) ) {
 			$work = array(
 				'objectClass' => 'organizationalUnit',
@@ -292,7 +293,8 @@ class LDAP_Wrapper {
 	}
 
 	public function dn_get_parent( $dn ) {
-		$new_parent = preg_split('/(?<!\\\\),/',$dn);
+		$new_parent = ldap_explode_dn($dn,0);
+		unset( $new_parent['count'] );
 		array_shift($new_parent);
 		$new_parent = implode(',',$new_parent);
 		return $new_parent;
@@ -486,6 +488,13 @@ class LDAP_Wrapper {
 
 		return array( $must, $may );
 	}
+}
+
+// Make sure this is called with only an RDN or attribute value,
+//  it will destroy a full DN because escaped characters are fully unescaped.
+function ldap_unescape($subject) {
+	$d = preg_replace_callback( '/\\\\([0-9A-Fa-f]{2})/', function($matches){return chr(hexdec($matches[0]));}, $subject);
+	return $d;
 }
 
 //  copied from http://stackoverflow.com/questions/8560874/

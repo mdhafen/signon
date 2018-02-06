@@ -44,7 +44,10 @@ function set_password( $ldap, $userdn, $password ) {
 
 		if ( ! empty( $entry ) ) {
 			$result = $ldap->do_modify( $userdn, $entry );
-			$user = !empty($_SESSION['loggedin_user']['username']) ? $_SESSION['loggedin_user']['username'] : "";
+
+			$user = ldap_explode_dn($userdn,1);
+			$user = ldap_unescape($user[0]);
+			$user = !empty($_SESSION['loggedin_user']['username']) ? $_SESSION['loggedin_user']['username'] : $user;
 			append_log( "Password changed by $user with entropy value $entropy for $userdn", 'auth' );
 		}
 	}
@@ -109,5 +112,21 @@ function remove_from_groups( $ldap, $userdn ) {
 		}
 	}
 	return $result;
+}
+
+function log_attr_change( $userdn, $changes ) {
+	$user = ldap_explode_dn($userdn,1);
+	$user = ldap_unescape($user[0]);
+	$user = !empty($_SESSION['loggedin_user']['username']) ? $_SESSION['loggedin_user']['username'] : $user;
+
+	$dbh = db_connect('core');
+	$sth = $dbh->prepare('REPLACE INTO attribute_changes (dn,user,attr,previous_value,timestamp) VALUES (:dn,:user,:attr,:prev,NOW())');
+	$sth->bindValue( ':dn', $userdn );
+	$sth->bindValue( ':user', $user );
+	foreach ( $changes as $attr => $prev ) {
+		$sth->bindValue( ':attr', $attr );
+		$sth->bindValue( ':prev', $prev );
+		$sth->execute();
+	}
 }
 ?>

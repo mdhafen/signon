@@ -139,12 +139,20 @@ if ( !empty($adds) || !empty($dels) || !empty($reps) ) {
 		$ldap->do_attr_del( $objectdn, $dels );
 		$ldap->do_attr_add( $objectdn, $adds );
 
+		$mods = array_keys(array_merge($dels,$adds,$reps));
+		$changes = array();
+		foreach ( $mods as $attr ) {
+			$changes[$attr] = $object[$attr][0];
+		}
+		log_attr_change( $objectdn, $changes );
+
 		if ( !empty($password) ) {
 			if ( strlen($password) < 8 ) {
 				$errors[] = "The password is to short";
 			}
 			else {
 				set_password( $ldap, $objectdn, $password );
+				log_attr_change( $objectdn, array('userPassword'=>'') );
 			}
 		}
 

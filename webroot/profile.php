@@ -39,6 +39,7 @@ else {
 				google_set_password( $object['mail'][0], $password );
 			}
 			set_password( $ldap, $dn, $password );
+			log_attr_change( $dn, array('userPassword'=>'') );
 			$output['result'] = 'Password Set';
 		}
 		else {

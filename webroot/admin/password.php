@@ -55,6 +55,7 @@ if ( ! empty($password) ) {
 	}
 	$result = set_password( $ldap, $objectdn, $password );
 	if ( $result ) {
+		log_attr_change( $objectdn, array('userPassword'=>'') );
 		$output['success'] = 1;
 		output( $output, 'admin/password.tmpl' );
 	}

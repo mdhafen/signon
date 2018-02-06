@@ -23,10 +23,18 @@ $config = array(
 			7 => 6, // DO Admin is Site Supervisor
 			8 => 6, // Tech Office is Site Supervisor
 		),
-    ),
+	),
 	'trusted_proxies'   => array(),
 	'database'          => array(
-		'core' => array(),
+		'core' => array(
+			'write' => array(
+				'engine' => 'mysql',
+				'host'   => 'localhost',
+				'schema' => 'SignOn',
+				'user'   => 'localsignon',
+				'passwd' => 'localpassword',
+			),
+		),
 		'Labs' => array(
 			'write' => array(
 				'engine' => 'mysql',
