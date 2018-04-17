@@ -45,6 +45,7 @@ foreach ( $data['must'] as $attr ) {
 <?php     foreach ( $data['object'][$attr] as $val ) { ?>
 <?php       if ( $attr == 'businessCategory' ) { ?>
 <select name="<?= $count ?>_val[]">
+  <option value="">Select a category</option>
   <option value="Staff"<?= $val == 'Staff' ? " selected":"" ?>>Staff</option>
   <option value="Student"<?= $val == 'Student' ? " selected":"" ?>>Student</option>
   <option value="Guest"<?= $val == 'Guest' ? " selected":"" ?>>Guest</option>
