@@ -34,7 +34,7 @@ if ( !empty($user) && strripos($user->email,'@'.$GOOGLE_DOMAIN) === False ) {
   $result = 'Wrong Google Domain';
 }
 
-if ( !empty($submitted) ) {
+if ( !empty($submitted) && ! $error ) {
   $email = input( 'email', INPUT_HTML_NONE );
   $user_email = $email;
   $entry = array();
@@ -63,6 +63,10 @@ if ( !empty($submitted) ) {
           $error = 1;
           $result = 'Password to short';
         }
+        if ( $times = is_pwned_password($password) ) {
+          $error = 1;
+          $result = "Password compromised, you can not use this password.  This password has been seen $times times before.  This password has previously appeared in a data breach and should never be used.  If you've ever used it anywhere before, you should change it as soon as possible.";
+        }
 
         $entry = google_user_hash_for_ldap( $user );
         $entry['objectclass'] = array('top','inetOrgPerson','posixAccount','sambaSamAccount');
@@ -77,7 +81,7 @@ if ( !empty($submitted) ) {
     $result = 'User not signed in';
   }
 
-  if ( !empty($entry['dn']) && !empty($password) ) {
+  if ( !empty($entry['dn']) && !empty($password) && ! $error ) {
     $ldap = new LDAP_Wrapper();
     $dups = $ldap->quick_search( array( 'uid' => $entry['uid'] ), array() );
 

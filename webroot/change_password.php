@@ -65,14 +65,18 @@ if ( !empty($user) ) {
       }
 
       if ( ! empty($dn) ) {
-        if ( $password === $password2 && strlen($password) >=8 ) {
+        if ( $password !== $password2 ) {
+          $errors[] = 'PASSWORDS_NO_MATCH';
+        } else if ( strlen($password) >=8 ) {
+          $errors[] = 'PASSWORDS_TO_SHORT';
+        } else if ( $times = is_pwned_password($password) ) {
+          $errors[] = 'PASSWORDS_TO_COMMON';
+          $output['error_times'] = $times;
+        } else {
           $result = google_set_password( $email, $password );
           set_password( $ldap, $dn, $password );
           log_attr_change( $dn, array('userPassword'=>'') );
           $output['success'] = true;
-        }
-        else {
-          $errors[] = 'PASSWORDS_NO_MATCH_OR_TOO_SHORT';
         }
       }
       else {

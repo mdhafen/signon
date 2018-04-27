@@ -114,6 +114,18 @@ function remove_from_groups( $ldap, $userdn ) {
 	return $result;
 }
 
+function is_pwned_password( $password ) {
+    $dbh = db_connect('core');
+    $sth = $dbh->prepare('SELECT * FROM pwned_passwords WHERE hash = :hash');
+    $sth->bindValue( ':hash', sha1($password) );
+    $sth->execute();
+    if ( $row = $sth->fetch() ) {
+        return $row['times_seen'];
+    }
+
+    return 0;
+}
+
 function log_attr_change( $userdn, $changes ) {
 	$user = ldap_explode_dn($userdn,1);
 	$user = ldap_unescape($user[0]);

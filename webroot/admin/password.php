@@ -49,6 +49,12 @@ if ( ! empty($password) ) {
 		output( $output, 'admin/password.tmpl' );
 		exit;
 	}
+	if ( $times = is_pwned_password($password) ) {
+		$output['error'] = 'PASS_TO_COMMON';
+        $output['error_times'] = $times;
+		output( $output, 'admin/password.tmpl' );
+		exit;
+	}
 
 	if ( !empty($object['employeeType'][0]) ) {
 		$result = google_set_password( $object['mail'][0], $password );
