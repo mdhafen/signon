@@ -8,6 +8,7 @@ if ( is_readable( $hash_file ) ) {
     $handle = fopen( $hash_file, "r" );
 
     $dbh->query('TRUNCATE pwned_passwords');
+    $dbh->beginTransaction();
     $sth = $dbh->prepare('INSERT INTO pwned_passwords (hash,times_seen) VALUES (:hash,:seen)');
 
     while ( ($word = fgets($handle)) !== false ) {
@@ -19,6 +20,7 @@ if ( is_readable( $hash_file ) ) {
         $sth->execute();
     }
     fclose( $handle );
+    $dbh->commit();
 }
 
 ?>
