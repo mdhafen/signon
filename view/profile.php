@@ -57,6 +57,18 @@ include( 'doc-header.php' );
 <h1><?= $data['object']['cn'][0] ?></h1>
 <div class="mainpage">
 
+<?php if ( ! empty($data['error']) ) { ?>
+<div class="alert alert-danger" role="alert">
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+<h1>Error!  Your password has not been changed!</h1>
+<?php if ( $data['error'] == 'PASS_TO_COMMON' ) { ?>
+<p><span class="big">Password compromised, you can not use this password.</span><br>  This password has been seen <?= $data['error_times'] ?> times before.  <span class="small">This password has previously appeared in a data breach and should never be used.  If you've ever used it anywhere before, you should change it as soon as possible.</span></p>
+<?php } else { ?>
+<?= $data['error'] ?>
+<?php } ?>
+</div>
+<?php } ?>
+
 <div class="panel panel-default panel-body">
   <div class="container-fluid">
     <div class="row">

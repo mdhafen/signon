@@ -32,13 +32,14 @@ else {
 
 	if ( !empty($password) && !empty($password2) ) {
 		if ( strlen($password) < 8 ) {
-			$output['result'] = 'Password is to short';
+			$output['error'] = 'Password is to short';
 		}
         else if ( $times = is_pwned_password($password) ) {
-			$output['result'] = "Password compromised, you can not use this password.  This password has been seen $times times before.  This password has previously appeared in a data breach and should never be used.  If you've ever used it anywhere before, you should change it as soon as possible.";
+			$output['error']= 'PASS_TO_COMMON';
+            $output['error_times'] = $times;
         }
 		else if ( $password === $password2 ) {
-                        if ( !empty($object['employeeType'][0]) && $object['employeeType'][0] != 'Guest' ) {
+            if ( !empty($object['employeeType'][0]) && $object['employeeType'][0] != 'Guest' ) {
 				google_set_password( $object['mail'][0], $password );
 			}
 			set_password( $ldap, $dn, $password );
@@ -46,7 +47,7 @@ else {
 			$output['result'] = 'Password Set';
 		}
 		else {
-			$output['result'] = 'Passwords do not match';
+			$output['error'] = 'Passwords do not match';
 		}
 	}
 
