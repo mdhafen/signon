@@ -40,6 +40,7 @@ function set_password( $ldap, $userdn, $password ) {
 		}
 		if ( in_array( 'sambaSamAccount', $object['objectClass'] ) ) {
 			$entry['sambaNTPassword'] = $smb_pass;
+            $entry['sambaPwdLastSet'] = time();
 		}
 
 		if ( ! empty( $entry ) ) {
