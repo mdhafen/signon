@@ -13,10 +13,12 @@ $template = 'admin/register.tmpl';
 $mac = input( 'client_mac', INPUT_STR );
 $location = input( 'loc', INPUT_PINT );
 $description = input( 'desc', INPUT_HTML_NONE );
+$category = input( 'cat', INPUT_HTML_NONE );
 $drop_first = input( 'drop_first', INPUT_STR );
 $mac_column = input( 'mac_column', INPUT_PINT );
 $loc_column = input( 'loc_column', INPUT_PINT );
 $desc_column = input( 'desc_column', INPUT_PINT );
+$cat_column = input( 'cat_column', INPUT_PINT );
 $op = input( 'op', INPUT_STR );
 $search_term = input( 'search_term', INPUT_HTML_NONE );
 
@@ -45,10 +47,24 @@ if ( !empty($op) ) {  // force other values here too?
     $user = $object['uid'][0];
     if ( ! in_array( $location, array_column($locations,'id') ) ) { $location = 0; }
 
+/*
+ * vlans:
+ * 10(Lan), 20(Labs), 50(Facilities), 70(Phone), 99(Guest)
+ */
+    switch ( $category ) {
+        case 'Lan' :
+        case 'Labs' :
+        case 'Facilities' :
+        case 'Phone' :
+        case 'Guest' :
+            break;
+        default : $category = '';
+    }
+
     if ( $op == 'Register' ) {
-        if ( !empty($mac) && !empty($location) ) {
+        if ( !empty($mac) && !empty($location) && !empty($category) ) {
             $mac = labs_normalize_mac( $mac );
-            $error = labs_register_mac( $mac, $location, $description, $user, $ip );
+            $error = labs_register_mac( $mac, $location, $description, $category, $user, $ip );
             if ( !$error ) {
                 $output['success'] = true;
             }
@@ -59,7 +75,7 @@ if ( !empty($op) ) {  // force other values here too?
         }
         else {
             $output['error'] = 1;
-            $output['err_msg'] = "MAC Address ($mac) or Location ($location) invalid";
+            $output['err_msg'] = "MAC Address ($mac) or Location invalid";
         }
     } else if ( $op == 'Import' && !empty($mac_column) ) {
         $line_number = 0;
@@ -83,15 +99,24 @@ if ( !empty($op) ) {  // force other values here too?
                 $mac = labs_normalize_mac( $row[ $mac_column - 1 ] );
                 $desc = empty($desc_column) && empty($row[ $desc_column - 1 ]) ? $description : trim($row[ $desc_column - 1 ]);
                 $loc = empty($loc_column) && empty($row[ $loc_column - 1 ]) ? $location : trim($row[ $loc_column - 1 ]);
+                $cat = empty($cat_column) && empty($row[ $cat_column - 1 ]) ? $category : trim($row[ $cat_column - 1 ]);
                 if ( ! in_array( $loc, array_column($locations,'id') ) ) { $loc = 0; }
-
-                if ( !empty($mac) && !empty($loc) ) {
-                    labs_register_mac( $mac, $loc, $desc, $user, $ip );
+                switch ( $cat ) {
+                    case 'Lan' :
+                    case 'Labs' :
+                    case 'Facilities' :
+                    case 'Phone' :
+                    case 'Guest' :
+                        break;
+                    default : $cat = 'Labs';
+                }
+                if ( !empty($mac) && !empty($loc) && !empty($cat) ) {
+                    labs_register_mac( $mac, $loc, $desc, $cat, $user, $ip );
                     $registered++;
                 }
                 else {
                     $output['error'] = 1;
-                    $output['err_msg'] = "Import file contains lines with invalid MAC Address ($mac) or Location ($loc).  Line $line_number: ". implode( ',', $row );
+                    $output['err_msg'] = "Import file contains lines with invalid MAC Address ($mac) or Location.  Line $line_number: ". implode( ',', $row );
                 }
             }
             $output['registered'] = $registered;

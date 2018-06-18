@@ -36,14 +36,15 @@ function labs_get_macs( $search_term = null ) {
   return $result;
 }
 
-function labs_register_mac( $mac, $location = '', $desc = '', $user, $ip ) {
+function labs_register_mac( $mac, $location = '', $desc = '', $cat = 'Labs', $user, $ip ) {
   $dbh = db_connect('Labs');
 
-  $query = "INSERT INTO authorized_macs ( macaddress, device_home, submitted_desc, submitted_user, submitted_ip, submitted_date ) VALUES ( :mac, :loc, :desc, :user, :ip, CURDATE() )";
+  $query = "INSERT INTO authorized_macs ( macaddress, device_home, submitted_desc, device_category, submitted_user, submitted_ip, submitted_date ) VALUES ( :mac, :loc, :desc, :cat, :user, :ip, CURDATE() )";
   $sth = $dbh->prepare( $query );
   $sth->bindValue( ':mac', $mac );
   $sth->bindValue( ':loc', $location );
   $sth->bindValue( ':desc', $desc );
+  $sth->bindValue( ':cat', $cat );
   $sth->bindValue( ':user', $user );
   $sth->bindValue( ':ip', ip_to_decimal( $ip ) );
 

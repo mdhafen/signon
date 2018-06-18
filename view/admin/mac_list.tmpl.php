@@ -53,6 +53,7 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 <th>Registered By</th>
 <th>Device Home</th>
 <th>Device Description</th>
+<th>Device Category</th>
 <th>Date Registered</th>
 <th></th>
 </tr>
@@ -65,6 +66,7 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 <td><?= $mac_row['submitted_user'] ?></td>
 <td><?= $mac_row['device_home'] ?></td>
 <td><?= $mac_row['submitted_desc'] ?></td>
+<td><?= $mac_row['device_category'] ?></td>
 <td><?= $mac_row['submitted_date'] ?></td>
 <td>
   <form method="post" action="register.php" class="form-horizontal" method="post" enctype="multipart/form-data">

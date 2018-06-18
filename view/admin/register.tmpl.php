@@ -53,6 +53,20 @@ There was an error! <?= $data['err_msg'] ?>
 </div>
 
 <div class="row form-group">
+  <label for="cat" class="col-sm-4 control-label">Device Category</label>
+  <div class="col-sm-8">
+  <select name="cat" id="cat">
+      <option value="Labs" selected>Lab device</option>
+      <option value="Lan">Staff device</option>
+      <option value="Facilities">Facilities device</option>
+      <option value="Phone">Phone</option>
+      <option value="Guest">Guest / untrusted device</option>
+  </select>
+  <span class="help-block">This field effects device access to school and district networks.  Only change this if you have been told to by Technology Department staff.</span>
+  </div>
+</div>
+
+<div class="row form-group">
 <input type="submit" name="op" value="Register" class="btn">
 </div>
 
@@ -84,6 +98,14 @@ There was an error! <?= $data['err_msg'] ?>
 <div class="col-sm-8">
   <input type="text" id="desc_column" name="desc_column" placeholder="for example: 2" class="form-control">
   <span class="help-block">Uses Description field above as a default value.</span>
+</div>
+</div>
+
+<div class="row form-group">
+<label for="cat_column" class="col-sm-4 control-label">Column of Device Category</label>
+<div class="col-sm-8">
+  <input type="text" id="cat_column" name="cat_column" placeholder="for example: 3" class="form-control">
+  <span class="help-block">Uses device category field above as a default value.</span>
 </div>
 </div>
 
