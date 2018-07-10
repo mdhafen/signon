@@ -67,7 +67,7 @@ if ( !empty($user) ) {
       if ( ! empty($dn) ) {
         if ( $password !== $password2 ) {
           $errors[] = 'PASSWORDS_NO_MATCH';
-        } else if ( strlen($password) >=8 ) {
+        } else if ( strlen($password) < 8 ) {
           $errors[] = 'PASSWORDS_TO_SHORT';
         } else if ( $times = is_pwned_password($password) ) {
           $errors[] = 'PASSWORDS_TO_COMMON';
