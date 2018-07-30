@@ -56,11 +56,11 @@ There was an error! <?= $data['err_msg'] ?>
   <label for="cat" class="col-sm-4 control-label">Device Category</label>
   <div class="col-sm-8">
   <select name="cat" id="cat">
-      <option value="Labs" selected>Lab device</option>
-      <option value="Lan">Staff device</option>
-      <option value="Facilities">Facilities device</option>
-      <option value="Phone">Phone</option>
-      <option value="Guest">Guest / untrusted device</option>
+      <option value="Labs"<?= empty($data['category']) || $data['category'] == 'Labs' ? " selected":"" ?>>Lab device</option>
+     <option value="Lan"<?= !empty($data['category']) && $data['category'] == 'Lan' ? " selected":""?>>Staff device</option>
+      <option value="Facilities"<?= !empty($data['category']) && $data['category'] == 'Facilities' ? " selected":""?>>Facilities device</option>
+      <option value="Phone"<?= !empty($data['category']) && $data['category'] == 'Phone' ? " selected":""?>>Phone</option>
+      <option value="Guest"<?= !empty($data['category']) && $data['category'] == 'Guest' ? " selected":""?>>Guest / untrusted device</option>
   </select>
   <span class="help-block">This field effects device access to school and district networks.  Only change this if you have been told to by Technology Department staff.</span>
   </div>

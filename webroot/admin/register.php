@@ -29,9 +29,10 @@ if ( empty($mac) && !empty($_SESSION['client_mac']) ) {
 $locations = labs_get_locations();
 $ip = get_remote_ip();
 $curr_loc = lab_get_locationid_for_ip( $ip );
+$selected_loc = empty($location) ? $curr_loc : $location;
 
 foreach ( $locations as &$loc ) {
-  if ( $loc['id'] == $curr_loc ) {
+  if ( $loc['id'] == $selected_loc ) {
     $loc['selected'] = true;
   }
 }
@@ -39,6 +40,7 @@ foreach ( $locations as &$loc ) {
 $output['client_mac'] = $mac;
 $output['locations'] = $locations;
 $output['desc'] = $description;
+$output['category'] = $category;
 
 if ( !empty($op) ) {  // force other values here too?
     $dn = $_SESSION['userid'];
