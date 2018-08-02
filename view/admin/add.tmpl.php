@@ -6,6 +6,14 @@ function update_dn(val,rid) {
          var parent_el = document.getElementById('parent');
          dn_el.value = rid + "=" + val + "," + parent_el.value;
 }
+
+function add_field( btn, attr_num ) {
+  var newInput = document.createElement("input");
+  newInput.setAttribute("type","text");
+  newInput.setAttribute("class","form-control");
+  newInput.setAttribute("name",attr_num+"_val[]");
+  btn.parentNode.insertBefore( newInput, btn )
+}
 </script>
 <?php
 include( $data['_config']['base_dir'] .'/view/doc-head-close.php' );
@@ -48,7 +56,7 @@ foreach ( $data['must'] as $attr ) {
 <?php
    if ( empty($data['attrs'][$attr]['SINGLE-VALUE']) ) {
 ?>
-<input type="button" class="btn btn-default" value="+" onclick="add_field('<?= $count ?>')">
+<input type="button" class="btn btn-default" value="+" onclick="add_field(this,'<?= $count ?>')">
 <?php
    }
 ?>
@@ -65,7 +73,7 @@ foreach ( $data['must'] as $attr ) {
 <div class="col-sm-8">
 <input type="text" id="<?= $count ?>_val" name="<?= $count ?>_val[]" value=""<?= empty($data['defaults'][$attr]) ? ' placeholder="'. $data['defaults'][$attr] .'"' : '' ?> class="form-control">
 <?php   if ( empty($data['attrs'][$attr]['SINGLE-VALUE']) ) { ?>
-<input type="button" class="btn btn-default" value="+" onclick="add_field('<?= $count ?>')">
+<input type="button" class="btn btn-default" value="+" onclick="add_field(this,'<?= $count ?>')">
 <?php   } ?>
 </div>
 </div>
@@ -73,7 +81,6 @@ foreach ( $data['must'] as $attr ) {
         $count++;
     }
 ?>
-</div>
 
 <div>
 <input type="submit" name="action" value="Add" class="btn btn-default">
@@ -85,6 +92,7 @@ foreach ( $data['must'] as $attr ) {
 </div>
 </form>
 
+</div>
 </div>
 </div>
 
