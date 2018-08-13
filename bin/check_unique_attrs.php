@@ -14,16 +14,17 @@ foreach ( $attrs as $user ) {
             $matches[$attr] = array();
         }
         if ( empty($matches[$attr][ $user[$attr][0] ]) ) {
-            $matches[$attr][ $user[$attr][0] ] = 0;
+            $matches[$attr][ $user[$attr][0] ] = array('count'=>0,'uids'=>array());
         }
-        $matches[$attr][ $user[$attr][0] ]++;
+        $matches[$attr][ $user[$attr][0] ]['count']++;
+        $matches[$attr][ $user[$attr][0] ]['uids'][ $user['uid'][0] ] = 0;
     }
 }
 
 foreach ( $matches as $attr => $values ) {
-    foreach ( $values as $key => $value ) {
-        if ( $value <= 1 ) { continue; }
-        print "$attr $key: $value\n";
+    foreach ( $values as $key => $values ) {
+        if ( $values['count'] <= 1 ) { continue; }
+        print "$attr $key: ". $values['count'] ." ". implode(',',array_keys($values['uids'])) ."\n";
     }
 }
 ?>
