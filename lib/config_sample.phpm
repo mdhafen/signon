@@ -10,6 +10,13 @@ $config = array(
 		'external' => 0,
 		'ldap'     => 'core',
 	),
+	'password_modes'   => array(
+		'salted_hash' => 1,
+		'openssl_bf_cbc' => 1,
+		'mcrypt_bf_ecb' => 1,
+		'md5' => 1,
+		'upgrade_from_old' => 1,
+	),
 	'authen_external_login_html' => '', //'<a class="external_auth_button" href="https://openid.localdomain/oidredirection?pluginName=FIXME">External Login</a>',
 	'user_external_module' => '',
 	'PS_API' => array(

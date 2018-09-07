@@ -157,19 +157,65 @@ function authen_db( $module, $username, $password ) {
 	global $config;
 	$user = user_by_username( $username, $module );
 	if ( $user && $user['username'] && $user['password'] ) {
-		$cipher = mcrypt_module_open( 'blowfish', '', 'ecb', '' );
-		$iv = mcrypt_create_iv( mcrypt_enc_get_iv_size( $cipher ), MCRYPT_RAND );
-		$key = substr( base64_decode( $user[ 'salt' ] ) . $config[ 'secure_phrase' ], 0, mcrypt_enc_get_key_size( $cipher ) );
-		mcrypt_generic_init( $cipher, $key, $iv );
+		$user_password = '';
+		$key = '';
+		$success = 0;
+		$old = 0;
+		if ( !$success && !empty($config['password_modes']['openssl_bf_cbc']) ) {
+			$cipher = 'BF-CBC';
+			$key = base64_decode( $user['salt'] ) . $config['secure_phrase'];
+			$user_password = openssl_decrypt( $user['password'], $cipher, $key );
+			$user_password = rtrim($user_password, "\0" );
+			if ( strcmp( $user_password, $password ) == 0 ) {
+				$success = 1;
+				$old = !empty($config['password_modes']['salted_hash']);
+			}
+		}
 
-		$user_password = mdecrypt_generic( $cipher, base64_decode( $user[ 'password' ] ) );
-		mcrypt_generic_deinit( $cipher );
-		mcrypt_module_close( $cipher );
+		if ( !$success && !empty($config['password_modes']['salted_hash']) ) {
+			$h_password = hash( 'sha512', $password . $key );
+			if ( strcmp( $user_password, $h_password ) == 0 ) {
+				$success = 1;
+			}
+		}
 
-		$user_password = rtrim($user_password, "\0" );
-		if ( strcmp( $user_password, $password ) == 0 ) {
+		if ( !$success && !empty($config['password_modes']['mcrypt_bf_ecb']) ) {
+			$cipher = 'BF-ECB';
+			$key = substr( base64_decode( $user['salt'] ) . $config['secure_phrase'], 0, 56 ); //mcrypt_enc_get_key_size('bf-ecb') returns 56
+
+			$user_password = openssl_decrypt( base64_decode($user['password']), $cipher, $key, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING );
+			$user_password = rtrim($user_password, "\0" );
+			if ( strcmp( $user_password, $password ) == 0 ) {
+				$success = 1;
+				$old = !empty($config['password_modes']['openssl_bf_cbc']);
+			}
+		}
+
+		if ( !$success && !empty($config['password_modes']['salted_hash']) ) {
+			$h_password = hash( 'sha512', $password . $key );
+			if ( strcmp( $user_password, $h_password ) == 0 ) {
+				$success = 1;
+				$old = !empty($config['password_modes']['openssl_bf_cbc']);
+			}
+		}
+
+		if ( !empty($config['password_modes']['md5']) ) {
+			$user_password = md5( $password . $user['salt'] );
+			if ( strcmp( $user['password'], $user_password ) == 0 ) {
+				$success = 1;
+				$old = 1;
+			}
+		}
+
+		if ( $success ) {
 			// dont need these anymore
 			unset( $user['salt'], $user['password'] );
+			if ( $old && !empty($config['password_modes']['upgrade_from_old']) ) {
+				list($new_pass,$new_salt) = new_password($password);
+				$updated['salt'] = $new_salt;
+				$updated['password'] = $new_pass;
+				update_user( $user['userid'], $updated );
+			}
 			return $user;
 		}
 	}
@@ -249,25 +295,21 @@ function roles() {
 
 function new_password( $new_password ) {
 	global $config;
-	$cipher = mcrypt_module_open( 'blowfish', '', 'ecb', '' );
-	$iv = mcrypt_create_iv( mcrypt_enc_get_iv_size( $cipher ), MCRYPT_RAND );
-	$key_size = mcrypt_enc_get_key_size( $cipher );
+
+	$cipher = 'BF-CBC';
+	$key_size = 72;
 
 	$rand_length = rand( $key_size - strlen( $config[ 'secure_phrase' ] ), $key_size );
-	$salt = '';
-	for ( $i = 0; $i < $rand_length; $i++ ) {
-		$salt .= chr( rand( 32, 255 ) );
-	}  // utilize as much of each byte as possible by using extended ASCII
+	$salt = openssl_random_pseudo_bytes($rand_length);
 
-	$key = substr( $salt . $config[ 'secure_phrase' ], 0, $key_size );
-	mcrypt_generic_init( $cipher, $key, $iv );
+	$key = $salt . $config[ 'secure_phrase' ];
 
-	$user_password = mcrypt_generic( $cipher, $new_password );
+	if ( !empty($config['password_modes']['salted_hash']) ) {
+		$new_password = hash( 'sha512', $new_password . $key );
+	}
+	$user_password = openssl_encrypt( $new_password, $cipher, $key );
 
-	mcrypt_generic_deinit( $cipher );
-	mcrypt_module_close( $cipher );
-
-	return array( base64_encode( $user_password ), base64_encode( $salt ) );
+	return array( $user_password, base64_encode( $salt ) );
 }
 
 /*
