@@ -45,6 +45,9 @@ for ( $i = 1; $i < $count; $i++ ) {
 	if ( ! empty($vals) ) {
 		$input[ $attr ] = $vals;
 	}
+    if ( $attr == 'objectClass' && count($vals) != count($object['objectClass']) ) {
+        list( $must, $may ) = $ldap->schema_get_object_requirements($vals);
+    }
 }
 $input_attrs = array_keys( $input );
 foreach ( $must as $attr ) {
@@ -138,9 +141,9 @@ if ( !empty($adds) || !empty($dels) || !empty($reps) ) {
 			unset( $adds['userPassword'] );
 		}
 
-		$ldap->do_attr_replace( $objectdn, $reps );
+		$ldap->do_attr_replace( $objectdn, array_merge($adds,$reps) );
 		$ldap->do_attr_del( $objectdn, $dels );
-		$ldap->do_attr_add( $objectdn, $adds );
+		//$ldap->do_attr_add( $objectdn, $adds );
 
 		$mods = array_keys(array_merge($dels,$adds,$reps));
 		$changes = array();

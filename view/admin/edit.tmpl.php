@@ -10,8 +10,8 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 
 <h1><?= $data['object_dn'] ?></h1>
 <div class="panel panel-default panel-body">
-<div class="container-fluid">
 <form method="post" action="save.php" class="form-horizontal">
+<div class="container-fluid">
 <?php
 $count = 1;
 foreach ( $data['must'] as $attr ) {
@@ -21,11 +21,11 @@ foreach ( $data['must'] as $attr ) {
 <div class="col-sm-8">
 <?php   if ( ! empty($data['object'][$attr]) ) {
             foreach ( $data['object'][$attr] as $val ) { ?>
-<input type="text" name="<?= $count ?>_val[]" value="<?= $val ?>" class="form-control">
+<input type="text" id="<?= $count ?>_val" name="<?= $count ?>_val[]" value="<?= $val ?>" class="form-control">
 <?php       }
         }
 	else { ?>
-<input type="text" name="<?= $count ?>_val[]" value="" class="form-control" required="true">
+<input type="text" id="<?= $count ?>_val" name="<?= $count ?>_val[]" value="" class="form-control" required="true">
 <?php   }
         if ( empty($data['attrs'][$attr]['SINGLE-VALUE']) ) { ?>
 <input type="button" class="btn btn-default" value="+" onclick="add_field(this,'<?= $count ?>')">
@@ -44,7 +44,7 @@ foreach ( $data['must'] as $attr ) {
 <?php   if ( ! empty($data['object'][$attr]) ) { ?>
 <?php     foreach ( $data['object'][$attr] as $val ) { ?>
 <?php       if ( $attr == 'businessCategory' ) { ?>
-<select name="<?= $count ?>_val[]">
+<select id="<?= $count ?>_val" name="<?= $count ?>_val[]">
   <option value="">Select a category</option>
   <option value="Staff"<?= $val == 'Staff' ? " selected":"" ?>>Staff</option>
   <option value="Student"<?= $val == 'Student' ? " selected":"" ?>>Student</option>
@@ -61,7 +61,7 @@ foreach ( $data['must'] as $attr ) {
         }
         else { ?>
 <?php     if ( $attr == 'businessCategory' ) { ?>
-<select name="<?= $count ?>_val[]">
+<select id="<?= $count ?>_val" name="<?= $count ?>_val[]">
   <option value="Staff"<?= $val == 'Staff' ? " selected":"" ?>>Staff</option>
   <option value="Student"<?= $val == 'Student' ? " selected":"" ?>>Student</option>
   <option value="Guest"<?= $val == 'Guest' ? " selected":"" ?>>Guest</option>
@@ -71,7 +71,7 @@ foreach ( $data['must'] as $attr ) {
   <option value="Banned"<?= $val == 'Banned' ? " selected":"" ?>>Banned</option>
 </select>
 <?php     } else { ?>
-<input type="text" name="<?= $count ?>_val[]" value="" class="form-control">
+<input type="text" id="<?= $count ?>_val" name="<?= $count ?>_val[]" value="" class="form-control">
 <?php     } ?>
 <?php   }
         if ( empty($data['attrs'][$attr]['SINGLE-VALUE']) ) { ?>
@@ -91,7 +91,9 @@ foreach ( $data['must'] as $attr ) {
 <input type="hidden" name="dn" value="<?= $data['object_dn'] ?>">
 <a class="btn btn-default" href="object.php?dn=<?= urlencode($data['object_dn']) ?>">Cancel</a>
 </div>
+
 </form>
+</div>
 
 </div>
 </div>
