@@ -2,7 +2,6 @@ PHP Modules required for this to work:
 
 php5-ldap
 php-mcrypt?
-php-xml-serializer
 php-google-api-php-client
 php5-imap
 

@@ -34,7 +34,6 @@ $PROVIDER_MAP = array(
 
 set_include_path( get_include_path() . PATH_SEPARATOR . $config['base_dir'].'/inc/Google_Client' );
 require_once "Google/autoload.php";
-require_once 'XML/Unserializer.php';
 include_once 'google_functions_directory.php';
 
 global $GOOGLE_CLIENT_SCOPES,$GOOGLE_SERVICE_SCOPES;
