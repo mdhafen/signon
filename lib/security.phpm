@@ -89,16 +89,27 @@ function get_authorizations() {
 
 function authenticate() {
 	global $config;
+	$op = input( '_op', INPUT_HTML_NONE );
 
-	if ( ! isset( $_SESSION[ 'loggedin_user' ] ) ) {
+	if ( $op == 'do_login' || ! isset( $_SESSION[ 'loggedin_user' ] ) ) {
+		$user = 0;
 		$username = input( '_username', INPUT_HTML_NONE );
 		$password = input( '_password', INPUT_STR );
 		if ( ! $username || ! $password ) {
-			$_SESSION[ 'NOSESSION' ] = 1;
-			$_SESSION[ 'username' ] = $username;
-			$_SESSION[ 'token' ] = '';
+			if ( !empty($config['authen_modules']['basic']) ) {
+				$username = $_SERVER['REMOTE_USER'];
+				$module = $config['authen_modules']['db'];
+				$user = user_by_username( $username, $module );
+			}
+			if ( !$user && !empty($config['authen_modules']['external']) ) {
+				$module = $config['authen_modules']['external'];
+				if ( is_readable( $config['base_dir'] ."/lib/". $module .".phpm" ) ) {
+					include_once( $module .".phpm" );
+					$ex = new Authen_External();
+					$user = $ex->authen_external( $module );
+				}
+			}
 		} else {
-			$user = 0;
 			if ( !empty( $config['authen_modules'] ) ) {
 				if ( !empty($config['authen_modules']['ldap']) ) {
 					$module = $config['authen_modules']['ldap'];
@@ -106,33 +117,36 @@ function authenticate() {
 				}
 				if ( ! $user && !empty($config['authen_modules']['external']) ) {
 					$module = $config['authen_modules']['external'];
+					if ( is_readable( $config['base_dir'] ."/lib/". $module .".phpm" ) ) {
+						include_once( $module .".phpm" );
+						$ex = new Authen_External();
+						$user = $ex->authen_external( $module, $username, $password );
+					}
 				}
 				if ( ! $user && !empty($config['authen_modules']['db']) ) {
 					$module = $config['authen_modules']['db'];
 					$user = authen_db( $module, $username, $password );
 				}
 			}
-			if ( $user && $user['username'] ) {
-				unset( $_SESSION[ 'BADLOGIN' ] );
-				unset( $_SESSION[ 'NOSESSION' ] );
-				$token = hash(
-					'sha512',
-					session_id() .','.
-					$_SERVER[ 'REMOTE_ADDR' ] .','.
-					$config[ 'secure_phrase' ]
-					);
-				$_SESSION[ 'token' ] = $token;
-				$_SESSION[ 'userid' ] = $user[ 'userid' ];
-				$_SESSION[ 'username' ] = $user[ 'username' ];
-				$_SESSION[ 'loggedin_user' ] = $user;
-				$_SESSION[ 'new_session' ] = 1;
-				append_log( "Valid Login by ".$user['username'], 'auth' );
-			} else {
-				$_SESSION[ 'BADLOGIN' ] = 1;
-				$_SESSION[ 'token' ] = '';
-				$_SESSION[ 'username' ] = $username;
-				append_log( "Invalid Login attempt by $username", 'auth' );
-			}
+		}
+		if ( $user && $user['username'] ) {
+			unset( $_SESSION[ 'BADLOGIN' ] );
+			unset( $_SESSION[ 'NOSESSION' ] );
+			$token = hash(
+				'sha512',
+				session_id() .','.
+				$_SERVER[ 'REMOTE_ADDR' ] .','.
+				$config[ 'secure_phrase' ]
+				);
+			$_SESSION[ 'token' ] = $token;
+			$_SESSION[ 'userid' ] = $user[ 'userid' ];
+			$_SESSION[ 'username' ] = $user[ 'username' ];
+			$_SESSION[ 'loggedin_user' ] = $user;
+			$_SESSION[ 'new_session' ] = 1;
+		} else {
+			$_SESSION[ 'BADLOGIN' ] = 1;
+			$_SESSION[ 'token' ] = '';
+			$_SESSION[ 'username' ] = $username;
 		}
 	}
 
@@ -153,57 +167,149 @@ function authenticate() {
 	}
 }
 
+function authen_against_db() {
+	global $config;
+	$op = input( '_op', INPUT_HTML_NONE );
+	$output[ 'DBLOGIN' ] = 1;
+	// Make sure the user is the DB user
+	if ( isset($_SESSION['loggedin_user']) && $_SESSION['loggedin_user']['userid'] != -1 ) {
+		unset( $_SESSION['loggein_user'] );
+	}
+
+	if ( $op == 'do_login' || ! isset( $_SESSION[ 'loggedin_user' ] ) ) {
+		$user = 0;
+		$username = input( '_username', INPUT_HTML_NONE );
+		$password = input( '_password', INPUT_STR );
+
+		if ( empty($username) || empty($password) ) {
+			$output[ 'BADLOGIN' ] = 1;
+		}
+		else {
+			$db_user = $config['database']['core']['write']['user'];
+			$db_pass = $config['database']['core']['write']['passwd'];
+			if ( $username === $db_user && $password === $db_pass ) {
+				$user = array();
+				$user[ 'userid' ] = -1;
+				$user[ 'username' ] = $config['this_url'];
+			}
+		}
+
+		if ( $user && $user['username'] ) {
+			unset( $_SESSION[ 'NOSESSION' ] );
+			$token = hash(
+				'sha512',
+				session_id() .','.
+				$_SERVER[ 'REMOTE_ADDR' ] .','.
+				$config[ 'secure_phrase' ]
+				);
+			$_SESSION[ 'token' ] = $token;
+			$_SESSION[ 'userid' ] = $user[ 'userid' ];
+			$_SESSION[ 'username' ] = $user[ 'username' ];
+			$_SESSION[ 'loggedin_user' ] = $user;
+			$_SESSION[ 'new_session' ] = 1;
+		} else {
+			$output[ 'BADLOGIN' ] = 1;
+			$_SESSION[ 'token' ] = '';
+			$_SESSION[ 'username' ] = $username;
+		}
+	}
+
+	$my_token = hash(
+		'sha512',
+		session_id() .','.
+		$_SERVER[ 'REMOTE_ADDR' ] .','.
+		$config[ 'secure_phrase' ]
+	);
+
+	if ( $my_token == $_SESSION[ 'token' ] ) {
+		return 1;
+	} else {
+		if ( !empty( $_SESSION['token'] ) ) {
+			destroy_session();
+		}
+		output( $output, 'login' );
+		exit;
+	}
+}
+
 function authen_db( $module, $username, $password ) {
 	global $config;
 	$user = user_by_username( $username, $module );
 	if ( $user && $user['username'] && $user['password'] ) {
-		$user_password = '';
-		$key = '';
 		$success = 0;
-		$old = 0;
-		if ( !$success && !empty($config['password_modes']['openssl_bf_cbc']) ) {
-			$cipher = 'BF-CBC';
-			$key = base64_decode( $user['salt'] ) . $config['secure_phrase'];
-			$user_password = openssl_decrypt( $user['password'], $cipher, $key );
-			$user_password = rtrim($user_password, "\0" );
-			if ( strcmp( $user_password, $password ) == 0 ) {
-				$success = 1;
-				$old = !empty($config['password_modes']['salted_hash']);
+		$old = 1;
+		if ( $user['password_mode'] ) {
+			if ( empty($config['password_modes'][ $user['password_mode'] ]) ) {
+				output( array( 'PASSWORD_EXPIRED' => 1 ), 'login' );
+				exit;
+			}
+
+			switch ($user['password_mode']) {
+				case 'openssl_bf_cbc_sha512' :
+					$success = check_password( $password, 'openssl_bf_cbc', 'ssha512', $user );
+					$old = 0;
+					break;
+				case 'openssl_bf_cbc_noiv_sha512' :
+					$success = check_password( $password, 'openssl_bf_cbc_noiv', 'ssha512', $user );
+					break;
+				case 'mcrypt_bf_ecb_sha512' :
+					$success = check_password( $password, 'mcrypt_bf_ecb', 'ssha512', $user );
+					break;
+				case 'openssl_bf_cbc' :
+					$success = check_password( $password, 'openssl_bf_cbc', '', $user );
+					break;
+				case 'openssl_bf_cbc_noiv' :
+					$success = check_password( $password, 'openssl_bf_cbc_noiv', '', $user );
+					break;
+				case 'mcrypt_bf_ecb' :
+					$success = check_password( $password, 'mcrypt_bf_ecb', '', $user );
+					break;
+				case 'salted_sha512' :
+					$success = check_password( $password, '', 'ssha512', $user );
+					break;
+				case 'md5' :
+					$success = check_password( $password, '', 'md5', $user );
+					break;
 			}
 		}
-
-		if ( !$success && !empty($config['password_modes']['salted_hash']) ) {
-			$h_password = hash( 'sha512', $password . $key );
-			if ( strcmp( $user_password, $h_password ) == 0 ) {
-				$success = 1;
+		else {
+			if ( !$success && !empty($config['password_modes']['openssl_bf_cbc_sha512']) ) {
+				$success = check_password( $password, 'openssl_bf_cbc', 'ssha512', $user );
 			}
-		}
 
-		if ( !$success && !empty($config['password_modes']['mcrypt_bf_ecb']) ) {
-			$cipher = 'BF-ECB';
-			$key = substr( base64_decode( $user['salt'] ) . $config['secure_phrase'], 0, 56 ); //mcrypt_enc_get_key_size('bf-ecb') returns 56
-
-			$user_password = openssl_decrypt( base64_decode($user['password']), $cipher, $key, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING );
-			$user_password = rtrim($user_password, "\0" );
-			if ( strcmp( $user_password, $password ) == 0 ) {
-				$success = 1;
-				$old = !empty($config['password_modes']['openssl_bf_cbc']);
+			if ( !$success && !empty($config['password_modes']['openssl_bf_cbc']) ) {
+				$success = check_password( $password, 'openssl_bf_cbc', '', $user );
+				$old = $success && !empty($config['password_modes']['openssl_bf_cbc_sha512']);
 			}
-		}
 
-		if ( !$success && !empty($config['password_modes']['salted_hash']) ) {
-			$h_password = hash( 'sha512', $password . $key );
-			if ( strcmp( $user_password, $h_password ) == 0 ) {
-				$success = 1;
-				$old = !empty($config['password_modes']['openssl_bf_cbc']);
+			if ( !$success && !empty($config['password_modes']['openssl_bf_cbc_noiv_sha512']) ) {
+				$success = check_password( $password, 'openssl_bf_cbc_noiv', 'ssha512', $user );
+				$old = $success;
 			}
-		}
 
-		if ( !empty($config['password_modes']['md5']) ) {
-			$user_password = md5( $password . $user['salt'] );
-			if ( strcmp( $user['password'], $user_password ) == 0 ) {
-				$success = 1;
-				$old = 1;
+			if ( !$success && !empty($config['password_modes']['openssl_bf_cbc_noiv']) ) {
+				$success = check_password( $password, 'openssl_bf_cbc_noiv', '', $user );
+				$old = $success;
+			}
+
+			if ( !$success && !empty($config['password_modes']['mcrypt_bf_ecb_sha512']) ) {
+				$success = check_password( $password, 'mcrypt_bf_ecb', 'ssha512', $user );
+				$old = $success;
+			}
+
+			if ( !$success && !empty($config['password_modes']['mcrypt_bf_ecb']) ) {
+				$success = check_password( $password, 'mcrypt_bf_ecb', '', $user );
+				$old = $success;
+			}
+
+			if ( !$success && !empty($config['password_modes']['salted_sha512']) ) {
+				$success = check_password( $password, '', 'ssha512', $user );
+				$old = $success;
+			}
+
+			if ( !$success && !empty($config['password_modes']['md5']) ) {
+				$success = check_password( $password, '', 'md5', $user );
+				$old = $success;
 			}
 		}
 
@@ -211,15 +317,53 @@ function authen_db( $module, $username, $password ) {
 			// dont need these anymore
 			unset( $user['salt'], $user['password'] );
 			if ( $old && !empty($config['password_modes']['upgrade_from_old']) ) {
-				list($new_pass,$new_salt) = new_password($password);
+				list($new_pass,$new_salt,$new_mode) = new_password($password);
 				$updated['salt'] = $new_salt;
 				$updated['password'] = $new_pass;
+				$updated['password_mode'] = $new_mode;
 				update_user( $user['userid'], $updated );
 			}
 			return $user;
 		}
 	}
 	return 0;
+}
+
+function check_password( $password, $cipher, $hash, $user ) {
+	global $config;
+	$user_password = $user['password'];
+	$key = base64_decode( $user['salt'] ) . $config['secure_phrase'];
+	$iv = '';
+	$options = 0;
+
+	switch ( $cipher ) {
+		case 'openssl_bf_cbc': $cipher = 'BF-CBC'; $iv = substr( $key, 0, openssl_cipher_iv_length($cipher) ); break;
+		case 'openssl_bf_cbc_noiv': $cipher = 'BF-CBC'; $iv = ''; break;
+		case 'mcrypt_bf_ecb':
+			$cipher = 'BF-ECB';
+			$user_password = base64_decode($user_password);
+			$key = substr($key,0,56); // mcrypt_enc_get_key_size('bf-ecb') = 56
+			$iv = '';
+			$options = OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING;
+			break;
+		default: $cipher = ''; $iv = '';
+	}
+	switch ( $hash ) {
+		case 'ssha512': $password = hash( 'sha512', $password . $key ); break;
+		case 'md5': $password = md5( $password );
+	}
+
+	if ( $cipher ) {
+		$user_password = openssl_decrypt( $user_password, $cipher, $key, $options, $iv );
+		$user_password = rtrim($user_password, "\0" );
+	}
+
+	if ( strcmp( $user_password, $password ) === 0 ) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
 }
 
 function authen_ldap( $module, $username, $password ) {
@@ -234,7 +378,7 @@ function authen_ldap( $module, $username, $password ) {
 	if ( strcasecmp( $username, $ldap->config['userdn'] ) == 0 ) {
 		$set = array();
 		$set[] = array( 'dn' => $username, 'cn' => array($username) );
-		$role = 3;
+		$role = $ldap->config['sysadmin_role'];
 	}
 	else if ( strripos( $username, $ldap->config['base'] ) > 0 ) {
 		$set = $ldap->quick_search( array('objectClass'=>'*'), array(), 0, $username );
@@ -251,22 +395,22 @@ function authen_ldap( $module, $username, $password ) {
 	}
 
 	if ( $userdn ) {
-		if ( ! empty($ldap->config['roles']) ) {
-			foreach ( $ldap->config['roles'] as $role_id => $group_dn ) {
-				$group = $ldap->quick_search( array('objectClass'=>'groupOfNames'), array(), 0, $group_dn );
-				if ( ! empty($group[0]) && ! empty($group[0]['member']) ) {
-					foreach ( $group[0]['member'] as $member_dn ) {
-						if ( strcasecmp($member_dn,$userdn) == 0 ) {
-							if ( $role_id > $role ) {
-								$role = $role_id;
+		if ( $ldap->do_connect( $module, $userdn, $password ) ) {
+			if ( ! empty($ldap->config['roles']) ) {
+				foreach ( $ldap->config['roles'] as $role_id => $group_dn ) {
+					$group = $ldap->quick_search( array('objectClass'=>'groupOfNames'), array(), 0, $group_dn );
+					if ( ! empty($group[0]) && ! empty($group[0]['member']) ) {
+						foreach ( $group[0]['member'] as $member_dn ) {
+							if ( strcasecmp($member_dn,$userdn) == 0 ) {
+								if ( $role_id > $role ) {
+									$role = $role_id;
+								}
 							}
 						}
 					}
 				}
 			}
-		}
 
-		if ( $ldap->do_connect( $module, $userdn, $password ) ) {
 			$user = array(
 				'userid' => $userdn,
 				'username' => $username,
@@ -296,20 +440,24 @@ function roles() {
 function new_password( $new_password ) {
 	global $config;
 
+	$mode = 'openssl_bf_cbc';
 	$cipher = 'BF-CBC';
 	$key_size = 72;
+	$phrase_size = min( strlen($config['secure_phrase']), 8 );
 
-	$rand_length = rand( $key_size - strlen( $config[ 'secure_phrase' ] ), $key_size );
+	$rand_length = rand( $key_size - $phrase_size, $key_size );
 	$salt = openssl_random_pseudo_bytes($rand_length);
 
-	$key = $salt . $config[ 'secure_phrase' ];
+	$key = $salt . $config['secure_phrase'];
+	$iv = substr( $key, 0, openssl_cipher_iv_length($cipher) );
 
-	if ( !empty($config['password_modes']['salted_hash']) ) {
+	if ( !empty($config['password_modes']['openssl_bf_cbc_sha512']) ) {
 		$new_password = hash( 'sha512', $new_password . $key );
+		$mode .= '_sha512';
 	}
-	$user_password = openssl_encrypt( $new_password, $cipher, $key );
+	$user_password = openssl_encrypt( $new_password, $cipher, $key, $options=0, $iv );
 
-	return array( $user_password, base64_encode( $salt ) );
+	return array( $user_password, base64_encode( $salt ), $mode );
 }
 
 /*

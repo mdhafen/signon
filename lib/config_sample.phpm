@@ -11,8 +11,9 @@ $config = array(
 		'ldap'     => 'core',
 	),
 	'password_modes'   => array(
-		'salted_hash' => 1,
+		'salted_sha512' => 1,
 		'openssl_bf_cbc' => 1,
+		'openssl_bf_cbc_noiv' => 1,
 		'mcrypt_bf_ecb' => 1,
 		'md5' => 1,
 		'upgrade_from_old' => 1,
@@ -71,6 +72,8 @@ $config = array(
 				2 => 'cn=TechnologyStaff,ou=Groups,dc=example',
 				3 => 'cn=DistrictManagers,ou=Groups,dc=example',
 			),
+			// role with most permissions
+			'sysadmin_role' => 3,
 		),
 	),
 	'auth' => array(
