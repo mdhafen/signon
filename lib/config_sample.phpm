@@ -136,6 +136,7 @@ while ( strripos( $dir, substr( $config['this_url'], 0, $count ) ) > 0 ) {
  except from certain trusted clients (the load balancers)
   (anything from the client, like these, can be easily spoofed
  */
+$host = '';
 if ( !empty($_SERVER['REMOTE_ADDR']) && ( !empty($_SERVER['SERVER_NAME']) || ( !empty($config['trusted_proxies']) && !empty($_SERVER['HTTP_X_FORWARDED_SERVER'])) ) ) {
 	if ( ! empty($config['trusted_proxies']) && array_search($_SERVER['REMOTE_ADDR'],$config['trusted_proxies']) !== false ) {
 		if ( isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' || isset($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on' ) {
