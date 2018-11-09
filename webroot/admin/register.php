@@ -57,6 +57,7 @@ if ( !empty($op) ) {  // force other values here too?
         case 'Lan' :
         case 'Labs' :
         case 'Facilities' :
+        case 'AV' :
         case 'Phone' :
         case 'Guest' :
             break;
@@ -107,6 +108,7 @@ if ( !empty($op) ) {  // force other values here too?
                     case 'Lan' :
                     case 'Labs' :
                     case 'Facilities' :
+                    case 'AV' :
                     case 'Phone' :
                     case 'Guest' :
                         break;
