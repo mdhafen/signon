@@ -13,6 +13,7 @@ function is_person( $o=array() ) {
 function set_password( $ldap, $userdn, $password ) {
 	$result = 0;
 	$entropy = get_entropy( $password );
+	$ip = get_remote_ip();
 	if ( ! empty($userdn) && ! empty($password) ) {
 		$set = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $userdn );
 		if ( !empty($set) ) {
@@ -49,7 +50,7 @@ function set_password( $ldap, $userdn, $password ) {
 			$user = ldap_explode_dn($userdn,1);
 			$user = ldap_unescape($user[0]);
 			$user = !empty($_SESSION['loggedin_user']['username']) ? $_SESSION['loggedin_user']['username'] : $user;
-			append_log( "Password changed by $user with entropy value $entropy for $userdn", 'auth' );
+			append_log( "Password changed by $user at $ip with entropy value $entropy for $userdn", 'auth' );
 		}
 	}
 	return $result;
