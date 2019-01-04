@@ -86,7 +86,9 @@ if ( !empty($submitted) && ! $error ) {
     $dups = $ldap->quick_search( array( 'uid' => $entry['uid'] ), array() );
 
     if ( count($dups) == 1 ) {
+      google_set_password( $entry['mail'], $password );
       set_password( $ldap, $dups[0]['dn'], $password );
+      log_attr_change( $dups[0]['dn'], array('userPassword'=>'') );
       $result = 'Account created';
     }
     else if ( count($dups) === 0 ) {
@@ -100,6 +102,7 @@ if ( !empty($submitted) && ! $error ) {
         $new_uid = explode('-',$entry['sambaSID']);
         $entry['uidNumber'] = end($new_uid);
         if ( $ldap->do_add( $dn, $entry ) ) {
+          google_set_password( $entry['mail'], $password );
           set_password( $ldap, $dn, $password );
           $result = 'Account created';
         }
