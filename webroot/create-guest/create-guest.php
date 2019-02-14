@@ -6,8 +6,6 @@ include_once( '../../lib/output.phpm' );
 include_once( '../../inc/google.phpm' );
 include_once( '../../inc/person.phpm' );
 
-global $PROVIDER_MAP;
-
 $output = array();
 $result = '';
 $error = 0;
@@ -50,7 +48,6 @@ if ( !empty($submitted) ) {
   $entry['employeeType'] = 'Guest';
   $entry['BusinessCategory'] = 'Guest';
   $entry['dn'] = 'uid='. ldap_escape($entry['uid'],'',LDAP_ESCAPE_DN) .',ou=Guest,dc=wcsd';
-  $provider = input( 'provider', INPUT_HTML_NONE );
 
   if ( !empty($entry['dn']) && !empty($password) ) {
     $ldap = new LDAP_Wrapper();
@@ -58,7 +55,7 @@ if ( !empty($submitted) ) {
 
     if ( count($dups) == 1 ) {
       set_password( $ldap, $dups[0]['dn'], $password );
-      google_send_password( $entry['uid'], $provider, $password );
+      google_send_password( $entry['uid'], $password );
       $result = 'Account created';
     }
     else if ( count($dups) === 0 ) {
@@ -69,7 +66,7 @@ if ( !empty($submitted) ) {
         $entry['sambaSID'] = $ldap->get_next_num('sambaSID');
         if ( $ldap->do_add( $dn, $entry ) ) {
           set_password( $ldap, $dn, $password );
-          google_send_password( $entry['uid'], $provider, $password );
+          google_send_password( $entry['uid'], $password );
           $result = 'Account created';
         }
         else {
@@ -90,7 +87,6 @@ if ( !empty($submitted) ) {
 $output['op'] = $op;
 $output['result'] = $result;
 $output['error'] = $error;
-$output['providers'] = array_keys( $PROVIDER_MAP );
 $output['username'] = (empty($user_email))? "" : $user_email;
 
 output( $output, 'create-guest/create-guest' );

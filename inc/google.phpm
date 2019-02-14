@@ -2,35 +2,20 @@
 global $config;
 include_once( $config['base_dir'].'/lib/output.phpm' );
 
+global $Twilio_From, $Twilio_Account, $Twilio_Token, $SMS_Message;
+$Twilio_From = '';
+$Twilio_Account = '';
+$Twilio_Token = '';
+$SMS_Message = "Your login for WCSDaccess follows, username: {{USERNAME}} password: {{PASSWORD}} Please don't reply, for help contact a WCSD Tech.";
+
+require_once 'Twilio/autoload.php';
+use Twilio\Rest\Client;
+
 global $GOOGLE_DOMAIN;
 global $GOOGLE_A_CLIENT,$GOOGLE_S_CLIENT;
 $GOOGLE_DOMAIN = 'washk12.org';
 $GOOGLE_A_CLIENT = '';
 $GOOGLE_S_CLIENT = '';
-
-global $GV_EMAIL, $GV_PASSWD, $GV_PHONE, $GV_MESSAGE, $PROVIDER_MAP;
-$GV_EMAIL = '';
-$GV_PASSWD = '';
-$GV_PHONE = '';
-$GV_MESSAGE = "Your login for WCSDaccess follows, username: {{USERNAME}} password: {{PASSWORD}} Please don't reply, for help contact a WCSD Tech.";
-$PROVIDER_MAP = array(
-  'Verizon' => 'vtext.com',
-  'Sprint' => 'messaging.sprintpcs.com',
-  'Alltel' => 'sms.alltelwireless.com',
-  'ATT' => 'txt.att.net',
-  'T-Mobile' => 'tmomail.net',
-  'US Cellular' => 'email.uscc.net',
-  'Virgin Mobile' => 'vmobl.com',
-  'Cingular' => 'cingularme.com',
-//  'Cricket' => 'sms.mycricket.com', // Cricket gave an SPF fail for me.
-  'Metro PCS' => 'MyMetroPcs.com',
-  'Powertel' => 'ptel.net',
-  'SunCom' => 'tms.suncom.com',
-  'Tracfone' => 'mmst5.tracfone.com',
-  'Consumer Cellular' => 'cingularme.com',
-  'Straight Talk' => 'vtext.com',
-  'Nextel' => 'page.nextel.com',
-                      );
 
 set_include_path( get_include_path() . PATH_SEPARATOR . $config['base_dir'].'/inc/Google_Client' );
 require_once "Google/autoload.php";
@@ -406,43 +391,39 @@ function google_user_hash_for_ldap( $user ) {
   return $entry;
 }
 
-function google_send_password( $phone, $provider, $password ) {
-  global $GV_EMAIL, $GV_PASSWD, $GV_PHONE, $GV_MESSAGE, $PROVIDER_MAP;
-  if ( empty($phone) || empty($password) ) {
-    return 0;
-  }
+function google_send_password( $phone, $password ) {
+    global $SMS_Message, $Twilio_From, $Twilio_Account, $Twilio_Token;
 
-  $message = $GV_MESSAGE;
-  $message = str_replace( '{{USERNAME}}', $phone, $message );
-  $message = str_replace( '{{PASSWORD}}', $password, $message );
-
-  $phone = preg_replace( '/\D/', "", $phone );
-  if ( strlen( $phone ) < 10 ) {
-    return 0;
-  }
-
-  $sent = 0;
-  if ( !empty($PROVIDER_MAP[$provider]) ) {
-    $to = $phone .'@'. $PROVIDER_MAP[$provider];
-    $from = ( empty($GV_PHONE) ? $GV_EMAIL : $GV_PHONE );
-    $subject = 'WCSD';
-
-    $message = wordwrap( $message, 70, "\r\n" );
-    $headers = 'From: '. $from ."\r\n";
-    $headers .= 'Reply-To: '. $from ."\r\n";
-    $headers .= 'Date: '. date(DATE_RFC2822) ."\r\n";
-    if ( mail( $to, $subject, $message, $headers, "-f$from" ) ) {
-      $sent = 1;
+    if ( empty($phone) || empty($password) ) {
+        return 0;
     }
-  }
-  if ( ! $sent ) {
-    include_once('GoogleVoice.php');
 
-    $gv = new GoogleVoice( $GV_EMAIL, $GV_PASSWD );
-    $gv->sendSMS( $phone, $message );
-  }
+    $message = $SMS_Message;
+    $message = str_replace( '{{USERNAME}}', $phone, $message );
+    $message = str_replace( '{{PASSWORD}}', $password, $message );
 
-  return 1;
+    $phone = preg_replace( '/\D/', "", $phone );
+    if ( strlen( $phone ) < 10 ) {
+        return 0;
+    }
+    if ( $phone[0] != '1' && $phone[0] != '+' ) {
+        $phone = '1' . $phone;
+    }
+    if ( $phone[0] != '+' ) {
+        $phone = '+' . $phone;
+    }
+
+    //$message = wordwrap( $message, 70, "\r\n" );
+    $client = new Client( $Twilio_Account, $Twilio_Token );
+    $client->messages->create(
+        $phone,
+        array(
+            'from' => $Twilio_From,
+            'body' => $message,
+        )
+    );
+
+    return 1;
 }
 
 function google_set_password( $email, $password ) {
