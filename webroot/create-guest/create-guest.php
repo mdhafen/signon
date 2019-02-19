@@ -49,7 +49,19 @@ if ( !empty($submitted) ) {
   $entry['BusinessCategory'] = 'Guest';
   $entry['dn'] = 'uid='. ldap_escape($entry['uid'],'',LDAP_ESCAPE_DN) .',ou=Guest,dc=wcsd';
 
-  if ( !empty($entry['dn']) && !empty($password) ) {
+  # force $entry['uid'] to xxx-xxx-xxxx format
+  $entry['uid'] = preg_replace( "/\D/", '', $entry['uid'] );
+  if ( strlen($entry['uid']) == 11 ) $entry['uid'] = preg_replace( "/^1/", '', $entry['uid'] );
+  if ( strlen($entry['uid']) == 10 ) {
+    $phone = substr( $entry['uid'], 0, 3 ) .'-'. substr( $entry['uid'], 3, 3 ) .'-'. substr( $entry['uid'], 6 );
+    $entry['uid'] = $phone;
+  }
+  else {
+    $error = 1;
+    $result = "Phone number isn't valid";
+  }
+
+  if ( !$error && !empty($entry['dn']) && !empty($password) ) {
     $ldap = new LDAP_Wrapper();
     $dups = $ldap->quick_search( array( 'uid' => $entry['uid'] ), array() );
 
