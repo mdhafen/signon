@@ -20,9 +20,14 @@ foreach ( $data['must'] as $attr ) {
 <input name="<?= $count ?>_attr" type="hidden" value="<?= $attr ?>">
 <div class="col-sm-8">
 <?php   if ( ! empty($data['object'][$attr]) ) {
-            foreach ( $data['object'][$attr] as $val ) { ?>
-<input type="text" id="<?= $count ?>_val" name="<?= $count ?>_val[]" value="<?= $val ?>" class="form-control">
-<?php       }
+            foreach ( $data['object'][$attr] as $val ) {
+                if ( strlen($val) > 80 ) { ?>
+<textarea id="<?= $count ?>_val" name="<?= $count ?>_val[]" class="form-control"><?= htmlspecialchars($val,ENT_QUOTES|ENT_HTML5|ENT_SUBSTITUTE) ?></textarea>
+<?php           }
+                else { ?>
+<input type="text" id="<?= $count ?>_val" name="<?= $count ?>_val[]" value="<?= htmlspecialchars($val,ENT_QUOTES|ENT_HTML5|ENT_SUBSTITUTE) ?>" class="form-control">
+<?php           }
+            }
         }
 	else { ?>
 <input type="text" id="<?= $count ?>_val" name="<?= $count ?>_val[]" value="" class="form-control" required="true">
@@ -41,9 +46,9 @@ foreach ( $data['must'] as $attr ) {
 <div class='row form-group'><label for="<?= $count ?>_val" class="col-sm-4 control-label"><?= $attr ?>:</label>
 <input name="<?= $count ?>_attr" type="hidden" value="<?= $attr ?>">
 <div class="col-sm-8">
-<?php   if ( ! empty($data['object'][$attr]) ) { ?>
-<?php     foreach ( $data['object'][$attr] as $val ) { ?>
-<?php       if ( $attr == 'businessCategory' ) { ?>
+<?php   if ( ! empty($data['object'][$attr]) ) {
+          foreach ( $data['object'][$attr] as $val ) {
+            if ( $attr == 'businessCategory' ) { ?>
 <select id="<?= $count ?>_val" name="<?= $count ?>_val[]">
   <option value="">Select a category</option>
   <option value="Staff"<?= $val == 'Staff' ? " selected":"" ?>>Staff</option>
@@ -54,13 +59,18 @@ foreach ( $data['must'] as $attr ) {
   <option value="Confinement"<?= $val == 'Confinement' ? " selected":"" ?>>Confinement</option>
   <option value="Banned"<?= $val == 'Banned' ? " selected":"" ?>>Banned</option>
 </select>
-<?php       } else { ?>
-<input type="text" name="<?= $count ?>_val[]" value="<?= $val ?>" class="form-control">
-<?php       } ?>
-<?php     }
+<?php       } else {
+              if ( strlen($val) > 80 ) { ?>
+<textarea id="<?= $count ?>_val" name="<?= $count ?>_val[]" class="form-control"><?= htmlspecialchars($val,ENT_QUOTES|ENT_HTML5|ENT_SUBSTITUTE) ?></textarea>
+<?php         }
+              else { ?>
+<input type="text" id="<?= $count ?>_val" name="<?= $count ?>_val[]" value="<?= htmlspecialchars($val,ENT_QUOTES|ENT_HTML5|ENT_SUBSTITUTE) ?>" class="form-control">
+<?php         }
+            }
+          }
         }
-        else { ?>
-<?php     if ( $attr == 'businessCategory' ) { ?>
+        else {
+          if ( $attr == 'businessCategory' ) { ?>
 <select id="<?= $count ?>_val" name="<?= $count ?>_val[]">
   <option value="">Select a category</option>
   <option value="Staff"<?= $val == 'Staff' ? " selected":"" ?>>Staff</option>
@@ -73,8 +83,8 @@ foreach ( $data['must'] as $attr ) {
 </select>
 <?php     } else { ?>
 <input type="text" id="<?= $count ?>_val" name="<?= $count ?>_val[]" value="" class="form-control">
-<?php     } ?>
-<?php   }
+<?php     }
+        }
         if ( empty($data['attrs'][$attr]['SINGLE-VALUE']) ) { ?>
 <input type="button" class="btn btn-default" value="+" onclick="add_field(this,'<?= $count ?>')">
 <?php   } ?>

@@ -16,7 +16,7 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 <div class="col-sm-4 text-right"><?= $key ?>:</div>
 <div class="col-sm-8">
 <?php   foreach ( $vals as $val ) { ?>
-  <div><?= $val ?></div>
+  <div><?= htmlspecialchars($val,ENT_QUOTES|ENT_HTML5|ENT_SUBSTITUTE) ?></div>
 <?php   } ?>
 <?php   if ( !empty($data['attr_changes'][$key]) ) { ?>
   <div class="text-muted">Last changed <?= date('m/d/Y g:i a',strtotime($data['attr_changes'][$key]['timestamp'])) ?> by <?= $data['attr_changes'][$key]['user'] ?></div>
