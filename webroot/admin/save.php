@@ -40,7 +40,7 @@ $count = input( 'count', INPUT_PINT );
 $input = array();
 for ( $i = 1; $i < $count; $i++ ) {
 	$attr = input( "${i}_attr", INPUT_HTML_NONE );
-	$vals = input( "${i}_val", INPUT_HTML_NONE );
+	$vals = input( "${i}_val", INPUT_HTML_SOME );
 	$vals = array_values(array_filter($vals));
 	if ( ! empty($vals) ) {
 		$input[ $attr ] = $vals;
