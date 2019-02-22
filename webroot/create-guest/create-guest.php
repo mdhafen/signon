@@ -67,8 +67,14 @@ if ( !empty($submitted) ) {
 
     if ( count($dups) == 1 ) {
       set_password( $ldap, $dups[0]['dn'], $password );
-      google_send_password( $entry['uid'], $password );
-      $result = 'Account created';
+      $result = google_send_password( $entry['uid'], $password );
+      if ( $result == 'blacklist' ) {
+          $error = 1;
+          $result = "You have blocked us in Twilio";
+      }
+      else {
+          $result = 'Account created';
+      }
     }
     else if ( count($dups) === 0 ) {
       if ( !empty($entry['dn']) ) {
@@ -78,8 +84,14 @@ if ( !empty($submitted) ) {
         $entry['sambaSID'] = $ldap->get_next_num('sambaSID');
         if ( $ldap->do_add( $dn, $entry ) ) {
           set_password( $ldap, $dn, $password );
-          google_send_password( $entry['uid'], $password );
-          $result = 'Account created';
+          $result = google_send_password( $entry['uid'], $password );
+          if ( $result == 'blacklist' ) {
+              $error = 1;
+              $result = "You have blocked us in Twilio";
+          }
+          else {
+              $result = 'Account created';
+          }
         }
         else {
           $error = 1;

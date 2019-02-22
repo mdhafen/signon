@@ -415,13 +415,20 @@ function google_send_password( $phone, $password ) {
 
     //$message = wordwrap( $message, 70, "\r\n" );
     $client = new Client( $Twilio_Account, $Twilio_Token );
-    $client->messages->create(
-        $phone,
-        array(
-            'from' => $Twilio_From,
-            'body' => $message,
-        )
-    );
+    try {
+        $client->messages->create(
+            $phone,
+            array(
+                'from' => $Twilio_From,
+                'body' => $message,
+            )
+        );
+    } catch ( \Exception $e ) {
+        $message = $e->getMessage();
+        if ( stripos($message,'blacklist') !== false ) {
+            return 'blacklist';
+        }
+    }
 
     return 1;
 }
