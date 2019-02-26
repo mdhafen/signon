@@ -1,4 +1,15 @@
 <?php
+
+global $Twilio_From, $Twilio_Account, $Twilio_Token, $SMS_Message, $SMS_Renew_Message;
+$Twilio_From = '';
+$Twilio_Account = '';
+$Twilio_Token = '';
+$SMS_Message = "Your login for WCSDaccess follows, username: {{USERNAME}} password: {{PASSWORD}} Please don't reply, for help contact a WCSD Tech.";
+$SMS_Renew_Message = "Please renew your WCSD Guest WiFi account at: https://signon.washk12.org/renew.php?t={{TOKEN}}";
+
+require_once 'Twilio/autoload.php';
+use Twilio\Rest\Client;
+
 function is_person( $o=array() ) {
 	$person = 0;
 	if ( ! empty( $o['objectClass'] ) ) {
@@ -114,6 +125,124 @@ function remove_from_groups( $ldap, $userdn ) {
 		}
 	}
 	return $result;
+}
+
+function get_guest_signature( $uid ) {
+    $dbh = db_connect('core');
+    $sth = $dbh->prepare('SELECT *,NOW() AS `now`,DATE_SUB(`aup_expire`, INTERVAL 3 MONTH) AS `send_notice` FROM guest_signatures WHERE guest_uid = :guest');
+    $sth->bindValue( ':guest', $uid );
+    $sth->execute();
+    $row = $sth->fetch();
+
+    return $row;
+}
+
+function sms_send_password( $phone, $password ) {
+    global $SMS_Message, $Twilio_From, $Twilio_Account, $Twilio_Token;
+
+    if ( empty($phone) || empty($password) ) {
+        return 0;
+    }
+
+    $message = $SMS_Message;
+    $message = str_replace( '{{USERNAME}}', $phone, $message );
+    $message = str_replace( '{{PASSWORD}}', $password, $message );
+
+    $phone = preg_replace( '/\D/', "", $phone );
+    if ( strlen( $phone ) < 10 ) {
+        return 0;
+    }
+    if ( $phone[0] != '1' && $phone[0] != '+' ) {
+        $phone = '1' . $phone;
+    }
+    if ( $phone[0] != '+' ) {
+        $phone = '+' . $phone;
+    }
+
+    //$message = wordwrap( $message, 70, "\r\n" );
+    $client = new Client( $Twilio_Account, $Twilio_Token );
+    try {
+        $client->messages->create(
+            $phone,
+            array(
+                'from' => $Twilio_From,
+                'body' => $message,
+            )
+        );
+    } catch ( \Exception $e ) {
+        $message = $e->getMessage();
+        if ( stripos($message,'blacklist') !== false ) {
+            return 'blacklist';
+        }
+    }
+
+    return 1;
+}
+
+function sms_send_renew_notice( $guest_uid ) {
+    global $SMS_Renew_Message, $Twilio_From, $Twilio_Account, $Twilio_Token;
+    $phone = $guest_uid;
+    
+    if ( empty($phone) ) {
+        return 'empty';
+    }
+
+    $token = bin2hex( random_bytes(32) );
+
+    $message = $SMS_Renew_Message;
+    $message = str_replace( '{{token}}', $token, $message );
+
+    $phone = preg_replace( '/\D/', "", $phone );
+    if ( strlen( $phone ) < 10 ) {
+        return 0;
+    }
+
+    $token = $phone . $token;  // ~ 74 characters
+
+    if ( $phone[0] != '1' && $phone[0] != '+' ) {
+        $phone = '1' . $phone;
+    }
+    if ( $phone[0] != '+' ) {
+        $phone = '+' . $phone;
+    }
+
+    //$message = wordwrap( $message, 70, "\r\n" );
+    $client = new Client( $Twilio_Account, $Twilio_Token );
+    try {
+        $client->messages->create(
+            $phone,
+            array(
+                'from' => $Twilio_From,
+                'body' => $message,
+            )
+        );
+    } catch ( \Exception $e ) {
+        $message = $e->getMessage();
+        if ( stripos($message,'blacklist') !== false ) {
+            return 'blacklist';
+        }
+    }
+
+    record_renew_sms( $guest_uid, $token );
+    return 1;
+}
+
+function record_renew_sms( $uid, $token ) {
+    $dbh = db_connect('core');
+    $sth = $dbh->prepare('SELECT * FROM guest_signatures WHERE guest_uid = :guest');
+    $sth->bindValue( ':guest', $uid );
+    $sth->execute();
+
+    $query;
+    if ( $row = $sth->fetch() ) {
+        $query = 'UPDATE guest_signatures SET aup_sent = NOW(), guest_token = :token WHERE guest_uid = :guest';
+    }
+    else {
+        $query = 'INSERT INTO guest_signatures (guest_token,guest_uid,aup_sent,aup_expire) VALUES (:token, :guest, NOW(), DATE_ADD(NOW(), INTERVAL 3 MONTH)';
+    }
+    $sth->bindValue( ':token', $token );
+    $sth->bindValue( ':guest', $uid );
+    $sth->execute();
 }
 
 function is_pwned_password( $password ) {

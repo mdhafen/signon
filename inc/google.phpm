@@ -2,15 +2,6 @@
 global $config;
 include_once( $config['base_dir'].'/lib/output.phpm' );
 
-global $Twilio_From, $Twilio_Account, $Twilio_Token, $SMS_Message;
-$Twilio_From = '';
-$Twilio_Account = '';
-$Twilio_Token = '';
-$SMS_Message = "Your login for WCSDaccess follows, username: {{USERNAME}} password: {{PASSWORD}} Please don't reply, for help contact a WCSD Tech.";
-
-require_once 'Twilio/autoload.php';
-use Twilio\Rest\Client;
-
 global $GOOGLE_DOMAIN;
 global $GOOGLE_A_CLIENT,$GOOGLE_S_CLIENT;
 $GOOGLE_DOMAIN = 'washk12.org';
@@ -389,48 +380,6 @@ function google_user_hash_for_ldap( $user ) {
     }
   }
   return $entry;
-}
-
-function google_send_password( $phone, $password ) {
-    global $SMS_Message, $Twilio_From, $Twilio_Account, $Twilio_Token;
-
-    if ( empty($phone) || empty($password) ) {
-        return 0;
-    }
-
-    $message = $SMS_Message;
-    $message = str_replace( '{{USERNAME}}', $phone, $message );
-    $message = str_replace( '{{PASSWORD}}', $password, $message );
-
-    $phone = preg_replace( '/\D/', "", $phone );
-    if ( strlen( $phone ) < 10 ) {
-        return 0;
-    }
-    if ( $phone[0] != '1' && $phone[0] != '+' ) {
-        $phone = '1' . $phone;
-    }
-    if ( $phone[0] != '+' ) {
-        $phone = '+' . $phone;
-    }
-
-    //$message = wordwrap( $message, 70, "\r\n" );
-    $client = new Client( $Twilio_Account, $Twilio_Token );
-    try {
-        $client->messages->create(
-            $phone,
-            array(
-                'from' => $Twilio_From,
-                'body' => $message,
-            )
-        );
-    } catch ( \Exception $e ) {
-        $message = $e->getMessage();
-        if ( stripos($message,'blacklist') !== false ) {
-            return 'blacklist';
-        }
-    }
-
-    return 1;
 }
 
 function google_set_password( $email, $password ) {
