@@ -6,6 +6,15 @@ include( 'doc-header.php' );
 ?>
 <div class="container">
 <div class="mainpage">
+<?php
+  if ( !empty($data['error']) ) { ?>
+<div class="alert alert-danger" role="alert">
+There was an error! <?= $data['error'] ?>
+</div>
+<?php
+  }
+?>
+
 <h2>Renew your WCSD Wifi Guest Account</h2>
 <form action="renew.php" method="post" class="form-horizontal">
 <?php if ( empty($data['token']) ) { ?>
