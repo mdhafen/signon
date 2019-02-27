@@ -127,10 +127,23 @@ function remove_from_groups( $ldap, $userdn ) {
 	return $result;
 }
 
-function get_guest_signature( $uid ) {
+function get_guest_signature( $uid, $token = null ) {
     $dbh = db_connect('core');
-    $sth = $dbh->prepare('SELECT *,NOW() AS `now`,DATE_SUB(`aup_expire`, INTERVAL 3 MONTH) AS `send_notice` FROM guest_signatures WHERE guest_uid = :guest');
-    $sth->bindValue( ':guest', $uid );
+    $data;
+    $query = 'SELECT *,NOW() AS `now`,DATE_SUB(`aup_expire`, INTERVAL 3 MONTH) AS `send_notice` FROM guest_signatures WHERE ';
+    if ( !empty($uid) ) {
+        $data = $uid;
+        $query .= 'guest_uid = :guest';
+    }
+    else if ( !empty($token) ) {
+        $data = $token;
+        $query .= 'guest_token = :guest';
+    }
+    else {
+        return array();
+    }
+    $sth = $dbh->prepare($query);
+    $sth->bindValue( ':guest', $data );
     $sth->execute();
     $row = $sth->fetch();
 
@@ -241,6 +254,23 @@ function record_renew_sms( $uid, $token ) {
         $query = 'INSERT INTO guest_signatures (guest_token,guest_uid,aup_sent,aup_expire) VALUES (:token, :guest, NOW(), DATE_ADD(NOW(), INTERVAL 3 MONTH)';
     }
     $sth->bindValue( ':token', $token );
+    $sth->bindValue( ':guest', $uid );
+    $sth->execute();
+}
+
+function record_guest_signature( $uid ) {
+    $dbh = db_connect('core');
+    $sth = $dbh->prepare('SELECT * FROM guest_signatures WHERE guest_uid = :guest');
+    $sth->bindValue( ':guest', $uid );
+    $sth->execute();
+
+    $query;
+    if ( $row = $sth->fetch() ) {
+        $query = 'UPDATE guest_signatures SET guest_token = NULL, aup_signed = NOW(), aup_expire = DATE_ADD(NOW(), INTERVAL 1 YEAR) WHERE guest_uid = :guest';
+    }
+    else {
+        $query = 'INSERT INTO guest_signatures (guest_uid,aup_signed,aup_expire) VALUES (:guest, NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR))';
+    }
     $sth->bindValue( ':guest', $uid );
     $sth->execute();
 }

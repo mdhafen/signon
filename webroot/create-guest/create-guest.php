@@ -68,11 +68,12 @@ if ( !empty($submitted) ) {
       set_password( $ldap, $dups[0]['dn'], $password );
       $result = sms_send_password( $entry['uid'], $password );
       if ( $result == 'blacklist' ) {
-          $error = 1;
-          $result = "You have blocked us in Twilio";
+        $error = 1;
+        $result = "You have blocked us in Twilio";
       }
       else {
-          $result = 'Account created';
+        $result = 'Account created';
+        record_guest_signature( $entry['uid'] );
       }
     }
     else if ( count($dups) === 0 ) {
@@ -85,11 +86,12 @@ if ( !empty($submitted) ) {
           set_password( $ldap, $dn, $password );
           $result = sms_send_password( $entry['uid'], $password );
           if ( $result == 'blacklist' ) {
-              $error = 1;
-              $result = "You have blocked us in Twilio";
+            $error = 1;
+            $result = "You have blocked us in Twilio";
           }
           else {
-              $result = 'Account created';
+            $result = 'Account created';
+            record_guest_signature( $entry['uid'] );
           }
         }
         else {

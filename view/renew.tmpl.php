@@ -10,20 +10,19 @@ include( 'doc-header.php' );
 <form action="renew.php" method="post" class="form-horizontal">
 <?php if ( empty($data['token']) ) { ?>
 <div class="row form-group">
-    <div class="help-block">Please enter the token at the end of the web site address you recieved in an SMS</div>
+    <div class="help-block">Please enter the token at the end of the web site address you recieved in the SMS</div>
     <input type="text" name="t" value="" class="form-control">
 </div>
 <?php } else { ?>
     <input type="hidden" name="t" value="<?= $data['token'] ?>">
 <?php } ?>
-<p>
-    Please review our Acceptable Use and Technology Security policies.  You must agree to these policies to use our WiFi.  Clicking on the 'Agree' button below constitutes a digital signature.
-</p>
-<p><a target="_BLANK" href="<?= $data['_config']['base_url'] ?>get_aup.php">Acceptable Use Policy</a></p>
-<!-- <p><a target="_BLANK" href="<?= $data['_config']['base_url'] ?>get_tsp.php">Technology Security Policy</a></p> -->
+
+<div class="row text-left">
+<?php include( $data['_config']['base_dir'] .'/view/create-guest/guest-tos.php' ); ?>
+</div>
 
 <div class="row form-group">
-    <input class="btn btn-primary" type="submit" name="submit" value="Agree">
+    <input class="btn btn-primary" type="submit" name="submit" value="I accept this agreement">
 </div>
 
 </form>

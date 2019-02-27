@@ -73,9 +73,13 @@ There was an error! <?= $data['result'] ?>
       <div class="col-sm-8"><input id="zip" name="zip" value="" class="form-control"></div>
     </div>
 
+    <div class="row text-left">
+<?php include( $data['_config']['base_dir'] .'/view/create-guest/guest-tos.php' ); ?>
+    </div>
+
     <div class="row form-group">
       <input type="hidden" name="op" value="<?= $data['op'] ?>">
-      <input class="btn btn-primary" type="submit" name="submit" value="Register">
+      <input class="btn btn-primary" type="submit" name="submit" value="I accept this agreement">
     </div>
     </form>
   </div>
