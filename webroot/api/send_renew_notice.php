@@ -14,31 +14,36 @@ $object = $set[0];
 $objectdn = $object['dn'];
 unset( $object['dn'] );
 
-$row = get_guest_signature($object['uid'][0]);
-$send = 0;
+$result = 'NOOP';
+$error = '';
 
-if ( empty($row) ) {
-    $send = 1;
-}
-else if ( $row['aup_expire'] < $row['now'] ) {
+if ( !empty($object['uid']) ) {
+    $row = get_guest_signature($object['uid'][0]);
     $send = 0;
-}
-else if ( $row['send_notice'] < $row['now'] ) {
-    if ( empty($row['aup_sent']) || ( $row['aup_signed'] && $row['aup_sent'] < $row['aup_signed'] ) ) {
+
+    if ( empty($row) ) {
         $send = 1;
     }
-}
-
-if ( $send ) {
-    // FIXME enable after signon/renew.php page is built
-    //$result = sms_send_renew_notice( $object['uid'][0] );
-    $result = 1;
-    if ( $result === 1 ) {
-        $result = "Success";
+    else if ( $row['aup_expire'] < $row['now'] ) {
+        $send = 0;
     }
-    else {
-        $error = '<message>'. $result .'</message>';
-        $result = "Error";
+    else if ( $row['send_notice'] < $row['now'] ) {
+        if ( empty($row['aup_sent']) || ( $row['aup_signed'] && $row['aup_sent'] < $row['aup_signed'] ) ) {
+            $send = 1;
+        }
+    }
+
+    if ( $send ) {
+        // FIXME enable after signon/renew.php page is built
+        //$result = sms_send_renew_notice( $object['uid'][0] );
+        $result = 1;
+        if ( $result === 1 ) {
+            $result = "Success";
+        }
+        else {
+            $error = '<message>'. $result .'</message>';
+            $result = "Error";
+        }
     }
 }
 
