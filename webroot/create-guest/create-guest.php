@@ -62,7 +62,7 @@ if ( !empty($submitted) ) {
 
   if ( !$error && !empty($entry['dn']) && !empty($password) ) {
     $ldap = new LDAP_Wrapper();
-    $dups = $ldap->quick_search( array( 'uid' => $entry['uid'] ), array() );
+    $dups = $ldap->quick_search( array( 'uid' => ldap_escape($entry['uid'],'',LDAP_ESCAPE_FILTER) ), array() );
 
     if ( count($dups) == 1 ) {
       set_password( $ldap, $dups[0]['dn'], $password );

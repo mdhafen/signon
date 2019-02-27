@@ -116,7 +116,6 @@ class LDAP_Wrapper {
 		}
 		else if ( is_array($filter) ) {
 			foreach ( $filter as $attr => $value ) {
-                $value = ldap_escape($value,'',LDAP_ESCAPE_FILTER);
 				$filter_str .= "($attr=$value)";
 			}
 			if ( count($filter) > 1 ) {

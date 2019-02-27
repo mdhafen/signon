@@ -9,6 +9,7 @@ $ldap = new LDAP_Wrapper();
 
 $uid = input( 'uid', INPUT_STR );
 
+$uid = ldap_escape($uid,'',LDAP_ESCAPE_FILTER);
 $set = $ldap->quick_search( array( 'uid' => $uid ) );
 $object = $set[0];
 $objectdn = $object['dn'];

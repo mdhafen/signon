@@ -29,6 +29,7 @@ if ( !empty($user) ) {
     if ( !empty($password) && !empty($password2) ) {
       $ldap = new LDAP_Wrapper();
       $dn = '';
+      $username = ldap_escape($username,'',LDAP_ESCAPE_FILTER);
       $set = $ldap->quick_search( array( 'uid' => $username ), array() );
       if ( empty($set) ) {
         $user = get_user_google( $email );
