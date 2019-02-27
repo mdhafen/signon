@@ -253,6 +253,7 @@ function record_renew_sms( $uid, $token ) {
     else {
         $query = 'INSERT INTO guest_signatures (guest_token,guest_uid,aup_sent,aup_expire) VALUES (:token, :guest, NOW(), DATE_ADD(NOW(), INTERVAL 3 MONTH)';
     }
+    $sth = $dbh->prepare($query);
     $sth->bindValue( ':token', $token );
     $sth->bindValue( ':guest', $uid );
     $sth->execute();
@@ -271,6 +272,7 @@ function record_guest_signature( $uid ) {
     else {
         $query = 'INSERT INTO guest_signatures (guest_uid,aup_signed,aup_expire) VALUES (:guest, NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR))';
     }
+    $sth = $dbh->prepare($query);
     $sth->bindValue( ':guest', $uid );
     $sth->execute();
 }
