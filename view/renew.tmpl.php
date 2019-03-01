@@ -16,6 +16,9 @@ There was an error! <?= $data['error'] ?>
 ?>
 
 <h2>Renew your WCSD Wifi Guest Account</h2>
+<?php if ( !empty($data['recorded']) ) { ?>
+<p>We have recorded your signature.  Thank you.</p>
+<?php } else { ?>
 <form action="renew.php" method="post" class="form-horizontal">
 <?php if ( empty($data['token']) ) { ?>
 <div class="row form-group">
@@ -35,6 +38,7 @@ There was an error! <?= $data['error'] ?>
 </div>
 
 </form>
+<?php } ?>
 </div>
 </div>
 

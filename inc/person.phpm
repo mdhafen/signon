@@ -202,15 +202,14 @@ function sms_send_renew_notice( $guest_uid ) {
 
     $token = bin2hex( random_bytes(32) );
 
-    $message = $SMS_Renew_Message;
-    $message = str_replace( '{{TOKEN}}', $token, $message );
-
     $phone = preg_replace( '/\D/', "", $phone );
     if ( strlen( $phone ) < 10 ) {
         return 0;
     }
 
     $token = $phone . $token;  // ~ 74 characters
+    $message = $SMS_Renew_Message;
+    $message = str_replace( '{{TOKEN}}', $token, $message );
 
     if ( $phone[0] != '+' ) {
         if ( $phone[0] != '1' ) {
@@ -278,6 +277,13 @@ function record_guest_signature( $uid ) {
     $sth = $dbh->prepare($query);
     $sth->bindValue( ':guest', $uid );
     $sth->execute();
+    if ( $sth->errorCode() !== '00000' ) {
+        error_log( "SQL Error: ". $sth->errorInfo()[2] );
+        return 0;
+    }
+    else {
+        return 1;
+    }
 }
 
 function is_pwned_password( $password ) {

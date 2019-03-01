@@ -22,7 +22,8 @@ if ( !empty($token) && !empty($submit) ) {
     $uid = $sig['guest_uid'];
 
     if ( !empty($uid) ) {
-        record_guest_signature( $uid );
+        $result = record_guest_signature( $uid );
+        $output['recorded'] = $result;
     }
     else {
         $output['error'] = "token not found";
