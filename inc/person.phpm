@@ -5,7 +5,7 @@ $Twilio_From = '';
 $Twilio_Account = '';
 $Twilio_Token = '';
 $SMS_Message = "Your login for WCSDaccess follows, username: {{USERNAME}} password: {{PASSWORD}} Please don't reply, for help contact a WCSD Tech.";
-$SMS_Renew_Message = "Please renew your WCSD Guest WiFi account at: https://signon.washk12.org/renew.php?t={{TOKEN}}";
+$SMS_Renew_Message = "Please renew your WCSD Guest WiFi account at: https://signon.washk12.org/renew.php/{{TOKEN}}";
 
 require_once 'Twilio/autoload.php';
 use Twilio\Rest\Client;
@@ -257,6 +257,9 @@ function record_renew_sms( $uid, $token ) {
     $sth->bindValue( ':token', $token );
     $sth->bindValue( ':guest', $uid );
     $sth->execute();
+    if ( $sth->errorCode() !== '00000' ) {
+        error_log( "SQL Error: ". $sth->errorInfo()[2] );
+    }
 }
 
 function record_guest_signature( $uid ) {
