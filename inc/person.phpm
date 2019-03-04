@@ -5,7 +5,7 @@ $Twilio_From = '';
 $Twilio_Account = '';
 $Twilio_Token = '';
 $SMS_Message = "Your login for WCSDaccess follows, username: {{USERNAME}} password: {{PASSWORD}} Please don't reply, for help contact a WCSD Tech.";
-$SMS_Renew_Message = "Please renew your WCSD Guest WiFi account at: https://signon.washk12.org/renew.php/{{TOKEN}}";
+$SMS_Renew_Message = "Your WCSD Guest Wifi account has expired, please renew your account at: https://signon.washk12.org/renew.php/{{TOKEN}}";
 
 require_once 'Twilio/autoload.php';
 use Twilio\Rest\Client;

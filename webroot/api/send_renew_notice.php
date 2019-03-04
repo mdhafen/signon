@@ -35,6 +35,9 @@ if ( !empty($object['uid']) ) {
     }
 
     if ( $send ) {
+if ( false !== array_search( $object['uid'][0], array('435-767-1347','435-668-6395') ) {
+ $result = sms_send_renew_notice( $object['uid'][0] );
+}
         // FIXME enable after signon/renew.php page is built
         //$result = sms_send_renew_notice( $object['uid'][0] );
         $result = 1;
