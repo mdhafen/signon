@@ -103,7 +103,7 @@ function update_user( $userid, $update, $module = 'core' ) {
     $query = rtrim( $query, ", " );
     $query .= "WHERE userid = ". $dbh->quote( $userid );
   } else {
-    $query = "INSERT INTO user (username,fullname,email,role,password,salt) VALUES (?,?,?,?,?,?)";
+    $query = "INSERT INTO user (username,fullname,email,role,password,salt,password_mode) VALUES (?,?,?,?,?,?,?)";
   }
   $sth = $dbh->prepare( $query );
   $sth->execute( array_values( $update ) );
