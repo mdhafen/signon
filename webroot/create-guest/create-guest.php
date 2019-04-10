@@ -69,7 +69,6 @@ if ( !empty($submitted) ) {
       $result = sms_send_password( $entry['uid'], $password );
       if ( $result == 'blacklist' ) {
         $error = 1;
-        $result = "You have blocked us in Twilio";
       }
       else {
         $result = 'Account created';
@@ -87,7 +86,6 @@ if ( !empty($submitted) ) {
           $result = sms_send_password( $entry['uid'], $password );
           if ( $result == 'blacklist' ) {
             $error = 1;
-            $result = "You have blocked us in Twilio";
           }
           else {
             $result = 'Account created';

@@ -19,7 +19,17 @@ Your account has been created.  Please switch to the WCSDaccess network and use 
 <?php
   } else { /* error */ ?>
 <div class="alert alert-danger" role="alert">
-There was an error! <?= $data['result'] ?>
+There was an error!
+<?php
+    global $Twilio_From;
+    switch ($data['result']) {
+      case 'blacklist':
+        print "You have blocked us.  Please text UNSTOP to $Twilio_From and register again to recieve your password.";
+        break;
+      default:
+        print $data['result'];
+    }
+?>
 </div>
 <?php
   }
