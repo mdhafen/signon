@@ -51,7 +51,7 @@ if ( !empty($op) ) {  // force other values here too?
 
 /*
  * vlans:
- * 10(Lan), 20(Labs), 50(Facilities), 70(Phone), 99(Guest)
+ * 10(Lan), 20(Labs), 50(Facilities), 70(Phone), 61(TechOffice), 99(Guest)
  */
     switch ( $category ) {
         case 'Lan' :
@@ -59,6 +59,7 @@ if ( !empty($op) ) {  // force other values here too?
         case 'Facilities' :
         case 'AV' :
         case 'Phone' :
+        case 'TechOffice' :
         case 'Guest' :
             break;
         default : $category = '';
@@ -110,6 +111,7 @@ if ( !empty($op) ) {  // force other values here too?
                     case 'Facilities' :
                     case 'AV' :
                     case 'Phone' :
+                    case 'TechOffice' :
                     case 'Guest' :
                         break;
                     default : $cat = 'Labs';

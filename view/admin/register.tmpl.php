@@ -61,6 +61,7 @@ There was an error! <?= $data['err_msg'] ?>
       <option value="Facilities"<?= !empty($data['category']) && $data['category'] == 'Facilities' ? " selected":""?>>Facilities device</option>
       <option value="AV"<?= !empty($data['category']) && $data['category'] == 'AV' ? " selected":""?>>Audio / Visual Devices</option>
       <option value="Phone"<?= !empty($data['category']) && $data['category'] == 'Phone' ? " selected":""?>>Phone</option>
+      <option value="TechOffice"<?= !empty($data['category']) && $data['category'] == 'TechOffice' ? " selected":""?>>Tech Office Only</option>
       <option value="Guest"<?= !empty($data['category']) && $data['category'] == 'Guest' ? " selected":""?>>Guest / untrusted device</option>
   </select>
   <span class="help-block">This field effects device access to school and district networks.  Only change this if you have been told to by Technology Department staff.</span>
