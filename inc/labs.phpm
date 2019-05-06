@@ -10,11 +10,83 @@ function labs_normalize_mac( $mac ) {
   return $mac;
 }
 
+
+function labs_normalize_categories( $labs_cat = null, $fields_cat = null, $iot_cat = null) {
+/*
+ * vlans:
+ * 10(Lan), 20(Labs), 50(Facilities), 70(Phone), 61(TechOffice), 99(Guest)
+ */
+    switch ( $labs_cat ) {
+        case 'Lan' :
+        case 'Labs' :
+        case 'Facilities' :
+        case 'AV' :
+        case 'Phone' :
+        case 'TechOffice' :
+        case 'Guest' :
+            break;
+        default : $labs_cat = '';
+    }
+
+    switch ( $fields_cat ) {
+        case 'Facilities' :
+            break;
+        default : $fields_cat = '';
+    }
+
+    switch ( $iot_cat ) {
+        case 'Lan' :
+        case 'Labs' :
+        case 'Facilities' :
+        case 'AV' :
+        case 'TechOffice' :
+            break;
+        default : $iot_cat = '';
+    }
+
+    return array ($labs_cat, $fields_cat, $iot_cat);
+}
+
+function labs_get_registration( $mac = null ) {
+    if ( empty($mac) ) {
+        return array();
+    }
+
+    $dbh = db_connect('Labs');
+
+    $query = "SELECT * FROM authorized_macs WHERE macaddress = :mac";
+
+    $sth = $dbh->prepare( $query );
+
+    $sth->bindValue( ':mac', $mac );
+
+    $sth->execute();
+
+    $result = $sth->fetch();
+    $result = stripslashes_array( $result );
+
+    $query = "SELECT * FROM macs_log WHERE macaddress = :mac ORDER BY submitted_date ASC";
+
+    $sth = $dbh->prepare( $query );
+
+    $sth->bindValue( ':mac', $mac );
+
+    $sth->execute();
+
+    while ( $row = $sth->fetch() ) {
+        $row = stripslashes_array( $row );
+        $logs[] = $row;
+    }
+    $result['logs'] = $logs;
+
+    return $result;
+}
+
 function labs_get_macs( $search_term = null ) {
   $dbh = db_connect('Labs');
 
   if($search_term !== null){
-    $query = "SELECT * FROM authorized_macs WHERE macaddress LIKE :searchTerm OR device_home LIKE :searchTerm OR submitted_desc LIKE :searchTerm OR submitted_user LIKE :searchTerm OR submitted_date LIKE :searchTerm";
+    $query = "SELECT macaddress FROM authorized_macs CROSS JOIN macs_log USING (macaddress) WHERE macaddress LIKE :searchTerm OR device_home LIKE :searchTerm OR submitted_desc LIKE :searchTerm OR submitted_user LIKE :searchTerm OR submitted_date LIKE :searchTerm GROUP BY macaddress";
   }
   else{
     return array();
@@ -32,26 +104,52 @@ function labs_get_macs( $search_term = null ) {
     $row = stripslashes_array( $row );
     $result[] = $row;
   }
+  foreach ( $result as &$row ) {
+      $row = labs_get_registration( $row['macaddress'] );
+  }
 
   return $result;
 }
 
-function labs_register_mac( $mac, $location = '', $desc = '', $cat = 'Labs', $user, $ip ) {
+function labs_register_mac( $mac, $location = '', $desc = '', $lab_cat = 'Labs', $field_cat = '', $iot_cat = '', $user, $ip ) {
   $dbh = db_connect('Labs');
 
-  $query = "INSERT INTO authorized_macs ( macaddress, device_home, submitted_desc, device_category, submitted_user, submitted_ip, submitted_date ) VALUES ( :mac, :loc, :desc, :cat, :user, :ip, CURDATE() )";
+  $query = "INSERT INTO authorized_macs ( macaddress, device_home, submitted_desc, labs_category, fields_category, iot_category ) VALUES ( :mac, :loc, :desc, :labcat, :fieldcat, :iotcat )";
   $sth = $dbh->prepare( $query );
   $sth->bindValue( ':mac', $mac );
   $sth->bindValue( ':loc', $location );
   $sth->bindValue( ':desc', $desc );
-  $sth->bindValue( ':cat', $cat );
-  $sth->bindValue( ':user', $user );
-  $sth->bindValue( ':ip', ip_to_decimal( $ip ) );
+  $sth->bindValue( ':labcat', $lab_cat );
+  $sth->bindValue( ':fieldcat', $field_cat );
+  $sth->bindValue( ':iotcat', $iot_cat );
 
   $sth->execute();
   if ( $sth->errorCode() !== '00000' ) {
     $db_error = $sth->errorInfo();
     return $db_error[2];
+  } else {
+      labs_add_mac_log( $user, $ip );
+  }
+}
+
+function labs_update_mac( $mac, $location = '', $desc = '', $lab_cat = 'Labs', $field_cat = '', $iot_cat = '', $user, $ip ) {
+  $dbh = db_connect('Labs');
+
+  $query = "UPDATE authorized_macs SET device_home = :loc, submitted_desc = :desc, labs_category = :labcat, fields_category = :fieldcat, iot_category = :iotcat WHERE macaddress = :mac";
+  $sth = $dbh->prepare( $query );
+  $sth->bindValue( ':mac', $mac );
+  $sth->bindValue( ':loc', $location );
+  $sth->bindValue( ':desc', $desc );
+  $sth->bindValue( ':labcat', $lab_cat );
+  $sth->bindValue( ':fieldcat', $field_cat );
+  $sth->bindValue( ':iotcat', $iot_cat );
+
+  $sth->execute();
+  if ( $sth->errorCode() !== '00000' ) {
+    $db_error = $sth->errorInfo();
+    return $db_error[2];
+  } else {
+      labs_add_mac_log( $mac, $user, $ip );
   }
 }
 
@@ -59,6 +157,31 @@ function labs_unregister_mac( $mac ) {
   $dbh = db_connect('Labs');
 
   $query = "DELETE FROM authorized_macs WHERE macaddress = :mac";
+  $sth = $dbh->prepare( $query );
+  $sth->bindValue( ':mac', $mac );
+
+  $sth->execute();
+  if ( $sth->errorCode() === '00000' ) {
+      labs_clear_mac_log($mac);
+  }
+}
+
+function labs_add_mac_log( $mac, $user, $ip ) {
+  $dbh = db_connect('Labs');
+
+  $query = "INSERT INTO macs_log ( macaddress, submitted_user, submitted_ip, submitted_date ) VALUES ( :mac, :user, :ip, CURDATE() )";
+  $sth = $dbh->prepare( $query );
+  $sth->bindValue( ':mac', $mac );
+  $sth->bindValue( ':user', $user );
+  $sth->bindValue( ':ip', ip_to_decimal( $ip ) );
+
+  $sth->execute();
+}
+
+function labs_clear_mac_log($mac) {
+  $dbh = db_connect('Labs');
+
+  $query = "DELETE FROM macs_log WHERE macaddress = :mac";
   $sth = $dbh->prepare( $query );
   $sth->bindValue( ':mac', $mac );
 

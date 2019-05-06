@@ -1,7 +1,7 @@
 <?php
 
 $updates = array(
-  '0001-example',
+  '0001-add_more_device_categories_to_mac_registry',
 );
 $results = array();
 

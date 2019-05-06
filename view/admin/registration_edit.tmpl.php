@@ -1,5 +1,5 @@
 <?php include($data['_config']['base_dir'] .'/view/doc-open.php'); ?>
-<title><?= $data['_config']['site_title'] ?> - Register Lab Device</title>
+<title><?= $data['_config']['site_title'] ?> - Update Lab Device Registration</title>
 <?php
 include( $data['_config']['base_dir'] .'/view/doc-head-close.php' );
 include( $data['_config']['base_dir'] .'/view/doc-header.php' );
@@ -8,33 +8,19 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 <div class="container">
 <div class="main-page">
 
-<h1>Register Lab Device</h1>
-<h3><a href="register.php?op=List">Search registered M.A.C.&apos;s</a></h3>
-
-<h1 class="bg-danger">Fields and IoT Categories are not yet implemented!</h1>
-
+<h1>Update Lab Device Registration</h1>
 <?php if ( ! empty($data['error']) ) { ?>
 <div class="alert alert-danger" role="alert">
 There was an error! <?= $data['err_msg'] ?>
 </div>
 <?php } ?>
 
-<?php if ( ! empty($data['success']) ) { ?>
-<div class="alert alert-info alert-dismissible" role="alert">
-  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-<p>Success!</p>
-<p>Now you can connect to the WCSDlabs wireless network with the pass-phrase "theskyisfalling2day!".</p>
-</div>
-<?php } ?>
+<h1 class="bg-danger">Fields and IoT Categories are not yet implemented!</h1>
 
 <form method="post" action="register.php" class="form-horizontal" method="post" enctype="multipart/form-data">
+<input type="hidden" name="client_mac" value="<?= $data['client_mac'] ?>">
 <div class="panel panel-default panel-body">
 <div class="container-fluid">
-
-<div class="row form-group">
-<label for="client_mac" class="col-sm-4 control-label">M.A.C. Address</label>
-<div class="col-sm-8"><input type="text" id="client_mac" name="client_mac" value="<?= $data['client_mac'] ?>" class="form-control"></div>
-</div>
 
 <div class="row form-group">
   <label for="loc" class="col-sm-4 control-label">Home Location</label>
@@ -57,7 +43,7 @@ There was an error! <?= $data['err_msg'] ?>
 <div class="row form-group">
   <label for="labs_cat" class="col-sm-4 control-label">Labs Category</label>
   <div class="col-sm-8">
-  <select name="labs_cat" id="cat">
+  <select name="labs_cat" id="labs_cat">
       <option value="">No Access</option>
       <option value="Labs"<?= empty($data['labs_cat']) || $data['labs_cat'] == 'Labs' ? " selected":"" ?>>Lab device</option>
      <option value="Lan"<?= !empty($data['labs_cat']) && $data['labs_cat'] == 'Lan' ? " selected":""?>>Staff device</option>
@@ -74,7 +60,7 @@ There was an error! <?= $data['err_msg'] ?>
 <div class="row form-group">
   <label for="fields_cat" class="col-sm-4 control-label">Fields Category</label>
   <div class="col-sm-8">
-  <select name="fields_cat" id="cat">
+  <select name="fields_cat" id="fields_cat">
       <option value="">No Access</option>
       <option value="Facilities"<?= !empty($data['fields_cat']) && $data['fields_cat'] == 'Facilities' ? " selected":""?>>Facilities device</option>
   </select>
@@ -85,7 +71,7 @@ There was an error! <?= $data['err_msg'] ?>
 <div class="row form-group">
   <label for="iot_cat" class="col-sm-4 control-label">IoT Category</label>
   <div class="col-sm-8">
-  <select name="iot_cat" id="cat">
+  <select name="iot_cat" id="iot_cat">
       <option value="">No Access</option>
       <option value="Labs"<?= !empty($data['iot_cat']) && $data['iot_cat'] == 'Labs' ? " selected":"" ?>>Lab device</option>
      <option value="Lan"<?= !empty($data['iot_cat']) && $data['iot_cat'] == 'Lan' ? " selected":""?>>Staff device</option>
@@ -98,74 +84,8 @@ There was an error! <?= $data['err_msg'] ?>
 </div>
 
 <div class="row form-group">
-<input type="submit" name="op" value="Register" class="btn">
-</div>
-
-</div>
-</div>
-
-<h2>Or...</h2>
-
-<div class="panel panel-default panel-body">
-<div class="container-fluid">
-
-<div class="row form-group">
-<label for="importfile" class="col-sm-4 control-label">CSV Import File</label>
-<div class="col-sm-8"><input type="file" id="importfile" name="importfile" class="form-control" style="height:auto;"></div>
-</div>
-
-<div class="row form-group">
-<label for="drop_first" class="col-sm-4 control-label">Discard first row</label>
-<div class="col-sm-8"><input type="checkbox" id="drop_first" name="drop_first" checked='checked'></div>
-</div>
-
-<div class="row form-group">
-<label for="mac_column" class="col-sm-4 control-label">Column of M.A.C. Address</label>
-<div class="col-sm-8"><input type="text" id="mac_column" name="mac_column" placeholder="for example: 1" class="form-control"></div>
-</div>
-
-<div class="row form-group">
-<label for="desc_column" class="col-sm-4 control-label">Column of Description</label>
-<div class="col-sm-8">
-  <input type="text" id="desc_column" name="desc_column" placeholder="for example: 2" class="form-control">
-  <span class="help-block">Uses Description field above as a default value.</span>
-</div>
-</div>
-
-<div class="row form-group">
-<label for="lab_cat_column" class="col-sm-4 control-label">Column of Labs Category</label>
-<div class="col-sm-8">
-  <input type="text" id="lab_cat_column" name="lab_cat_column" placeholder="for example: 3" class="form-control">
-  <span class="help-block">Uses labs category field above as a default value.</span>
-</div>
-</div>
-
-<div class="row form-group">
-<label for="field_cat_column" class="col-sm-4 control-label">Column of Fields Category</label>
-<div class="col-sm-8">
-  <input type="text" id="field_cat_column" name="field_cat_column" placeholder="for example: 3" class="form-control">
-  <span class="help-block">Uses fields category field above as a default value.</span>
-</div>
-</div>
-
-<div class="row form-group">
-<label for="iot_cat_column" class="col-sm-4 control-label">Column of IoT Category</label>
-<div class="col-sm-8">
-  <input type="text" id="iot_cat_column" name="iot_cat_column" placeholder="for example: 3" class="form-control">
-  <span class="help-block">Uses iot category field above as a default value.</span>
-</div>
-</div>
-
-<div class="row form-group">
-<label for="loc_column" class="col-sm-4 control-label">Column of Location Number</label>
-<div class="col-sm-8">
-  <input type="text" id="loc_column" name="loc_column" placeholder="for example: 3" class="form-control">
-  <span class="help-block">Uses Location drop-down above as a default value.</span>
-</div>
-</div>
-
-<div class="row form-group">
-<input type="submit" name="op" value="Import" class="btn">
+<input type="submit" name="op" value="Save" class="btn">
+<a class="btn" href="register.php?op=List&search_term=<?= urlencode($data['search_term']) ?>">Cancel</a>
 </div>
 
 </div>

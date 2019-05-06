@@ -18,8 +18,8 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 
 <div class="panel panel-default panel-body">
 <div class="container-fluid">
-<form method="post" action="register.php?op=List" class="form-horizontal">
-
+<form method="post" action="register.php" class="form-horizontal">
+<input type="hidden" name="op" value="List">
 <div class="row form-group">
 <div class="col-sm-4">
   <label for="query" class="control-label">Enter a search term:</label>
@@ -35,12 +35,18 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 </div>
 </div>
 
-<h1>List Of Registered Lab Device</h1>
+<h1>List Of Registered Lab Devices</h1>
 
 <?php if ( ! empty($data['deleted']) ) { ?>
 <div class="alert alert-info alert-dismissible" role="alert">
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-<p>M.A.C. removed from register!</p>
+<p>M.A.C. address removed from register!</p>
+</div>
+<?php } ?>
+<?php if ( ! empty($data['edited']) ) { ?>
+<div class="alert alert-info alert-dismissible" role="alert">
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+<p>M.A.C. address updated in register!</p>
 </div>
 <?php } ?>
 
@@ -50,28 +56,42 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 <thead>
 <tr>
 <th>M.A.C. Address</th>
-<th>Registered By</th>
+<th>Registered / Updated By</th>
 <th>Device Home</th>
 <th>Device Description</th>
-<th>Device Category</th>
-<th>Date Registered</th>
+<th>Labs Category</th>
+<th>Fields Category</th>
+<th>IoT Category</th>
+<th>Date Registered / Updated</th>
 <th></th>
 </tr>
 </thead>
 <tbody>
-<?php foreach ( $data['mac_list'] as $mac_row ) { ?>
+<?php
+    foreach ( $data['mac_list'] as $mac_row ) {
+        $log = array_pop($mac_row['logs']);
+?>
 
 <tr>
 <td><?= $mac_row['macaddress'] ?></td>
-<td><?= $mac_row['submitted_user'] ?></td>
+<td><?= $log['submitted_user'] ?></td>
 <td><?= $mac_row['device_home'] ?></td>
 <td><?= $mac_row['submitted_desc'] ?></td>
-<td><?= $mac_row['device_category'] ?></td>
-<td><?= $mac_row['submitted_date'] ?></td>
+<td><?= $mac_row['labs_category'] ?></td>
+<td><?= $mac_row['fields_category'] ?></td>
+<td><?= $mac_row['iot_category'] ?></td>
+<td><?= $log['submitted_date'] ?></td>
 <td>
-  <form method="post" action="register.php" class="form-horizontal" method="post" enctype="multipart/form-data">
+   <form method="post" action="register.php" class="form-horizontal" method="post" enctype="multipart/form-data">
   <input type="hidden" name="client_mac" value="<?= $mac_row['macaddress'] ?>">
+  <input type="hidden" name="search_term" value="<?= $data['search_term'] ?>">
   <input type="submit" name="op" value="Delete" class="form-control">
+  </form>
+
+   <form method="post" action="register.php" class="form-horizontal" method="post" enctype="multipart/form-data">
+  <input type="hidden" name="client_mac" value="<?= $mac_row['macaddress'] ?>">
+  <input type="hidden" name="search_term" value="<?= $data['search_term'] ?>">
+  <input type="submit" name="op" value="Edit" class="form-control">
   </form>
 </td>
 </tr>
