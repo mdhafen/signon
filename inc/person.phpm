@@ -250,14 +250,14 @@ function record_renew_sms( $uid, $token ) {
         $query = 'UPDATE guest_signatures SET aup_sent = NOW(), guest_token = :token WHERE guest_uid = :guest';
     }
     else {
-        $query = 'INSERT INTO guest_signatures (guest_token,guest_uid,aup_sent,aup_expire) VALUES (:token, :guest, NOW(), DATE_ADD(NOW(), INTERVAL 3 MONTH)';
+        $query = 'INSERT INTO guest_signatures (guest_token,guest_uid,aup_sent,aup_expire) VALUES (:token, :guest, NOW(), DATE_ADD(NOW(), INTERVAL 3 MONTH))';
     }
     $sth = $dbh->prepare($query);
     $sth->bindValue( ':token', $token );
     $sth->bindValue( ':guest', $uid );
     $sth->execute();
     if ( $sth->errorCode() !== '00000' ) {
-        error_log( "SQL Error: ". $sth->errorInfo()[2] );
+        error_log( "Record Renewal Sent SQL Error: ". $sth->errorInfo()[2] );
     }
 }
 
@@ -278,7 +278,7 @@ function record_guest_signature( $uid ) {
     $sth->bindValue( ':guest', $uid );
     $sth->execute();
     if ( $sth->errorCode() !== '00000' ) {
-        error_log( "SQL Error: ". $sth->errorInfo()[2] );
+        error_log( "Record Signature SQL Error: ". $sth->errorInfo()[2] );
         return 0;
     }
     else {
