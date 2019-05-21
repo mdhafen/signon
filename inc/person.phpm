@@ -200,7 +200,7 @@ function sms_send_renew_notice( $guest_uid ) {
         return 'empty';
     }
 
-    $token = bin2hex( random_bytes(32) );
+    $token = bin2hex( random_bytes(16) );
 
     $phone = preg_replace( '/\D/', "", $phone );
     if ( strlen( $phone ) < 10 ) {
