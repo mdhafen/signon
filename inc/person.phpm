@@ -4,7 +4,7 @@ global $Twilio_From, $Twilio_Account, $Twilio_Token, $SMS_Message, $SMS_Renew_Me
 $Twilio_From = '';
 $Twilio_Account = '';
 $Twilio_Token = '';
-$SMS_Message = "Your login for WCSDaccess follows, username: {{USERNAME}} password: {{PASSWORD}} Please don't reply, for help contact a WCSD Tech.";
+$SMS_Message = "Your login for WCSDaccess follows, username: {{USERNAME}} password: {{PASSWORD}} reply STOP to opt-out, for help contact a WCSD Tech.";
 $SMS_Renew_Message = "Your WCSD Guest Wifi account has expired, please renew your account at: https://signon.washk12.org/renew.php/{{TOKEN}}";
 
 require_once 'Twilio/autoload.php';
