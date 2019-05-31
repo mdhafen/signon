@@ -7,6 +7,9 @@ $dns = array();
 
 foreach ( $ous as $ou ) {
     $dn = $ou['dn'];
+    if ( stripos($ou['ou'][0],'macosxodconfig') !== false ) {
+        continue;
+    }
     $children = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 1, $dn );
     if ( ! count($children) ) {
         $dns[] = $dn;
