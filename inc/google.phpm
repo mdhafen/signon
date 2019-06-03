@@ -334,6 +334,12 @@ function google_user_hash_for_ldap( $user ) {
           }
         }
       }
+      if ( !empty($user['customSchemas']['SIS_Information']) ) {
+        $ci=$user['customSchemas']['SIS_Information'];
+        if ( !empty($ci['SISID'] )) {
+          $entry['registeredAddress'] = $ci['SISID'];
+        }
+      }
       if ( !empty($user['customSchemas']['Contact_Information']) ) {
         $ci=$user['customSchemas']['Contact_Information'];
         if ( !empty($ci['Street_Address'] )) {
