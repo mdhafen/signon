@@ -65,6 +65,7 @@ function labs_get_registration( $mac = null ) {
     $result = $sth->fetch();
     $result = stripslashes_array( $result );
 
+    $logs = array();
     $query = "SELECT * FROM macs_log WHERE macaddress = :mac ORDER BY submitted_date ASC";
 
     $sth = $dbh->prepare( $query );

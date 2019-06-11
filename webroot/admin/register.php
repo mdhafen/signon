@@ -32,7 +32,7 @@ if ( empty($mac) && !empty($_SESSION['client_mac']) ) {
 }
 
 $registration = labs_get_registration($mac);
-$reg_loc = !empty($registration) ? $registration['device_home'] : "";
+$reg_loc = !empty($registration['device_home']) ? $registration['device_home'] : "";
 
 $locations = labs_get_locations();
 $ip = get_remote_ip();
@@ -46,6 +46,7 @@ foreach ( $locations as &$loc ) {
 }
 
 $output = array(
+    'desc' => '',
     'client_mac' => $mac,
     'locations' => $locations,
     'search_term' => $search_term,
