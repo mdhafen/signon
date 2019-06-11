@@ -128,7 +128,7 @@ function labs_register_mac( $mac, $location = '', $desc = '', $lab_cat = 'Labs',
     $db_error = $sth->errorInfo();
     return $db_error[2];
   } else {
-      labs_add_mac_log( $user, $ip );
+      labs_add_mac_log( $mac, $user, $ip );
   }
 }
 
