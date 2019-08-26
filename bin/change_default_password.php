@@ -27,8 +27,12 @@ if ( !empty($argv[1]) ) {
 
 $change_users = array();
 foreach ( $users as $user ) {
+  if ( empty($user['givenName']) || empty($user['sn']) || empty($user['employeeNumber']) ) {
+    print "Could not computer old default password for ". $user['dn'] ."\n";
+    continue;
+  }
   $password = strtolower( substr($user['givenName'][0],0,1) . substr($user['sn'][0],0,1) . $user['employeeNumber'][0] );
-  if ( $ldap->do_connect('core',$user['dn'],$password) ) {
+  if ( @$ldap->do_connect('core',$user['dn'],$password) ) {
     $change_users[] = $user;
   }
 }
@@ -36,14 +40,20 @@ unset($users);
 
 /* reauth ldap as root */
 $ldap->do_connect( 'core', $ldap->config['userdn'], $ldap->config['passwd'] );
+print "Continuing\n";
 
 foreach ( $change_users as $user ) {
+  if ( empty($user['telephoneNumber']) || empty($user['registeredAddress']) ) {
+    print "Could not compute new default password for ". $user['dn'] ."\n";
+    continue;
+  }
   $password = strtolower( substr($user['givenName'][0],0,1) . substr($user['sn'][0],0,1) . $user['telephoneNumber'][0] . $user['registeredAddress'][0] );
+  print "Changing password for ". $user['dn'] ."\n";
 
-  	if ( !empty($user['employeeType'][0]) && strtolower(strstr($email,'@')) == '@'.$GOOGLE_DOMAIN ) {
-		$result = google_set_password( $user['mail'][0], $password );
-	}
-	$result = set_password( $ldap, $user['dn'], $password );
+  if ( !empty($user['employeeType'][0]) && strtolower(strstr($email,'@')) == '@'.$GOOGLE_DOMAIN ) {
+    $result = google_set_password( $user['mail'][0], $password );
+  }
+  $result = set_password( $ldap, $user['dn'], $password );
 }
 
 ?>
