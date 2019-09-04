@@ -10,6 +10,9 @@ foreach ( $ous as $ou ) {
     if ( stripos($ou['ou'][0],'macosxodconfig') !== false ) {
         continue;
     }
+    if ( stripos($ou['ou'][0],'ou=wcsd,ou=technology') !== false {
+        continue;
+    }
     $children = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 1, $dn );
     if ( ! count($children) ) {
         $dns[] = $dn;
