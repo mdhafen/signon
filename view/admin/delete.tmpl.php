@@ -43,4 +43,10 @@ Object has child objects and so can not be deleted!
 </div>
 </div>
 
+<script>
+  $(document).ready(function(){
+    var el = document.getElementById('nav-manage');
+    $(el).addClass('active');
+  });
+</script>
 <?php include( $data['_config']['base_dir'] .'/view/doc-close.php' ); ?>

@@ -24,6 +24,8 @@ include( 'doc-header.php' );
   $(document).ready(function(){
     var el = document.getElementById('password');
     $(el).trigger('keyup');
+    el = document.getElementById('nav-passwords');
+    $(el).addClass('active');
   });
 
   function GeneratePassword(input_id,report_id) {

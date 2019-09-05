@@ -12,12 +12,12 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
          <ul class="nav navbar-nav">
-          <li class="active"><a href="<?= $data['_config']['base_url'] ?>">Home</a></li>
-     <li><a href="<?= $data['_config']['base_url'] ?>passwords.php">Password Generator</a></li>
+          <li id="nav-home"><a href="<?= $data['_config']['base_url'] ?>">Home</a></li>
+          <li id="nav-passwords"><a href="<?= $data['_config']['base_url'] ?>passwords.php">Password Generator</a></li>
 <?php if ( ! empty($data['_session']['CAN_reset_password']) ) { ?>
-          <li><a href="<?= $data['_config']['base_url'] ?>admin/search.php">Search</a></li>
-          <li><a href="<?= $data['_config']['base_url'] ?>admin/">Manage Users</a></li>
-          <li><a href="<?= $data['_config']['base_url'] ?>admin/register.php">Register a Lab Device</a></li>
+          <li id="nav-search"><a href="<?= $data['_config']['base_url'] ?>admin/search.php">Search</a></li>
+          <li id="nav-manage"><a href="<?= $data['_config']['base_url'] ?>admin/">Manage Users</a></li>
+          <li id="nav-register"><a href="<?= $data['_config']['base_url'] ?>admin/register.php">Register a Lab Device</a></li>
 <?php } ?>
 
          </ul>

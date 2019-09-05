@@ -101,6 +101,11 @@ include( 'doc-header.php' );
 </div>
 </div>
 <script>
+  $(document).ready(function(){
+    var el = document.getElementById('nav-home');
+    $(el).addClass('active');
+  });
+
   Math.log2 = Math.log2 || function(x){ Math.log(x)*Math.LOG2E; };
   function CheckEntropy(value,report_el_id) {
     var guideline = 70;

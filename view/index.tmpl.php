@@ -31,4 +31,12 @@ include( 'doc-header.php' );
 
 </div>
 </div><!-- /container -->
+
+</div>
+<script>
+  $(document).ready(function(){
+    var el = document.getElementById('nav-home');
+    $(el).addClass('active');
+  });
+</script>
 <?php include( 'doc-close.php' ); ?>
