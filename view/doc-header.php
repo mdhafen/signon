@@ -13,6 +13,7 @@
         <div id="navbar" class="navbar-collapse collapse">
          <ul class="nav navbar-nav">
           <li class="active"><a href="<?= $data['_config']['base_url'] ?>">Home</a></li>
+     <li><a href="<?= $data['_config']['base_url'] ?>passwords.php">Password Generator</a></li>
 <?php if ( ! empty($data['_session']['CAN_reset_password']) ) { ?>
           <li><a href="<?= $data['_config']['base_url'] ?>admin/search.php">Search</a></li>
           <li><a href="<?= $data['_config']['base_url'] ?>admin/">Manage Users</a></li>
