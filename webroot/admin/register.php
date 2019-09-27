@@ -32,12 +32,12 @@ if ( empty($mac) && !empty($_SESSION['client_mac']) ) {
 }
 
 $registration = labs_get_registration($mac);
-$reg_loc = !empty($registration['device_home']) ? $registration['device_home'] : "";
+$reg_loc = $registration['device_home'] ?? "";
 
 $locations = labs_get_locations();
 $ip = get_remote_ip();
 $curr_loc = lab_get_locationid_for_ip( $ip );
-$selected_loc = empty($reg_loc) ? $curr_loc : $reg_loc;
+$selected_loc = !empty($reg_loc) ? $reg_loc : !empty($location) ? $location : $curr_loc;
 
 foreach ( $locations as &$loc ) {
   if ( $loc['id'] == $selected_loc ) {
@@ -46,7 +46,7 @@ foreach ( $locations as &$loc ) {
 }
 
 $output = array(
-    'desc' => '',
+    'desc' => $description ?? "",
     'client_mac' => $mac,
     'locations' => $locations,
     'search_term' => $search_term,
@@ -107,6 +107,7 @@ if ( !empty($op) ) {  // force other values here too?
             $error = labs_register_mac( $mac, $location, $description, $labs_category, $fields_category, $iot_category, $user, $ip );
             if ( !$error ) {
                 $output['success'] = true;
+                unset( $output['client_mac'] );
             }
             else {
                 $output['error'] = 1;
