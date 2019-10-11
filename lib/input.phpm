@@ -121,10 +121,13 @@ function input_validation( $output, $type ) {
 			if ( ! is_string( $value ) ) { $error++; }
 		}
 		if ( $type == INPUT_HTML_NONE ) {
+			if ( ! is_string( $value ) ) { $error++; }
 			if ( ! $error ) {
-				if ( ! is_string( $value ) ) { $error++; }
-				$value = strip_tags( clean_string( $value ) );
-				$value = htmlspecialchars( $value );
+				// strip_tags goes to far, it kills < even when there's no tag
+				$value = preg_replace('/\<([^[:alpha:]\/!])/','&lt;$1',clean_string($value));
+				$value = strip_tags( $value );
+				// htmlspecialchars should not double encode
+				$value = htmlspecialchars( $value, ENT_QUOTES|ENT_HTML5, '', false );
 			}
 		}
 		if ( $type == INPUT_HTML_SOME ) {
