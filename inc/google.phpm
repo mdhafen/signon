@@ -357,7 +357,7 @@ function google_user_hash_for_ldap( $user ) {
         if ( !empty($ci['School_Abbreviation'] )) {
           $entry['o'] = $ci['School_Abbreviation'];
         }
-        if ( !empty($ci['Guardian_Email'] )) {
+        if ( isset($ci['Guardian_Email'] )) { // empty-string is ok
           $entry['labeledURI'] = $ci['Guardian_Email'];
         }
         if ( !empty($ci['City'] )) {
