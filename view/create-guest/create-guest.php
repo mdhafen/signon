@@ -55,7 +55,7 @@ There was an error!
 
     <div class="row form-group">
       <label for="mobile" class="col-sm-4 control-label">Cell Phone Number: </label>
-      <div class="col-sm-8"><input id="mobile" name="mobile" value="" class="form-control" type="tel" required="required" placeholder="xxx-xxx-xxxx" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" title="A cell phone number with the three digit area code, three digit prefix, and four digits."></div>
+      <div class="col-sm-8"><input id="mobile" name="mobile" value="" class="form-control" type="text" required="required" placeholder="xxx-xxx-xxxx" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" data-toggle="tooltip" title="A cell phone number with the three digit area code, three digit prefix, and four digits, seperated by dashes."></div>
     </div>
 
     <div class="row form-group">
@@ -103,5 +103,6 @@ There was an error!
     var el = document.getElementById('nav-home');
     $(el).addClass('active');
   });
+  $('[data-toggle="tooltip"]').tooltip({trigger:'focus'});
 </script>
 <?php include( $data['_config']['base_dir'] .'/view/doc-close.php' ); ?>
