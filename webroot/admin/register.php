@@ -152,7 +152,7 @@ if ( !empty($op) ) {  // force other values here too?
                 }
                 else {
                     $output['error'] = 1;
-                    $output['err_msg'] = "Import file contains lines with invalid MAC Address ($mac) or Location.  Line $line_number: ". implode( ',', $row );
+                    $output['err_msg'] = "Import file contains a line with an invalid value.  Line $line_number: ". implode( ',', $row );
                 }
             }
             $output['registered'] = $registered;
