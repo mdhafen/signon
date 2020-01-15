@@ -19,7 +19,7 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
   <label for="attrib" class="control-label sr-only">Choose attribute</label>
   <select name="attrib">
 <?php foreach ( $data['attributes'] as $attr => $label ) { ?>
-    <option value="<?= $attr ?>"><?= $label ?></option>
+    <option value="<?= $attr ?>"<?= $attr == $data['attr'] ? ' selected' : '' ?>><?= $label ?></option>
 <?php } ?>
   </select>
 </div>

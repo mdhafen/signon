@@ -62,6 +62,7 @@ if ( !empty($filter) ) {
 }
 
 $output['attributes'] = $attrs;
+$output['attr'] = empty($attr) ? "" : $attr;
 
 output( $output, 'admin/search.tmpl' );
 ?>
