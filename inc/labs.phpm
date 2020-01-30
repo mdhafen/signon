@@ -25,6 +25,10 @@ function labs_normalize_categories( $labs_cat = null, $fields_cat = null, $iot_c
         case 'TechOffice' :
         case 'Guest' :
             break;
+        case 'Lab device' : $labs_cat = 'Labs'; break;
+        case 'Staff device' : $labs_cat = 'Lan'; break;
+        case 'Facilities device' : $labs_cat = 'Facilities'; break;
+        case 'Audio / Visual Devices' : $labs_cat = 'AV'; break;
         default : $labs_cat = '';
     }
 
