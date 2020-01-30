@@ -33,7 +33,7 @@ There was an error! <?= $data['err_msg'] ?>
 
 <div class="row form-group">
 <label for="client_mac" class="col-sm-4 control-label">M.A.C. Address</label>
-<div class="col-sm-8"><input type="text" id="client_mac" name="client_mac" value="<?= $data['client_mac'] ?>" class="form-control"></div>
+<div class="col-sm-8"><input type="text" id="client_mac" name="client_mac" value="<?= !empty($data['client_mac']) ? $data['client_mac'] : '' ?>" class="form-control"></div>
 </div>
 
 <div class="row form-group">
