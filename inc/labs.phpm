@@ -91,7 +91,7 @@ function labs_get_macs( $search_term = null ) {
   $dbh = db_connect('Labs');
 
   if($search_term !== null){
-    $query = "SELECT macaddress FROM authorized_macs LEFT JOIN macs_log USING (macaddress) WHERE macaddress LIKE :searchTerm OR device_home LIKE :searchTerm OR submitted_desc LIKE :searchTerm OR submitted_user LIKE :searchTerm OR submitted_date LIKE :searchTerm GROUP BY macaddress";
+    $query = "SELECT macaddress FROM authorized_macs LEFT JOIN macs_log USING (macaddress) WHERE macaddress LIKE :macTerm OR device_home LIKE :searchTerm OR submitted_desc LIKE :searchTerm OR submitted_user LIKE :searchTerm OR submitted_date LIKE :searchTerm GROUP BY macaddress";
   }
   else{
     return array();
@@ -100,6 +100,8 @@ function labs_get_macs( $search_term = null ) {
   $sth = $dbh->prepare( $query );
 
   if($search_term !== null){
+    $mac_term = labs_normalize_mac($search_term);
+    $sth->bindValue( ':macTerm', "%". (!empty($mac_term)?$mac_term:$search_term) ."%" );
     $sth->bindValue( ':searchTerm', "%".$search_term."%" );
   }
 
