@@ -147,8 +147,14 @@ if ( !empty($op) ) {  // force other values here too?
                 list($lab_cat,$field_cat,$iot_cat) = labs_normalize_categories($lab_cat,$field_cat,$iot_cat);
 
                 if ( !empty($mac) && !empty($loc) && ( !empty($lab_cat) || !empty($field_cat) || !empty($iot_cat) ) ) {
-                    labs_register_mac( $mac, $loc, $desc, $lab_cat, $field_cat, $iot_cat, $user, $ip );
-                    $registered++;
+                    $error = labs_register_mac( $mac, $loc, $desc, $lab_cat, $field_cat, $iot_cat, $user, $ip );
+                    if ( !$error ) {
+                        $registered++;
+                    }
+                    else {
+                        $output['error'] = 1;
+                        $output['err_msg'] = "Database Error: $error";
+                    }
                 }
                 else {
                     $output['error'] = 1;
