@@ -41,7 +41,7 @@ There was an error!
 
 <div class="panel panel-default panel-body">
   <div class="container-fluid">
-    <form action="create-guest.php" method="post" class="form-horizontal">
+    <form action="create-guest.php" id="create_guest_form" method="post" class="form-horizontal">
 
     <div class="row form-group">
       <label for="firstName" class="col-sm-4 control-label">First Name: </label>
@@ -89,7 +89,7 @@ There was an error!
 
     <div class="row form-group">
       <input type="hidden" name="op" value="<?= $data['op'] ?>">
-      <input class="btn btn-primary" type="submit" name="submit" value="I accept this agreement">
+      <input class="btn btn-primary" type="submit" name="submit" id="create_guest_submit" value="I accept this agreement">
     </div>
     </form>
   </div>
@@ -104,5 +104,16 @@ There was an error!
     $(el).addClass('active');
   });
   $('[data-toggle="tooltip"]').tooltip({trigger:'focus'});
+
+$("#create_guest_form").submit(function (e) {
+    // Check if we have submitted before
+    if ( $("#create_guest_submit").attr('data-attempted') == 'true' ) {
+      //stop submitting the form because we have already clicked submit.
+      e.preventDefault();
+    }
+    else {
+      $("#create_guest_submit").attr("data-attempted", 'true');
+    }
+  });
 </script>
 <?php include( $data['_config']['base_dir'] .'/view/doc-close.php' ); ?>
