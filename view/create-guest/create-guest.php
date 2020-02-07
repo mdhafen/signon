@@ -9,6 +9,17 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 <h1>Create account</h1>
 <div class="mainpage">
 
+<div class="modal hidden" id="generic-modal" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="generic-modal-title"></h4>
+      </div>
+      <div class="modal-body" id="generic-modal-message"></div>
+    </div>
+  </div>
+</div>
 <?php
 if ( !empty($data['result']) ) {
   if ( empty($data['error']) ) { ?>
@@ -89,7 +100,8 @@ There was an error!
 
     <div class="row form-group">
       <input type="hidden" name="op" value="<?= $data['op'] ?>">
-      <input class="btn btn-primary" type="submit" name="submit" id="create_guest_submit" value="I accept this agreement">
+      <button class="btn btn-primary" type="button" name="submit" id="create_guest_captcha_check" onclick="check_captcha">I accept this agreement</button>
+      <input class="btn btn-primary hidden" type="submit" name="submit" id="create_guest_submit" value="submit">
     </div>
     </form>
   </div>
@@ -98,14 +110,45 @@ There was an error!
 
 </div>
 </div>
+<script src="https://www.google.com/recaptcha/api.js?render=<?= $data['recaptcha_key'] ?>"></script>
 <script>
+  function check_captcha() {
+    if ( $("#create_guest_captcha_check").attr('data-attempted') == 'true' ) {
+        return false;
+    }
+    else {
+      $("#create_guest_captcha_check").attr("data-attempted", 'true');
+    }
+    grecaptcha.ready(function(){
+      grecaptcha.execute('<?= $data['recaptcha_key'] ?>', {action: 'create-guest'}).then(function(token) {
+        var data = {
+          g-recaptcha-response: token,
+          op: 'recaptcha-verify'
+        };
+        $.post('<?= $data['_config']['base_url'] ?>api/recaptcha_verify.php', data, function(result){
+          var parser = new DOMParser();
+          var response = parser.parseFromString( result, "application/xml" ).getElementsByTagName("result")[0];
+          var status = response.getElementsByTagName('state')[0].nodeValue;
+          if ( status == 'success' ) {
+            document.getElementById('create_guest_form').submit();
+          }
+          else {
+            $('#generic-modal #generic-modal-title').empty().text('Error');
+            $('#generic-modal #generic-modal-message').empty().text(response.getElementsByTagName('message')[0].nodeValue);
+            $('#generic-modal #generic-modal-message').modal('show');
+          }
+        });
+      });
+    });
+  }
+
   $(document).ready(function(){
     var el = document.getElementById('nav-home');
     $(el).addClass('active');
   });
   $('[data-toggle="tooltip"]').tooltip({trigger:'focus'});
 
-$("#create_guest_form").submit(function (e) {
+  $("#create_guest_form").submit(function (e) {
     // Check if we have submitted before
     if ( $("#create_guest_submit").attr('data-attempted') == 'true' ) {
       //stop submitting the form because we have already clicked submit.

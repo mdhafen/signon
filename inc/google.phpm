@@ -44,6 +44,10 @@ if ( $GOOGLE_S_CLIENT->getAuth()->isAccessTokenExpired() ) {
   $GOOGLE_S_CLIENT->getAuth()->refreshTokenWithAssertion();
 }
 
+global $RECAPTCHA_KEY, $RECAPTCHA_SECRET;
+$RECAPTCHA_KEY='';
+$RECAPTCHA_SECRET='';
+
 $OTHER_TITLES = array(
 'Extra Duty',
 'SRO',

@@ -4,7 +4,9 @@ include_once( '../../lib/security.phpm' );
 include_once( '../../lib/data.phpm' );
 include_once( '../../lib/output.phpm' );
 include_once( '../../inc/person.phpm' );
+include_once( '../../inc/google.phpm' );
 
+global $RECAPTCHA_KEY;
 $output = array();
 $result = '';
 $error = 0;
@@ -111,6 +113,7 @@ $output['op'] = $op;
 $output['result'] = $result;
 $output['error'] = $error;
 $output['username'] = (empty($user_email))? "" : $user_email;
+$output['recaptcha_key'] = $RECAPTCHA_KEY;
 
 output( $output, 'create-guest/create-guest' );
 ?>
