@@ -100,8 +100,8 @@ There was an error!
 
     <div class="row form-group">
       <input type="hidden" name="op" value="<?= $data['op'] ?>">
-      <button class="btn btn-primary" type="button" name="submit" id="create_guest_captcha_check" onclick="check_captcha">I accept this agreement</button>
-      <input class="btn btn-primary hidden" type="submit" name="submit" id="create_guest_submit" value="submit">
+      <button class="btn btn-primary" type="button" name="captcha_submit" id="create_guest_captcha_check" onclick="check_captcha()">I accept this agreement</button>
+      <input class="btn btn-primary hidden" type="submit" name="guest_submit" id="create_guest_submit" value="I accept this agreement">
     </div>
     </form>
   </div>
@@ -120,21 +120,19 @@ There was an error!
       $("#create_guest_captcha_check").attr("data-attempted", 'true');
     }
     grecaptcha.ready(function(){
-      grecaptcha.execute('<?= $data['recaptcha_key'] ?>', {action: 'create-guest'}).then(function(token) {
+      grecaptcha.execute('<?= $data['recaptcha_key'] ?>', {action: 'createguest'}).then(function(token) {
         var data = {
-          g-recaptcha-response: token,
-          op: 'recaptcha-verify'
+          'g-recaptcha-response': token,
+          'op': 'recaptcha-verify'
         };
         $.post('<?= $data['_config']['base_url'] ?>api/recaptcha_verify.php', data, function(result){
-          var parser = new DOMParser();
-          var response = parser.parseFromString( result, "application/xml" ).getElementsByTagName("result")[0];
-          var status = response.getElementsByTagName('state')[0].nodeValue;
+          var status = $(result).find('state').text();
           if ( status == 'success' ) {
-            document.getElementById('create_guest_form').submit();
+              document.getElementById('create_guest_submit').click();
           }
           else {
             $('#generic-modal #generic-modal-title').empty().text('Error');
-            $('#generic-modal #generic-modal-message').empty().text(response.getElementsByTagName('message')[0].nodeValue);
+            $('#generic-modal #generic-modal-message').empty().text( $(result).find('message').text() );
             $('#generic-modal #generic-modal-message').modal('show');
           }
         });

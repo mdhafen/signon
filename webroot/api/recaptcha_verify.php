@@ -34,10 +34,12 @@ if ( $op == 'recaptcha-verify' ) {
     if ( $responseKeys["success"] ) {
         $output .= '<state>success</state><message>Captcha passed!</message></result>';
         output( $output, '', $xml=1 );
+        exit;
     }
     else {
         $output .= '<state>error</state><message>Captcha failed!</message></result>';
         output( $output, '', $xml=1 );
+        exit;
     }
 }
 $output .= '<state>error</state><message>Undefined Operation</message></result>';

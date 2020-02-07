@@ -12,7 +12,7 @@ $result = '';
 $error = 0;
 $user = '';
 $user_email = '';
-$submitted = input( 'submit', INPUT_STR );
+$submitted = input( 'guest_submit', INPUT_STR );
 $op = input( 'op', INPUT_HTML_NONE );
 
 if ( !empty($submitted) ) {
