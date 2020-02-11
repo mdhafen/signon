@@ -110,7 +110,7 @@ There was an error!
 
 </div>
 </div>
-<script src="https://www.google.com/recaptcha/api.js?render=<?= $data['recaptcha_key'] ?>"></script>
+<script src="https://www.recaptcha.net/recaptcha/api.js?render=<?= $data['recaptcha_key'] ?>"></script>
 <script>
   function check_captcha() {
     if ( $("#create_guest_captcha_check").attr('data-attempted') == 'true' ) {
