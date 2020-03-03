@@ -100,8 +100,9 @@ There was an error!
 
     <div class="row form-group">
       <input type="hidden" name="op" value="<?= $data['op'] ?>">
-      <button class="btn btn-primary" type="button" name="captcha_submit" id="create_guest_captcha_check" onclick="check_captcha()">I accept this agreement</button>
-      <input class="btn btn-primary hidden" type="submit" name="guest_submit" id="create_guest_submit" value="I accept this agreement">
+<!-- FIXME disable reCaptcha for now since it tries to pass the walled garden on https://www.google.com/recaptcha/api2/anchor?[...] -->
+      <button class="btn btn-primary hidden" type="button" name="captcha_submit" id="create_guest_captcha_check" onclick="check_captcha()">I accept this agreement</button>
+      <input class="btn btn-primary" type="submit" name="guest_submit" id="create_guest_submit" value="I accept this agreement">
     </div>
     </form>
   </div>
