@@ -5,6 +5,7 @@ include_once( '../../lib/data.phpm' );
 include_once( '../../lib/output.phpm' );
 include_once( '../../inc/person.phpm' );
 include_once( '../../inc/google.phpm' );
+include_once( '../../inc/securimage/securimage.php' );
 
 global $RECAPTCHA_KEY;
 $output = array();

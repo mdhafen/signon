@@ -8,12 +8,13 @@ include_once( '../../inc/google.phpm' );
 
 global $RECAPTCHA_SECRET;
 
+$passed = false;
 $op = input( 'op', INPUT_HTML_NONE );
+$output = '<?xml version="1.0"?>
+<result>';
 
 if ( $op == 'recaptcha-verify' ) {
     $token = input( 'g-recaptcha-response', INPUT_STR );
-    $output = '<?xml version="1.0"?>
-<result>';
 
     if ( !$token ) {
         $output .= '<state>error</state><message>Captcha form empty</message></result>';
@@ -32,15 +33,30 @@ if ( $op == 'recaptcha-verify' ) {
     $response = file_get_contents( $url, false, $context );
     $responseKeys = json_decode($response,true);
     if ( $responseKeys["success"] ) {
-        $output .= '<state>success</state><message>Captcha passed!</message></result>';
-        output( $output, '', $xml=1 );
-        exit;
+        $passed = true;
     }
     else {
-        $output .= '<state>error</state><message>Captcha failed!</message></result>';
-        output( $output, '', $xml=1 );
-        exit;
     }
 }
-$output .= '<state>error</state><message>Undefined Operation</message></result>';
+else if ( $op == 'sicaptcha-verify' ) {
+    include_once( '../../inc/securimage/securimage.php' );
+    $si = new Securimage();
+    $token = input( 'captcha_code', INPUT_STR );
+    if ( $si->check($token) == true ) {
+        $passed = true;
+    }
+    else {
+    }
+}
+else {
+    $output .= '<state>error</state><message>Undefined Operation</message></result>';
+}
+
+if ( $passed ) {
+    $output .= '<state>success</state><message>Captcha passed!</message></result>';
+}
+else {
+    $output .= '<state>error</state><message>Captcha failed!</message></result>';
+}
+
 output( $output, '', $xml=1 );

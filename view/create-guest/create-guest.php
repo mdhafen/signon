@@ -100,9 +100,37 @@ There was an error!
 
     <div class="row form-group">
       <input type="hidden" name="op" value="<?= $data['op'] ?>">
-<!-- FIXME disable reCaptcha for now since it tries to pass the walled garden on https://www.google.com/recaptcha/api2/anchor?[...] -->
-      <button class="btn btn-primary hidden" type="button" name="captcha_submit" id="create_guest_captcha_check" onclick="check_captcha()">I accept this agreement</button>
-      <input class="btn btn-primary" type="submit" name="guest_submit" id="create_guest_submit" value="I accept this agreement">
+      <button class="btn btn-primary hidden" type="button" name="captcha_submit" id="create_guest_recaptcha_check" onclick="check_recaptcha()">I accept this agreement</button>
+      <input class="btn btn-primary hidden" type="submit" name="guest_submit" id="create_guest_submit" value="I accept this agreement">
+
+      <div>
+        <img style="float: left; padding-right: 5px" id="captcha_image" src="<?= $data['_config']['base_url'] ?>securimage/securimage_show.php?<?= md5(uniqid(time)) ?>" alt="CAPTCHA Image">
+        <div id="captcha_image_audio_div">
+          <audio id="captcha_image_audio" preload="none" style="display: none">
+            <source id="captcha_image_source_wav" src="<?= $data['_config']['base_url'] ?>securimage/securimage_play.php?id=1234" type="audio/wav">
+          </audio>
+        </div>
+        <div id="captcha_image_audio_controls">
+          <a tabindex="-1" class="captcha_play_button" href="<?= $data['_config']['base_url'] ?>securimage/securimage_play.php?id=1234 ?>" onclick="return false">
+            <img class="captcha_play_image" height="32" width="32" src="<?= $data['_config']['base_url'] ?>securimage/images/audio_icon.png" alt="Play CAPTCHA Audio" style="border: 0px">
+            <img class="captcha_loading_image rotating" height="32" width="32" src="<?= $data['_config']['base_url'] ?>securimage/images/loading.png" alt="Loading audio" style="display: none">
+          </a>
+          <noscript>Enable Javascript for audio controls</noscript>
+        </div>
+        <a tabindex="-1" style="border: 0" href="#" title="Refresh Image" onclick="document.getElementById('captcha_image').src = '<?= $data['_config']['base_url'] ?>securimage/securimage_show.php?' + Math.random(); captcha_image_audioObj.refresh(); this.blur(); return false">
+          <img height="32" width="32" src="<?= $data['_config']['base_url'] ?>securimage/images/refresh.png" alt="Refresh Image" onclick="this.blur()" style="border: 0px; vertical-align: bottom" />
+        </a>
+        <br>
+        <script type="text/javascript" src="<?= $data['_config']['base_url'] ?>securimage/securimage.js"></script>
+        <script type="text/javascript">
+          captcha_image_audioObj = new SecurimageAudio({ audioElement: 'captcha_image_audio', controlsElement: 'captcha_image_audio_controls' });
+        </script>
+        <div style="clear: both"></div>
+        <label for="captcha_code">Type the text:</label>
+        <input type="text" name="captcha_code" id="captcha_code">
+        <button class="btn btn-primary" type="button" name="captcha_submit" id="create_guest_sicaptcha_check" onclick="verify_sicaptcha()">I accept this agreement</button>
+      </div>
+
     </div>
     </form>
   </div>
@@ -111,15 +139,9 @@ There was an error!
 
 </div>
 </div>
-<script src="https://www.recaptcha.net/recaptcha/api.js?render=<?= $data['recaptcha_key'] ?>"></script>
+<!-- <script src="https://www.recaptcha.net/recaptcha/api.js?render=<?= $data['recaptcha_key'] ?>"></script> -->
 <script>
-  function check_captcha() {
-    if ( $("#create_guest_captcha_check").attr('data-attempted') == 'true' ) {
-        return false;
-    }
-    else {
-      $("#create_guest_captcha_check").attr("data-attempted", 'true');
-    }
+  function check_recaptcha() {
     grecaptcha.ready(function(){
       grecaptcha.execute('<?= $data['recaptcha_key'] ?>', {action: 'createguest'}).then(function(token) {
         var data = {
@@ -138,6 +160,25 @@ There was an error!
           }
         });
       });
+    });
+  }
+
+  function verify_sicaptcha() {
+    var token = $("#captcha_code").val();
+    var data = {
+      'captcha_code': token,
+      'op': 'sicaptcha-verify'
+    };
+    $.post('<?= $data['_config']['base_url'] ?>api/recaptcha_verify.php', data, function(result){
+      var status = $(result).find('state').text();
+      if ( status == 'success' ) {
+          document.getElementById('create_guest_submit').click();
+      }
+      else {
+        $('#generic-modal #generic-modal-title').empty().text('Error');
+        $('#generic-modal #generic-modal-message').empty().text( $(result).find('message').text() );
+        $('#generic-modal #generic-modal-message').modal('show');
+      }
     });
   }
 
