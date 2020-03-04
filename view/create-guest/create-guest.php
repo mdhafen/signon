@@ -104,30 +104,33 @@ There was an error!
       <input class="btn btn-primary hidden" type="submit" name="guest_submit" id="create_guest_submit" value="I accept this agreement">
 
       <div>
-        <img style="float: left; padding-right: 5px" id="captcha_image" src="<?= $data['_config']['base_url'] ?>securimage/securimage_show.php?<?= md5(uniqid(time())) ?>" alt="CAPTCHA Image">
-        <div id="captcha_image_audio_div">
-          <audio id="captcha_image_audio" preload="none" style="display: none">
-            <source id="captcha_image_source_wav" src="<?= $data['_config']['base_url'] ?>securimage/securimage_play.php?id=1234" type="audio/wav">
-          </audio>
-        </div>
-        <div id="captcha_image_audio_controls">
-          <a tabindex="-1" class="captcha_play_button" href="<?= $data['_config']['base_url'] ?>securimage/securimage_play.php?id=1234 ?>" onclick="return false">
-            <img class="captcha_play_image" height="32" width="32" src="<?= $data['_config']['base_url'] ?>securimage/images/audio_icon.png" alt="Play CAPTCHA Audio" style="border: 0px">
-            <img class="captcha_loading_image rotating" height="32" width="32" src="<?= $data['_config']['base_url'] ?>securimage/images/loading.png" alt="Loading audio" style="display: none">
+        <img style="display:inline-block; padding-right: 5px" id="captcha_image" src="<?= $data['_config']['base_url'] ?>securimage/securimage_show.php?<?= md5(uniqid(time())) ?>" alt="CAPTCHA Image">
+        <div style="display:inline-block">
+          <div id="captcha_image_audio_div">
+            <audio id="captcha_image_audio" preload="none" style="display: none">
+              <source id="captcha_image_source_wav" src="<?= $data['_config']['base_url'] ?>securimage/securimage_play.php?id=1234" type="audio/wav">
+            </audio>
+          </div>
+          <div id="captcha_image_audio_controls">
+            <a tabindex="-1" class="captcha_play_button" href="<?= $data['_config']['base_url'] ?>securimage/securimage_play.php?id=1234 ?>" onclick="return false">
+              <img class="captcha_play_image" height="32" width="32" src="<?= $data['_config']['base_url'] ?>securimage/images/audio_icon.png" alt="Play CAPTCHA Audio" style="border: 0px">
+              <img class="captcha_loading_image rotating" height="32" width="32" src="<?= $data['_config']['base_url'] ?>securimage/images/loading.png" alt="Loading audio" style="display: none">
+            </a>
+            <noscript>Enable Javascript for audio controls</noscript>
+          </div>
+          <a tabindex="-1" style="border: 0" href="#" title="Refresh Image" onclick="document.getElementById('captcha_image').src = '<?= $data['_config']['base_url'] ?>securimage/securimage_show.php?' + Math.random(); captcha_image_audioObj.refresh(); this.blur(); return false">
+            <img height="32" width="32" src="<?= $data['_config']['base_url'] ?>securimage/images/refresh.png" alt="Refresh Image" onclick="this.blur()" style="border: 0px; vertical-align: bottom" />
           </a>
-          <noscript>Enable Javascript for audio controls</noscript>
         </div>
-        <a tabindex="-1" style="border: 0" href="#" title="Refresh Image" onclick="document.getElementById('captcha_image').src = '<?= $data['_config']['base_url'] ?>securimage/securimage_show.php?' + Math.random(); captcha_image_audioObj.refresh(); this.blur(); return false">
-          <img height="32" width="32" src="<?= $data['_config']['base_url'] ?>securimage/images/refresh.png" alt="Refresh Image" onclick="this.blur()" style="border: 0px; vertical-align: bottom" />
-        </a>
-        <br>
         <script type="text/javascript" src="<?= $data['_config']['base_url'] ?>securimage/securimage.js"></script>
         <script type="text/javascript">
           captcha_image_audioObj = new SecurimageAudio({ audioElement: 'captcha_image_audio', controlsElement: 'captcha_image_audio_controls' });
         </script>
         <div style="clear: both"></div>
-        <label for="captcha_code">Type the text:</label>
-        <input type="text" name="captcha_code" id="captcha_code">
+        <p>
+          <label for="captcha_code">Type the text:</label>
+          <input type="text" name="captcha_code" id="captcha_code">
+        </p>
         <button class="btn btn-primary" type="button" name="captcha_submit" id="create_guest_sicaptcha_check" onclick="verify_sicaptcha()">I accept this agreement</button>
       </div>
 
