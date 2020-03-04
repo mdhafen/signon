@@ -47,7 +47,7 @@ There was an error!
 } else { ?>
 <div class="alert alert-info alert-dismissible" role="alert">
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-  Please enter the form below to register for network access.  You password will then be sent to you by SMS.
+  Please enter your information in the form below to register for network access.  You password will then be sent to you by SMS.
 </div>
 
 <div class="panel panel-default panel-body">
@@ -104,7 +104,7 @@ There was an error!
       <input class="btn btn-primary hidden" type="submit" name="guest_submit" id="create_guest_submit" value="I accept this agreement">
 
       <div>
-        <img style="float: left; padding-right: 5px" id="captcha_image" src="<?= $data['_config']['base_url'] ?>securimage/securimage_show.php?<?= md5(uniqid(time)) ?>" alt="CAPTCHA Image">
+        <img style="float: left; padding-right: 5px" id="captcha_image" src="<?= $data['_config']['base_url'] ?>securimage/securimage_show.php?<?= md5(uniqid(time())) ?>" alt="CAPTCHA Image">
         <div id="captcha_image_audio_div">
           <audio id="captcha_image_audio" preload="none" style="display: none">
             <source id="captcha_image_source_wav" src="<?= $data['_config']['base_url'] ?>securimage/securimage_play.php?id=1234" type="audio/wav">
@@ -156,7 +156,7 @@ There was an error!
           else {
             $('#generic-modal #generic-modal-title').empty().text('Error');
             $('#generic-modal #generic-modal-message').empty().text( $(result).find('message').text() );
-            $('#generic-modal #generic-modal-message').modal('show');
+            $('#generic-modal').modal('show');
           }
         });
       });
@@ -177,7 +177,7 @@ There was an error!
       else {
         $('#generic-modal #generic-modal-title').empty().text('Error');
         $('#generic-modal #generic-modal-message').empty().text( $(result).find('message').text() );
-        $('#generic-modal #generic-modal-message').modal('show');
+        $('#generic-modal').modal('show');
       }
     });
   }
@@ -185,6 +185,7 @@ There was an error!
   $(document).ready(function(){
     var el = document.getElementById('nav-home');
     $(el).addClass('active');
+    $('#generic-modal').modal({'show':false});
   });
   $('[data-toggle="tooltip"]').tooltip({trigger:'focus'});
 
