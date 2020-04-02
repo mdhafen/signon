@@ -22,6 +22,11 @@ $object = $set[0];
 $objectdn = $object['dn'];
 unset( $object['dn'] );
 
+$set = $ldap->quick_search( array( 'objectClass' => 'posixGroup', 'cn' => 'vpn2_access' ), array() );
+$group = $set[0];
+$groupdn = $group['dn'];
+unset( $group['dn'] );
+
 $output = '<?xml version="1.0"?>
 <confine>';
 
@@ -30,33 +35,47 @@ $input = input( 'toggle', INPUT_STR );
 $return = input( 'return', INPUT_STR );
 
 if ( ! empty($input) ) {
-    if ( $input == 'off' ) {
-	if ( $class == 'Confinement' && $object['businessCategory'][0] == 'Confinement' ) {
-          $state = !empty($object['employeeType'][0])?$object['employeeType'][0]:'Other';
-        } else if ( $class == 'Banned' && $object['businessCategory'][0] == 'Banned' ) {
-          $state = !empty($object['employeeType'][0])?$object['employeeType'][0]:'Other';
+    switch ($class) {
+    case 'Confinement':
+    case 'Banned':
+        $state = $object['businessCategory'][0];
+        if ( $input == 'off' ) {
+            if ( $object['businessCategory'][0] == $class ) {
+                $state = !empty($object['employeeType'][0])?$object['employeeType'][0]:'Other';
+            }
+        } else {
+            if ( $class == 'Confinement' || $class == 'Banned' ) {
+                $state = $class;
+            }
         }
-    } else {
-	if ( $class == 'Confinement' ) {
-            $state = 'Confinement';
-        } else if ( $class == 'Banned' ) {
-            $state = 'Banned';
+
+        if ( empty($object['businessCategory'][0]) || $state != $object['businessCategory'][0] ) {
+            $results = $ldap->do_modify( $objectdn, array('businessCategory'=>$state) );
         }
+        break;
+
+    case 'VPN':
+        if ( $input == 'off' ) {
+            if ( array_search($object['uid'][0],$group['memberUid']) !== false ) {
+                $results = $ldap->do_attr_del( $groupdn, array('memberUid'=>$object['uid'][0]) );
+            }
+        }
+        else if ( array_search($object['uid'][0],$group['memberUid']) === false ) {
+            $results = $ldap->do_attr_add( $groupdn, array('memberUid'=>$object['uid'][0]) );
+        }
+        break;
     }
 
-    if ( empty($object['businessCategory'][0]) || $state != $object['businessCategory'][0] ) {
-        $results = $ldap->do_modify( $objectdn, array('businessCategory'=>$state) );
-        if ( $results ) {
-            $output .= "\n<result>Success</result>";
+    if ( $results ) {
+        $output .= "\n<result>Success</result>";
+    }
+    else {
+        if ( empty($return) ) {
+            output( '<?xml version ="1.0"?><error>'. $ldap->get_error() .'</error>', '', $xml=1 );
+        } else {
+            redirect('admin/object.php?dn='.urlencode($dn) );
         }
-        else {
-            if ( empty($return) ) {
-                output( '<?xml version ="1.0"?><error>'. $ldap->get_error() .'</error>', '', $xml=1 );
-            } else {
-                redirect('admin/object.php?dn='.urlencode($dn) );
-            }
-            exit;
-        }
+        exit;
     }
 }
 
