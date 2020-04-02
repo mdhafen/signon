@@ -52,7 +52,7 @@ function set_password( $ldap, $userdn, $password ) {
 		}
 		if ( in_array( 'sambaSamAccount', $object['objectClass'] ) ) {
 			$entry['sambaNTPassword'] = $smb_pass;
-            $entry['sambaPwdLastSet'] = time();
+			$entry['sambaPwdLastSet'] = time();
 		}
 
 		if ( ! empty( $entry ) ) {
@@ -99,8 +99,8 @@ function get_entropy( $password ) {
 	return $entropy;
 }
 
-function remove_from_groups( $ldap, $userdn ) {
-	$result = 0;
+function get_groups( $ldap, $userdn ) {
+	$result = [];
 	if ( !empty($userdn) ) {
 		$set = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $userdn );
 		if ( !empty($set) ) {
@@ -112,15 +112,37 @@ function remove_from_groups( $ldap, $userdn ) {
 
 		$groups = $ldap->quick_search( array( 'member' => "$userdn" ) );
 		foreach ( $groups as $group ) {
-			$group_dn = $group['dn'];
-			$ldap->do_attr_del( $group_dn, array('member' => $userdn) );
-			$result++;
+			$result[] = $group;
 		}
 
 		$groups = $ldap->quick_search( array( 'memberUid' => $object['uid'][0] ) );
 		foreach ( $groups as $group ) {
+			$result[] = $group;
+		}
+	}
+	return $result;
+}
+
+function remove_from_groups( $ldap, $userdn ) {
+	$result = 0;
+	if ( !empty($userdn) ) {
+		$set = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $userdn );
+		if ( !empty($set) ) {
+			$object = $set[0];
+		}
+		if ( empty($object) ) {
+			return 0;
+		}
+
+		$groups = get_groups($ldap, $userdn);
+		foreach ( $groups as $group ) {
 			$group_dn = $group['dn'];
-			$ldap->do_attr_del( $group_dn, array('memberUid' => $object['uid'][0]) );
+			if ( !empty( $group['member'] ) ) {
+				$ldap->do_attr_del( $group_dn, array('member' => $userdn) );
+			}
+			else if ( !empty( $group['memberUid'] ) ) {
+				$ldap->do_attr_del( $group_dn, array('memberUid' => $object['uid'][0]) );
+			}
 			$result++;
 		}
 	}

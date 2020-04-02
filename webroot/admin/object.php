@@ -15,6 +15,11 @@ $object = $set[0];
 $objectdn = $object['dn'];
 unset( $object['dn'] );
 
+$is_person = is_person( $object );
+if ( $is_person ) {
+    $groups = get_groups( $ldap, $objectdn );
+}
+
 ksort( $object, SORT_STRING | SORT_FLAG_CASE );
 
 $attr_changes = get_attr_changes( $objectdn );
@@ -30,7 +35,8 @@ usort( $children, 'sorter' );
 $output = array(
 	'object_dn' => $objectdn,
 	'object' => $object,
-	'is_person' => is_person( $object ),
+	'is_person' => $is_person,
+	'object_vpn' => ( $is_person && empty(array_filter($groups,function($k){return empty($k['cn'])?0:$k['cn'][0]=='vpn2_access';})) ),
 	'parentdn' => $parentdn,
 	'attr_changes' => $attr_changes,
 	'children' => $children,
@@ -46,4 +52,5 @@ function sorter( $a, $b ) {
 
 	return strcasecmp( $a[$aa][0], $b[$ba][0] );
 }
+
 ?>
