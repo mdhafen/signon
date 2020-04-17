@@ -49,10 +49,11 @@ Add:
 <?php   if ( stripos($data['object_dn'],',ou=students,') !== FALSE ) { ?>
 <a class="btn btn-default" href="password.php?default=1&amp;dn=<?= urlencode($data['object_dn']) ?>">Set Password to Default</a>
 <?php   } ?>
-<div class="well btn-group">
-<div>User is <?= ($data['object']['businessCategory'][0] != 'Confinement' && $data['object']['businessCategory'][0] != 'Banned' ? 'Not' : '' ) ?> WiFi Confined <?php if ($data['object']['businessCategory'][0] != 'Banned') { ?><a class="btn btn-default" href="../api/confine.php?dn=<?= urlencode($data['object_dn']) ?>&amp;return=1&amp;toggle=<?= ($data['object']['businessCategory'][0] != 'Confinement' ? 'on' : 'off') ?>">Toggle</a><?php } ?></div>
-<div>User is <?= ($data['object']['businessCategory'][0] != 'Banned' ? 'Not' : '' ) ?> Banned from gina Access <a class="btn btn-default" href="../api/confine.php?dn=<?= urlencode($data['object_dn']) ?>&amp;return=1&amp;class=Banned&amp;toggle=<?= ($data['object']['businessCategory'][0] != 'Banned' ? 'on' : 'off') ?>">Toggle</a></div>
-     <div>User <?= (!empty($data['object_vpn']) ? 'Does Not Have' : 'Has' ) ?> vpn access <a class="btn btn-default" href="../api/confine.php?dn=<?= urlencode($data['object_dn']) ?>&amp;return=1&amp;class=VPN&amp;toggle=<?= (!empty($data['object_vpn']) ? 'on' : 'off') ?>">Toggle</a></div>
+<div class="form-group">
+<h4>Security</h4>
+<a href="../api/confine.php?dn=<?= urlencode($data['object_dn']) ?>&amp;return=1&amp;toggle=<?= ($data['object']['businessCategory'][0] != 'Confinement' ? 'on' : 'off') ?>" <?= ($data['object']['businessCategory'][0] != 'Confinement' && $data['object']['businessCategory'][0] != 'Banned' ? 'class="btn btn-success">WiFi Access Enabled' : 'class="btn btn-danger">WiFi Access Disabled' ) ?></a>
+<a href="../api/confine.php?dn=<?= urlencode($data['object_dn']) ?>&amp;return=1&amp;class=Banned&amp;toggle=<?= ($data['object']['businessCategory'][0] != 'Banned' ? 'on' : 'off') ?>" <?= ($data['object']['businessCategory'][0] != 'Banned' ? 'class="btn btn-success">GinaAccess Logins Enabled' : 'class="btn btn-danger">GinaAccess Logins Disabled' ) ?></a>
+     <a href="../api/confine.php?dn=<?= urlencode($data['object_dn']) ?>&amp;return=1&amp;class=VPN&amp;toggle=<?= (!empty($data['object_vpn']) ? 'on' : 'off') ?>" <?= (!empty($data['object_vpn']) ? 'class="btn btn-success">VPN Access Enabled' : 'class="btn btn-danger">VPN Access Disabled' ) ?></a>
 </div>
 <?php } ?>
 </div>

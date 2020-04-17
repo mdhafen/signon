@@ -30,6 +30,9 @@ include( 'doc-header.php' );
 <img src='img/WCSDsignon.jpg'>
 
 </div>
+
+<a class="btn btn-default" role="button" href="<?= $data['_config']['base_url'] ?>tutorials.php" aria-expanded="false" aria-controls="tutorial_tabs">View our Tutorials</a>
+
 </div><!-- /container -->
 
 </div>
