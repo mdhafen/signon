@@ -36,7 +36,7 @@ $output = array(
 	'object_dn' => $objectdn,
 	'object' => $object,
 	'is_person' => $is_person,
-	'object_vpn' => ( $is_person && empty(array_filter($groups,function($k){return empty($k['cn'])?0:$k['cn'][0]=='vpn2_access';})) ),
+	'object_vpn' => ( $is_person && !empty(array_filter($groups,function($k){return empty($k['cn'])?0:$k['cn'][0]=='vpn2_access';})) ),
 	'parentdn' => $parentdn,
 	'attr_changes' => $attr_changes,
 	'children' => $children,
