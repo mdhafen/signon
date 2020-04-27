@@ -10,7 +10,6 @@ define( 'INPUT_EMAIL', '8' );
 
 require_once( 'PEAR.php' );  // to check for error
 require_once( 'Mail/RFC822.php' );  // to validate the email address
-(include_once 'HTML/Safe.php') || (include_once '../inc/HTML/Safe.php');
 
 require_once( 'config.phpm' );
 require_once( 'data.phpm' );
