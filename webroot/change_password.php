@@ -66,6 +66,7 @@ if ( !empty($user) ) {
       }
 
       if ( ! empty($dn) ) {
+        $user_lock = get_lock_status( $objectdn );
         if ( $password !== $password2 ) {
           $errors[] = 'PASSWORDS_NO_MATCH';
         } else if ( strlen($password) < 8 ) {
@@ -73,6 +74,8 @@ if ( !empty($user) ) {
         } else if ( $times = is_pwned_password($password) ) {
           $errors[] = 'PASSWORDS_TO_COMMON';
           $output['error_times'] = $times;
+        } else if ( !empty($user_lock) ) {
+          $errors[] = 'USER_LOCKED';
         } else {
           $result = google_set_password( $email, $password );
           set_password( $ldap, $dn, $password );

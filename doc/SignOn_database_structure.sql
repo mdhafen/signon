@@ -33,6 +33,22 @@ CREATE TABLE `attribute_changes` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `user_locks`
+--
+
+DROP TABLE IF EXISTS `user_locks`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_locks` (
+  `dn` varchar(256) NOT NULL,
+  `passwd` mediumtext NULL,
+  `user` mediumtext,
+  `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`dn`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `guest_signatures`
 --
 

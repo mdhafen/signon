@@ -73,9 +73,10 @@ $config = array(
 			'roles' => array(
 				2 => 'cn=TechnologyStaff,ou=Groups,dc=example',
 				3 => 'cn=DistrictManagers,ou=Groups,dc=example',
+				4 => 'cn=LDAPAdmins,ou=Groups,dc=example',
 			),
 			// role with most permissions
-			'sysadmin_role' => 3,
+			'sysadmin_role' => 4,
 		),
 	),
 	'auth' => array(
@@ -84,6 +85,7 @@ $config = array(
 		4   => "reset_password",
 		8   => "add_to_group",
 		16  => "manage_objects",
+		32	=> "lock_user",
 	),
 	'role' => array(
 		1 => array(
@@ -97,6 +99,10 @@ $config = array(
 		3 => array(
 			'name' => 'manager',
 			'auth' => 31,
+		),
+		4 => array(
+			'name' => 'admin',
+			'auth' => 63,
 		),
 	),
 );

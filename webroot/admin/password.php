@@ -27,6 +27,12 @@ if ( ! ( authorized('reset_password') || ( !empty($_SESSION['loggedin_user']) &&
 	output( $output, 'admin/password.tmpl' );
 	exit;
 }
+$user_lock = get_lock_status( $objectdn );
+if ( !empty($user_lock) && ! authorized('lock_user') ) {
+	$output['error'] = 'USER_LOCKED';
+	output( $output, 'admin/password.tmpl' );
+	exit;
+}
 
 $password = input( 'password', INPUT_STR );
 $confirm = input( 'confirm', INPUT_STR );

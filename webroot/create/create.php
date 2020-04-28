@@ -53,6 +53,7 @@ if ( !empty($submitted) && ! $error ) {
       else {
         $password = input( 'password', INPUT_STR );
         $password2 = input( 'password2', INPUT_STR );
+        $user_lock = get_lock_status( $objectdn );
         if ( $password != $password2 ) {
           unset($password);
           $error = 1;
@@ -66,6 +67,10 @@ if ( !empty($submitted) && ! $error ) {
         if ( $times = is_pwned_password($password) ) {
           $error = 1;
           $result = "Password compromised, you can not use this password.  This password has been seen $times times before.  This password has previously appeared in a data breach and should never be used.  If you've ever used it anywhere before, you should change it as soon as possible.";
+        }
+        if ( ! empty($user_lock) ) {
+          $error = 1;
+          $result = 'Your Account is locked.';
         }
 
         $entry = google_user_hash_for_ldap( $user );

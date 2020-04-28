@@ -64,6 +64,17 @@ if ( ! empty($input) ) {
             $results = $ldap->do_attr_add( $groupdn, array('memberUid'=>$object['uid'][0]) );
         }
         break;
+
+    case 'Lock':
+        if ( $input == 'off' ) {
+            unlock_user($objectdn);
+        }
+        else {
+            $password = create_password();
+            lock_user( $objectdn, $password );
+            set_password( $ldap, $objectdn, $password );
+        }
+        break;
     }
 
     if ( $results ) {

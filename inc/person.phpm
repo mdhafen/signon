@@ -320,6 +320,39 @@ function is_pwned_password( $password ) {
     return 0;
 }
 
+function get_lock_status( $userdn ) {
+    $locked = array();
+	$dbh = db_connect('core');
+	$sth = $dbh->prepare('SELECT * FROM user_locks WHERE dn = :dn');
+	$sth->bindValue( ':dn', $userdn );
+	$sth->execute();
+
+	while ( $row = $sth->fetch() ) {
+		$row = stripslashes_array( $row );
+		$locked = $row;
+	}
+
+	return $locked;
+}
+
+function lock_user( $userdn, $password ) {
+	$user = !empty($_SESSION['loggedin_user']['username']) ? $_SESSION['loggedin_user']['username'] : $userdn;
+
+	$dbh = db_connect('core');
+	$sth = $dbh->prepare('REPLACE INTO user_locks (dn,passwd,user) VALUES (:dn,:passwd,:user)');
+	$sth->bindValue( ':dn', $userdn );
+	$sth->bindValue( ':passwd', $password );
+	$sth->bindValue( ':user', $user );
+	$sth->execute();
+}
+
+function unlock_user( $userdn ) {
+	$dbh = db_connect('core');
+	$sth = $dbh->prepare('DELETE FROM user_locks WHERE dn = :dn');
+	$sth->bindValue( ':dn', $userdn );
+	$sth->execute();
+}
+
 function log_attr_change( $userdn, $changes ) {
 	$user = ldap_explode_dn($userdn,1);
 	$user = ldap_unescape($user[0]);

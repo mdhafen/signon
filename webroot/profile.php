@@ -29,14 +29,18 @@ else {
 
 	$password = input( 'password', INPUT_STR );
 	$password2 = input( 'password2', INPUT_STR );
+	$user_lock = get_lock_status( $objectdn );
 
 	if ( !empty($password) && !empty($password2) ) {
 		if ( strlen($password) < 8 ) {
 			$output['error'] = 'Password is to short';
 		}
         else if ( $times = is_pwned_password($password) ) {
-			$output['error']= 'PASS_TO_COMMON';
+			$output['error'] = 'PASS_TO_COMMON';
             $output['error_times'] = $times;
+        }
+        else if ( ! empty($user_lock) ) {
+            $output['error'] = 'USER_LOCKED';
         }
 		else if ( $password === $password2 ) {
             if ( !empty($object['employeeType'][0]) && $object['employeeType'][0] != 'Guest' ) {
