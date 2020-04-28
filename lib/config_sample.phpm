@@ -73,7 +73,7 @@ $config = array(
 			'roles' => array(
 				2 => 'cn=TechnologyStaff,ou=Groups,dc=example',
 				3 => 'cn=DistrictManagers,ou=Groups,dc=example',
-				4 => 'cn=LDAPAdmins,ou=Groups,dc=example',
+				4 => 'cn=LDAPManagers,ou=Groups,dc=example',
 			),
 			// role with most permissions
 			'sysadmin_role' => 4,

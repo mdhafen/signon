@@ -46,16 +46,15 @@ Add:
 
 <?php
 if ( ! empty($data['can_password']) && ! empty($data['is_person']) ) {
-  if ( ! ( !empty($data['user_lock']) && ! $data['can_lock'] ) ) {
+  if ( empty($data['user_lock']) ) {
 ?>
 <a class="btn btn-default" href="password.php?dn=<?= urlencode($data['object_dn']) ?>">Reset Password</a>
 <?php   if ( stripos($data['object_dn'],',ou=students,') !== FALSE ) { ?>
 <a class="btn btn-default" href="password.php?default=1&amp;dn=<?= urlencode($data['object_dn']) ?>">Set Password to Default</a>
 <?php   } ?>
 <?php }
-      else {
+      else if ( !empty($data['can_lock']) ) {
 ?>
-<a href="../api/confine.php?dn=<?= urlencode($data['object_dn']) ?>&amp;return=1&amp;toggle=off&amp;class=Lock" class="btn btn-danger">User is Locked</a>
 <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#lock_details">Show/Hide Lock Details</button>
 <div class="collapse" id="lock_details"><div class="well">
 Password: <?= $data['user_lock']['passwd'] ?><br>
@@ -68,9 +67,12 @@ Locked on: <?= $data['user_lock']['timestamp'] ?><br>
 <a href="../api/confine.php?dn=<?= urlencode($data['object_dn']) ?>&amp;return=1&amp;toggle=<?= ($data['object']['businessCategory'][0] != 'Confinement' && $data['object']['businessCategory'][0] != 'Banned' ? 'on' : 'off') ?>" <?= ($data['object']['businessCategory'][0] != 'Confinement' && $data['object']['businessCategory'][0] != 'Banned' ? 'class="btn btn-success">WiFi Access Enabled' : 'class="btn btn-danger">WiFi Access Disabled' ) ?></a>
 <a href="../api/confine.php?dn=<?= urlencode($data['object_dn']) ?>&amp;return=1&amp;class=Banned&amp;toggle=<?= ($data['object']['businessCategory'][0] != 'Banned' ? 'on' : 'off') ?>" <?= ($data['object']['businessCategory'][0] != 'Banned' ? 'class="btn btn-success">GinaAccess Logins Enabled' : 'class="btn btn-danger">GinaAccess Logins Disabled' ) ?></a>
      <a href="../api/confine.php?dn=<?= urlencode($data['object_dn']) ?>&amp;return=1&amp;class=VPN&amp;toggle=<?= (!empty($data['object_vpn']) ? 'on' : 'off') ?>" <?= (!empty($data['object_vpn']) ? 'class="btn btn-success">VPN Access Enabled' : 'class="btn btn-danger">VPN Access Disabled' ) ?></a>
-<?php if ( $data['can_lock'] ) { ?>
+<?php if ( !empty($data['can_lock']) ) { ?>
+<?php if ( empty($data['user_lock']) ) { ?>
       <a href="../api/confine.php?dn=<?= urlencode($data['object_dn']) ?>&amp;return=1&amp;toggle=on&amp;class=Lock" class="btn btn-success">User is Unlocked</a>
-<?php } ?>
+<?php } else { ?>
+<a href="../api/confine.php?dn=<?= urlencode($data['object_dn']) ?>&amp;return=1&amp;toggle=off&amp;class=Lock" class="btn btn-danger">User is Locked</a>
+<?php } } ?>
 </div>
 <?php } ?>
 </div>

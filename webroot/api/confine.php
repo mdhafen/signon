@@ -9,7 +9,11 @@ include_once( '../../inc/google.phpm' );
 authenticate();
 
 if ( ! ( authorized('reset_password') || ( !empty($_SESSION['loggedin_user']) && strcasecmp($dn,$_SESSION['loggedin_user']['userid']) == 0 ) ) ) {
-	output( '<?xml version ="1.0"?><error>ACCESS_DENIED</error>', '', $xml=1 );
+	if ( empty($return) ) {
+		output( '<?xml version ="1.0"?><error>ACCESS_DENIED</error>', '', $xml=1 );
+	} else {
+		error(array('ACCESS_DENIED'));
+	}
 	exit;
 }
 
@@ -66,13 +70,22 @@ if ( ! empty($input) ) {
         break;
 
     case 'Lock':
+        if ( !authorized('lock_user') ) {
+			if ( empty($return) ) {
+				output( '<?xml version ="1.0"?><error>ACCESS_DENIED</error>', '', $xml=1 );
+			} else {
+				error(array('ACCESS_DENIED'));
+			}
+            exit;
+        }
+
         if ( $input == 'off' ) {
             unlock_user($objectdn);
         }
         else {
             $password = create_password();
             lock_user( $objectdn, $password );
-            set_password( $ldap, $objectdn, $password );
+            $results = set_password( $ldap, $objectdn, $password );
         }
         break;
     }
