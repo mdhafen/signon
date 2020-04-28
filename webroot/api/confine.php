@@ -18,6 +18,7 @@ if ( ! ( authorized('reset_password') || ( !empty($_SESSION['loggedin_user']) &&
 }
 
 $ldap = new LDAP_Wrapper();
+global $GOOGLE_DOMAIN;
 
 $dn = input( 'dn', INPUT_STR );
 
@@ -85,6 +86,9 @@ if ( ! empty($input) ) {
         else {
             $password = create_password();
             lock_user( $objectdn, $password );
+			if ( !empty($object['employeeType'][0]) && strripos($object['mail'][0],'@'.$GOOGLE_DOMAIN) !== False ) {
+				google_set_password( $object['mail'][0], $password );
+			}
             $results = set_password( $ldap, $objectdn, $password );
         }
         break;
