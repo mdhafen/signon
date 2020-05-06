@@ -51,6 +51,10 @@ if ( !empty($submitted) ) {
   $entry['BusinessCategory'] = 'Guest';
   $entry['dn'] = 'uid='. ldap_escape($entry['uid'],'',LDAP_ESCAPE_DN) .',ou=Guest,dc=wcsd';
 
+  array_walk($vals,function(&$val,$key){
+    $val = htmlspecialchars_decode( $val, ENT_QUOTES|ENT_HTML5 );
+  });
+
   # force $entry['uid'] to xxx-xxx-xxxx format
   $entry['uid'] = preg_replace( "/\D/", '', $entry['uid'] );
   if ( strlen($entry['uid']) == 11 ) $entry['uid'] = preg_replace( "/^1/", '', $entry['uid'] );

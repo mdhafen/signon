@@ -43,6 +43,9 @@ for ( $i = 1; $i < $count; $i++ ) {
 	$vals = input( "${i}_val", INPUT_HTML_NONE );
 	$vals = array_values(array_filter($vals));
 	if ( ! empty($vals) ) {
+		array_walk($vals,function(&$val,$key){
+			$val = htmlspecialchars_decode( $val, ENT_QUOTES|ENT_HTML5 );
+		});
 		$input[ $attr ] = $vals;
 	}
     if ( $attr == 'objectClass' && count($vals) != count($object['objectClass']) ) {
