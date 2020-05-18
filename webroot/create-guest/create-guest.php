@@ -51,8 +51,8 @@ if ( !empty($submitted) ) {
   $entry['BusinessCategory'] = 'Guest';
   $entry['dn'] = 'uid='. ldap_escape($entry['uid'],'',LDAP_ESCAPE_DN) .',ou=Guest,dc=wcsd';
 
-  array_walk($vals,function(&$val,$key){
-    $val = htmlspecialchars_decode( $val, ENT_QUOTES|ENT_HTML5 );
+  array_walk($entry,function(&$val,$key){
+    $val = htmlspecialchars_decode( array_filter($val,function($val,$key){return $key != 'objectclass';}), ENT_QUOTES|ENT_HTML5 );
   });
 
   # force $entry['uid'] to xxx-xxx-xxxx format
