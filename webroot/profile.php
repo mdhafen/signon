@@ -29,7 +29,7 @@ else {
 
 	$password = input( 'password', INPUT_STR );
 	$password2 = input( 'password2', INPUT_STR );
-	$user_lock = get_lock_status( $objectdn );
+	$user_lock = get_lock_status( $dn );
 
 	if ( !empty($password) && !empty($password2) ) {
 		if ( strlen($password) < 8 ) {

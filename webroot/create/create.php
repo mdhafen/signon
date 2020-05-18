@@ -51,9 +51,10 @@ if ( !empty($submitted) && ! $error ) {
         $result = 'Trying to register service account';
       }
       else {
+        $entry = google_user_hash_for_ldap( $user );
         $password = input( 'password', INPUT_STR );
         $password2 = input( 'password2', INPUT_STR );
-        $user_lock = get_lock_status( $objectdn );
+        $user_lock = get_lock_status( $entry['dn'] );
         if ( $password != $password2 ) {
           unset($password);
           $error = 1;
@@ -73,7 +74,6 @@ if ( !empty($submitted) && ! $error ) {
           $result = 'Your Account is locked.';
         }
 
-        $entry = google_user_hash_for_ldap( $user );
         $entry['objectclass'] = array('top','inetOrgPerson','posixAccount','sambaSamAccount');
         $entry['gidNumber'] = '65534';
         $entry['loginShell'] = '/bin/bash';

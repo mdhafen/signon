@@ -66,7 +66,7 @@ if ( !empty($user) ) {
       }
 
       if ( ! empty($dn) ) {
-        $user_lock = get_lock_status( $objectdn );
+        $user_lock = get_lock_status( $dn );
         if ( $password !== $password2 ) {
           $errors[] = 'PASSWORDS_NO_MATCH';
         } else if ( strlen($password) < 8 ) {
