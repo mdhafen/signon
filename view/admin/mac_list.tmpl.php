@@ -69,7 +69,8 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 <tbody>
 <?php
     foreach ( $data['mac_list'] as $mac_row ) {
-        $log = array_pop($mac_row['logs']);
+        if ( empty($mac_row) ) { continue; }
+        $log = !empty($mac_row['logs'])?array_pop($mac_row['logs']):['submitted_user'=>'','submitted_date'=>''];
 ?>
 
 <tr>
