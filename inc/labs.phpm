@@ -107,6 +107,7 @@ function labs_get_macs( $search_term = null ) {
 
   $sth->execute();
 
+  $result = array();
   while ( $row = $sth->fetch() ) {
     $row = stripslashes_array( $row );
     $result[] = $row;
