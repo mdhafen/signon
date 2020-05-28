@@ -52,7 +52,15 @@ if ( !empty($submitted) ) {
   $entry['dn'] = 'uid='. ldap_escape($entry['uid'],'',LDAP_ESCAPE_DN) .',ou=Guest,dc=wcsd';
 
   array_walk($entry,function(&$val,$key){
-    $val = htmlspecialchars_decode( array_filter($val,function($val,$key){return $key != 'objectclass';}), ENT_QUOTES|ENT_HTML5 );
+    if ( $key == 'objectclass' ) { return; }
+    if ( is_array($val) ) {
+        array_walk($val,function(&$v,$k){
+            $v = htmlspecialchars_decode( $v, ENT_QUOTES|ENT_HTML5 );
+        });
+    }
+    else {
+        $val = htmlspecialchars_decode( $val, ENT_QUOTES|ENT_HTML5 );
+    }
   });
 
   # force $entry['uid'] to xxx-xxx-xxxx format
