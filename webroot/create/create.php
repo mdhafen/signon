@@ -94,7 +94,7 @@ if ( !empty($submitted) && ! $error ) {
       google_set_password( $entry['mail'], $password );
       set_password( $ldap, $dups[0]['dn'], $password );
       log_attr_change( $dups[0]['dn'], array('userPassword'=>'') );
-      $result = 'Account created';
+      $result = 'Password updated';
     }
     else if ( count($dups) === 0 ) {
       if ( !empty($entry['dn']) ) {

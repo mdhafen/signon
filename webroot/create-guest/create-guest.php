@@ -86,7 +86,7 @@ if ( !empty($submitted) ) {
         $error = 1;
       }
       else {
-        $result = 'Account created';
+        $result = 'Password updated';
         record_guest_signature( $entry['uid'] );
       }
     }
