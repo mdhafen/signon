@@ -353,6 +353,7 @@ function lock_user( $userdn, $password, $userpass, $ntpass ) {
 function unlock_user( $ldap, $userdn ) {
 	$dbh = db_connect('core');
 
+	$user = !empty($_SESSION['loggedin_user']['username']) ? $_SESSION['loggedin_user']['username'] : $userdn;
 	$locked = array();
 	$entry = array();
 
