@@ -335,16 +335,16 @@ function get_lock_status( $userdn ) {
 	return $locked;
 }
 
-function lock_user( $userdn, $password, $ssha, $nthash ) {
+function lock_user( $userdn, $password, $userpass, $ntpass ) {
 	$user = !empty($_SESSION['loggedin_user']['username']) ? $_SESSION['loggedin_user']['username'] : $userdn;
 
 	$dbh = db_connect('core');
-	$sth = $dbh->prepare('REPLACE INTO user_locks (dn,passwd,user,userPass,NTPass) VALUES (:dn,:passwd,:user,:ssha,:nthash)');
+	$sth = $dbh->prepare('REPLACE INTO user_locks (dn,passwd,user,userPass,NTPass) VALUES (:dn,:passwd,:user,:userPass,:NTPass)');
 	$sth->bindValue( ':dn', $userdn );
 	$sth->bindValue( ':passwd', $password );
 	$sth->bindValue( ':user', $user );
-	$sth->bindValue( ':userPass', $ssha );
-	$sth->bindValue( ':NTPass', $nthash );
+	$sth->bindValue( ':userPass', $userpass );
+	$sth->bindValue( ':NTPass', $ntpass );
 	$sth->execute();
 
 	append_log( "$userdn Locked by $user", 'auth' );
@@ -369,14 +369,14 @@ function unlock_user( $ldap, $userdn ) {
 	$sth->bindValue( ':dn', $userdn );
 	$sth->execute();
 
-	if ( !emtpy($locked['UserPass']) ) {
+	if ( !empty($locked['userPass']) ) {
 		$entry['userPassword'] = $locked['userPass'];
 	}
 	if ( !empty($locked['NTPass']) ) {
 		$entry['sambaNTPassword'] = $locked['NTPass'];
 		$entry['sambaPwdLastSet'] = time();
 	}
-	if ( !emtpy($entry) ) {
+	if ( !empty($entry) ) {
 		$result = $ldap->do_modify( $userdn, $entry );
 	}
 

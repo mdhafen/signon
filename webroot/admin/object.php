@@ -45,7 +45,7 @@ $output = array(
 	'attr_changes' => $attr_changes,
 	'children' => $children,
 	'can_edit' => authorized('manage_objects'),
-	'can_lock' => ( ( $object['businessCategory'][0] == 'Student' && authorized('lock_student') ) || ( $object['businessCategory'][0] == 'Staff' && authorized('lock_staff') ) ),
+	'can_lock' => ( !empty($object['businessCategory']) && ( ( $object['businessCategory'][0] == 'Student' && authorized('lock_student') ) || ( $object['businessCategory'][0] == 'Staff' && authorized('lock_staff') ) ) ),
 	'can_password' => authorized('reset_password') || ($objectdn == $_SESSION['userid']),
 );
 

@@ -81,7 +81,7 @@ if ( ! empty($input) ) {
         }
 
         if ( $input == 'off' ) {
-            unlock_user($ldap,$objectdn);
+            $results = unlock_user($ldap,$objectdn);
         }
         else {
             $password = create_password();
