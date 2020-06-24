@@ -71,7 +71,7 @@ if ( ! empty($input) ) {
         break;
 
     case 'Lock':
-        if ( !authorized('lock_user') ) {
+        if ( ( $object['businessCategory'][0] == 'Student' && !authorized('lock_student') ) || ( $object['businessCategory'][0] == 'Staff' && !authorized('lock_staff') ) ) {
 			if ( empty($return) ) {
 				output( '<?xml version ="1.0"?><error>ACCESS_DENIED</error>', '', $xml=1 );
 			} else {
@@ -81,11 +81,11 @@ if ( ! empty($input) ) {
         }
 
         if ( $input == 'off' ) {
-            unlock_user($objectdn);
+            unlock_user($ldap,$objectdn);
         }
         else {
             $password = create_password();
-            lock_user( $objectdn, $password );
+            lock_user( $objectdn, $password, $object['userPassword'][0], $object['sambaNTPassword'][0] );
 			if ( !empty($object['employeeType'][0]) && strripos($object['mail'][0],'@'.$GOOGLE_DOMAIN) !== False ) {
 				google_set_password( $object['mail'][0], $password );
 			}

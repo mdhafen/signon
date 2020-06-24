@@ -28,7 +28,9 @@ if ( ! ( authorized('reset_password') || ( !empty($_SESSION['loggedin_user']) &&
 	exit;
 }
 $user_lock = get_lock_status( $objectdn );
-if ( !empty($user_lock) && ! authorized('lock_user') ) {
+if ( !empty($user_lock) && (
+   ( $object['businessCategory'][0] == 'Student' && !authorized('lock_student') ) || ( $object['businessCategory'][0] == 'Staff' && !authorized('lock_staff')
+) ) ) {
 	$output['error'] = 'USER_LOCKED';
 	output( $output, 'admin/password.tmpl' );
 	exit;

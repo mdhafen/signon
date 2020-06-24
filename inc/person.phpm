@@ -335,22 +335,52 @@ function get_lock_status( $userdn ) {
 	return $locked;
 }
 
-function lock_user( $userdn, $password ) {
+function lock_user( $userdn, $password, $ssha, $nthash ) {
 	$user = !empty($_SESSION['loggedin_user']['username']) ? $_SESSION['loggedin_user']['username'] : $userdn;
 
 	$dbh = db_connect('core');
-	$sth = $dbh->prepare('REPLACE INTO user_locks (dn,passwd,user) VALUES (:dn,:passwd,:user)');
+	$sth = $dbh->prepare('REPLACE INTO user_locks (dn,passwd,user,userPass,NTPass) VALUES (:dn,:passwd,:user,:ssha,:nthash)');
 	$sth->bindValue( ':dn', $userdn );
 	$sth->bindValue( ':passwd', $password );
 	$sth->bindValue( ':user', $user );
+	$sth->bindValue( ':userPass', $ssha );
+	$sth->bindValue( ':NTPass', $nthash );
 	$sth->execute();
+
+	append_log( "$userdn Locked by $user", 'auth' );
 }
 
-function unlock_user( $userdn ) {
+function unlock_user( $ldap, $userdn ) {
 	$dbh = db_connect('core');
+
+	$locked = array();
+	$entry = array();
+
+	$sth = $dbh->prepare('SELECT * FROM user_locks WHERE dn = :dn');
+	$sth->bindValue( ':dn', $userdn );
+	$sth->execute();
+
+	while ( $row = $sth->fetch() ) {
+		$row = stripslashes_array( $row );
+		$locked = $row;
+	}
+
 	$sth = $dbh->prepare('DELETE FROM user_locks WHERE dn = :dn');
 	$sth->bindValue( ':dn', $userdn );
 	$sth->execute();
+
+	if ( !emtpy($locked['UserPass']) ) {
+		$entry['userPassword'] = $locked['userPass'];
+	}
+	if ( !empty($locked['NTPass']) ) {
+		$entry['sambaNTPassword'] = $locked['NTPass'];
+		$entry['sambaPwdLastSet'] = time();
+	}
+	if ( !emtpy($entry) ) {
+		$result = $ldap->do_modify( $userdn, $entry );
+	}
+
+	append_log( "$userdn Unlocked by $user", 'auth' );
 }
 
 function log_attr_change( $userdn, $changes ) {

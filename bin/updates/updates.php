@@ -2,6 +2,7 @@
 
 $updates = array(
   '0001-add_more_device_categories_to_mac_registry',
+  '0002-add_userPass_NTPass_to_user_locks',
 );
 $results = array();
 

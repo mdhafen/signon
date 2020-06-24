@@ -85,7 +85,8 @@ $config = array(
 		4   => "reset_password",
 		8   => "add_to_group",
 		16  => "manage_objects",
-		32	=> "lock_user",
+		32	=> "lock_student",
+		64	=> "lock_staff",
 	),
 	'role' => array(
 		1 => array(
@@ -98,11 +99,11 @@ $config = array(
 		),
 		3 => array(
 			'name' => 'manager',
-			'auth' => 31,
+			'auth' => 63,
 		),
 		4 => array(
 			'name' => 'admin',
-			'auth' => 63,
+			'auth' => 127,
 		),
 	),
 );
