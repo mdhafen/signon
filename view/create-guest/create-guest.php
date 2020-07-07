@@ -5,7 +5,7 @@ include( $data['_config']['base_dir'] .'/view/doc-head-close.php' );
 include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 ?>
 
-<div class="modal hidden" id="generic-modal" role="dialog">
+<div class="modal fade" id="generic-modal" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
