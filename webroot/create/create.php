@@ -73,11 +73,6 @@ if ( !empty($submitted) && ! $error ) {
           $error = 1;
           $result = 'Your Account is locked.';
         }
-
-        $entry['objectclass'] = array('top','inetOrgPerson','posixAccount','sambaSamAccount');
-        $entry['gidNumber'] = '65534';
-        $entry['loginShell'] = '/bin/bash';
-        $entry['homeDirectory'] = '/Users/'. $entry['uid'];
       }
     }
   }
@@ -98,14 +93,9 @@ if ( !empty($submitted) && ! $error ) {
     }
     else if ( count($dups) === 0 ) {
       if ( !empty($entry['dn']) ) {
+        populate_static_user_attrs($ldap,$entry);
         $dn = $entry['dn'];
         unset( $entry['dn'] );
-
-        $entry['sambaSID'] = $ldap->get_next_num('sambaSID');
-        $entry['sambaPwdLastSet'] = time();
-        $entry['sambaAcctFlags'] = '[U ]';
-        $new_uid = explode('-',$entry['sambaSID']);
-        $entry['uidNumber'] = end($new_uid);
         if ( $ldap->do_add( $dn, $entry ) ) {
           google_set_password( $entry['mail'], $password );
           set_password( $ldap, $dn, $password );

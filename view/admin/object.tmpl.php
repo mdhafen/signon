@@ -74,6 +74,13 @@ Locked on: <?= $data['user_lock']['timestamp'] ?><br>
 <a href="../api/confine.php?dn=<?= urlencode($data['object_dn']) ?>&amp;return=1&amp;toggle=off&amp;class=Lock" class="btn btn-danger">User is Locked</a>
 <?php } } ?>
 </div>
+
+<div class="form-group">
+<button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#default_passwd_details">Show/Hide Default Password</button>
+<div class="collapse" id="default_passwd_details"><div class="well">
+Password: <?= $data['default_passwd'] ?><br>
+</div></div>
+</div>
 <?php } ?>
 </div>
 

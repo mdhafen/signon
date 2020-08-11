@@ -31,7 +31,8 @@ foreach ( $users as $user ) {
     print "Could not computer old default password for ". $user['dn'] ."\n";
     continue;
   }
-  $password = strtolower( substr($user['givenName'][0],0,1) . substr($user['sn'][0],0,1) . $user['employeeNumber'][0] );
+  $password = get_default_password($user['dn']);
+
   if ( @$ldap->do_connect('core',$user['dn'],$password) ) {
     $change_users[] = $user;
   }
@@ -43,13 +44,13 @@ $ldap->do_connect( 'core', $ldap->config['userdn'], $ldap->config['passwd'] );
 print "Continuing\n";
 
 foreach ( $change_users as $user ) {
-  if ( empty($user['telephoneNumber']) || empty($user['registeredAddress']) ) {
-    print "Could not compute new default password for ". $user['dn'] ."\n";
-    continue;
-  }
-  $password = strtolower( substr($user['givenName'][0],0,1) . substr($user['sn'][0],0,1) . $user['telephoneNumber'][0] . $user['registeredAddress'][0] );
+  $password = create_password();
+  // turn the three-word passphrase into a two-word passphrase
+  $password = substr( $password, 0, strrpos($s,'-') );
+
   print "Changing password for ". $user['dn'] ."\n";
 
+  set_default_password( $user['dn'], $password );
   if ( !empty($user['employeeType'][0]) && strtolower(strstr($email,'@')) == '@'.$GOOGLE_DOMAIN ) {
     $result = google_set_password( $user['mail'][0], $password );
   }

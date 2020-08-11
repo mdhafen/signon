@@ -21,6 +21,29 @@ function is_person( $o=array() ) {
 	return $person;
 }
 
+function get_default_password( $objectdn ) {
+	$dbh = db_connect('core');
+	$sth = $dbh->prepare('SELECT * FROM user_default_password WHERE dn = :dn');
+	$sth->bindValue( ':dn', $objectdn );
+	$sth->execute();
+	$pass = '';
+
+	while ( $row = $sth->fetch() ) {
+		$row = stripslashes_array( $row );
+		$pass = $row['default_password'];
+	}
+
+	return $pass;
+}
+
+function set_default_password( $dn, $password ) {
+	$dbh = db_connect('core');
+	$sth = $dbh->prepare('REPLACE INTO user_default_password (dn,default_password,timestamp) VALUES (:dn,:passwd,NOW())');
+	$sth->bindValue( ':dn', $dn );
+	$sth->bindValue( ':passwd', $password );
+	$sth->execute();
+}
+
 function set_password( $ldap, $userdn, $password ) {
 	$result = 0;
 	$entropy = get_entropy( $password );
@@ -97,6 +120,18 @@ function get_entropy( $password ) {
 	}
 
 	return $entropy;
+}
+
+function populate_static_user_attrs( $ldap, &$object ) {
+	$object['objectClass'] = array('top','inetOrgPerson','posixAccount','sambaSamAccount');
+	$object['sambaSID'] = $ldap->get_next_num('sambaSID');
+	$object['sambaPwdLastSet'] = time();
+	$object['sambaAcctFlags'] = '[U ]';
+	$new_uid = explode('-',$object['sambaSID']);
+	$object['uidNumber'] = end($new_uid);
+	$object['gidNumber'] = '65534';
+	$object['loginShell'] = '/bin/bash';
+	$object['homeDirectory'] = '/Users/'. $object['uid'];
 }
 
 function get_groups( $ldap, $userdn ) {

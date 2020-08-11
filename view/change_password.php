@@ -13,7 +13,7 @@ include( 'doc-header.php' );
 </div>
 <?php } else { ?>
 <h1 class="modal-title" id="password_modal_label">Change Password</h1>
-<form action="change_password.php" method="post" class="form-horizontal">
+<form action="<?= $data['op'] == 'ChangeFromDefault' ? 'force_password_from_default.php' : 'change_password.php' ?>" method="post" class="form-horizontal">
   <div class="panel panel-default panel-body">
     <div class="container-fluid">
       <div class="row form-group">

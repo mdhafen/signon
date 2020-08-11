@@ -15,11 +15,8 @@ $output = array();
 $rid = '';
 $must = array();
 $may = array();
-$defaults = array(
-  'gidNumber' => '65534',
-  'loginShell' => '/bin/bash',
-  'homeDirectory' => '/Users/[uid]',
-);
+$defaults = array();
+populate_static_user_attrs($ldap,$defaults);
 
 switch ( $class ) {
   case 'security': $class = array('person');

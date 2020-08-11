@@ -16,11 +16,13 @@ $objectdn = $object['dn'];
 unset( $object['dn'] );
 $groups = array();
 $user_lock = array();
+$default_passwd = '';
 
 $is_person = is_person( $object );
 if ( $is_person ) {
     $groups = get_groups( $ldap, $objectdn );
     $user_lock = get_lock_status( $objectdn );
+    $default_passwd = get_default_password( $objectdn );
 }
 
 ksort( $object, SORT_STRING | SORT_FLAG_CASE );
@@ -42,6 +44,7 @@ $output = array(
 	'object_vpn' => ( $is_person && !empty(array_filter($groups,function($k){return empty($k['cn'])?0:$k['cn'][0]=='vpn2_access';})) ),
 	'parentdn' => $parentdn,
 	'user_lock' => $user_lock,
+	'default_passwd' => $default_passwd,
 	'attr_changes' => $attr_changes,
 	'children' => $children,
 	'can_edit' => authorized('manage_objects'),

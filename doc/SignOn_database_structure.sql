@@ -66,6 +66,19 @@ CREATE TABLE `guest_signatures` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `user_default_password`
+--
+
+DROP TABLE IF EXISTS `user_default_password`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_default_password` (
+  dn varchar(256) NOT NULL,
+  default_password varchar(39) DEFAULT NULL,
+  timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX (dn)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+--
 -- Table structure for table `pwned_passwords`
 --
 
