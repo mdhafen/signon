@@ -19,7 +19,7 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
   <div><?= htmlspecialchars($val,ENT_QUOTES|ENT_HTML5|ENT_SUBSTITUTE) ?></div>
 <?php   } ?>
 <?php   if ( !empty($data['attr_changes'][$key]) ) { ?>
-  <div class="text-muted">Last changed <?= date('m/d/Y g:i a',strtotime($data['attr_changes'][$key]['timestamp'])) ?> by <?= $data['attr_changes'][$key]['user'] ?></div>
+  <div class="text-muted">Last changed <?= date('m/d/Y g:i a',strtotime($data['attr_changes'][$key]['timestamp'])) ?> by <?= $data['attr_changes'][$key]['user'] ?> at <?= $data['attr_changes'][$key]['user_ip'] ?></div>
 <?php   } ?>
 </div>
 </div>

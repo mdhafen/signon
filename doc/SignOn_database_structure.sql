@@ -27,6 +27,7 @@ CREATE TABLE `attribute_changes` (
   `attr` varchar(28) NOT NULL,
   `previous_value` mediumtext,
   `user` mediumtext,
+  `ip` varchar(40) NOT NULL DEFAULT '0.0.0.0',
   `timestamp` datetime DEFAULT NULL,
   PRIMARY KEY (`attr`,`dn`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

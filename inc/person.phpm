@@ -420,14 +420,16 @@ function unlock_user( $ldap, $userdn ) {
 }
 
 function log_attr_change( $userdn, $changes ) {
+	$ip = get_remote_ip();
 	$user = ldap_explode_dn($userdn,1);
 	$user = ldap_unescape($user[0]);
 	$user = !empty($_SESSION['loggedin_user']['username']) ? $_SESSION['loggedin_user']['username'] : $user;
 
 	$dbh = db_connect('core');
-	$sth = $dbh->prepare('REPLACE INTO attribute_changes (dn,user,attr,previous_value,timestamp) VALUES (:dn,:user,:attr,:prev,NOW())');
+	$sth = $dbh->prepare('REPLACE INTO attribute_changes (dn,user,ip,attr,previous_value,timestamp) VALUES (:dn,:user,:ip,:attr,:prev,NOW())');
 	$sth->bindValue( ':dn', $userdn );
 	$sth->bindValue( ':user', $user );
+    $sth->bindValue( ':ip', $ip );
 	foreach ( $changes as $attr => $prev ) {
 		$sth->bindValue( ':attr', $attr );
 		$sth->bindValue( ':prev', $prev );
