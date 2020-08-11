@@ -71,9 +71,10 @@ $config = array(
 			'userdn' => 'cn=admin,dc=example',
 			'passwd' => 'localpassword',
 			'roles' => array(
-				2 => 'cn=TechnologyStaff,ou=Groups,dc=example',
-				3 => 'cn=DistrictManagers,ou=Groups,dc=example',
-				4 => 'cn=LDAPManagers,ou=Groups,dc=example',
+				'cn=SchoolTechnologyStaff,ou=Groups,dc=example' => 2,
+				'cn=TechnologyStaff,ou=Groups,dc=example' => 2,
+				'cn=DistrictManagers,ou=Groups,dc=example' => 3,
+				'cn=LDAPManagers,ou=Groups,dc=example' => 4,
 			),
 			// role with most permissions
 			'sysadmin_role' => 4,

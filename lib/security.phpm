@@ -397,7 +397,7 @@ function authen_ldap( $module, $username, $password ) {
 	if ( $userdn ) {
 		if ( $ldap->do_connect( $module, $userdn, $password ) ) {
 			if ( ! empty($ldap->config['roles']) ) {
-				foreach ( $ldap->config['roles'] as $role_id => $group_dn ) {
+				foreach ( $ldap->config['roles'] as $group_dn => $role_id ) {
 					$group = $ldap->quick_search( array('objectClass'=>'groupOfNames'), array(), 0, $group_dn );
 					if ( ! empty($group[0]) && ! empty($group[0]['member']) ) {
 						foreach ( $group[0]['member'] as $member_dn ) {
