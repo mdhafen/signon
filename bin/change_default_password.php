@@ -32,6 +32,10 @@ foreach ( $users as $user ) {
     continue;
   }
   $password = get_default_password($user['dn']);
+  if ( empty($password) ) {
+    print "No default password for ". $user['dn'] ."\n";
+    continue;
+  }
 
   if ( @$ldap->do_connect('core',$user['dn'],$password) ) {
     $change_users[] = $user;

@@ -14,7 +14,7 @@ if ( $row['count'] == 0 ) {
   $query = "CREATE TABLE user_default_password ( dn varchar(256) NOT NULL, default_password varchar(39) DEFAULT NULL, timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, INDEX (dn) ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
   $dbh->exec( $query );
 
-  $query = "INSERT INTO default_password (dn,default_password,timestamp) VALUES (:dn,:passwd)";
+  $query = "INSERT INTO user_default_password (dn,default_password) VALUES (:dn,:passwd)";
   $sth = $dbh->prepare($query);
   $ldap = new LDAP_Wrapper();
   $users = array();
