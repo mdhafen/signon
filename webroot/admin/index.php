@@ -5,7 +5,7 @@ include_once( '../../lib/data.phpm' );
 include_once( '../../lib/output.phpm' );
 
 $ldap = new LDAP_Wrapper();
-authorize( 'reset_password' );
+authorize( 'set_password' );
 
 $children = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 1, $ldap->config['base'] );
 usort( $children, 'sorter' );

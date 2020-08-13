@@ -6,7 +6,7 @@ include_once( '../../lib/output.phpm' );
 include_once( '../../inc/person.phpm' );
 
 $ldap = new LDAP_Wrapper();
-authorize( 'reset_password' );
+authorize( 'set_password' );
 
 $attr = input( 'attrib', INPUT_STR );
 $query = input( 'query', INPUT_STR );

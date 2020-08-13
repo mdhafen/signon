@@ -22,7 +22,7 @@ $output = array(
 
 authenticate();
 
-if ( ! ( authorized('reset_password') || ( !empty($_SESSION['loggedin_user']) && strcasecmp($dn,$_SESSION['loggedin_user']['userid']) == 0 ) ) ) {
+if ( ! ( authorized('set_password') || ( !empty($_SESSION['loggedin_user']) && strcasecmp($dn,$_SESSION['loggedin_user']['userid']) == 0 ) ) ) {
 	$output['error'] = 'ACCESS_DENIED';
 	output( $output, 'admin/password.tmpl' );
 	exit;

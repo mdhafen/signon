@@ -6,7 +6,7 @@ include_once( '../../lib/output.phpm' );
 include_once( '../../inc/labs.phpm' );
 
 $ldap = new LDAP_Wrapper();
-authorize( 'reset_password' );
+authorize( 'set_password' );
 
 $template = 'admin/register.tmpl';
 $mac = input( 'client_mac', INPUT_STR );

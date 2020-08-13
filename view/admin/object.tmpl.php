@@ -45,7 +45,7 @@ Add:
   } ?>
 
 <?php
-if ( ! empty($data['can_password']) && ! empty($data['is_person']) ) {
+if ( ! empty($data['can_set_password']) && ! empty($data['is_person']) ) {
   if ( empty($data['user_lock']) ) {
 ?>
 <a class="btn btn-default" href="password.php?dn=<?= urlencode($data['object_dn']) ?>">Reset Password</a>
@@ -75,6 +75,7 @@ Locked on: <?= $data['user_lock']['timestamp'] ?><br>
 <?php } } ?>
 </div>
 
+<?php if ( ! empty($data['can_see_password']) ) { ?>
 <div class="form-group">
 <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#default_passwd_details">Show/Hide Default Password</button>
 <div class="collapse" id="default_passwd_details"><div class="well">
@@ -82,6 +83,9 @@ Password: <?= $data['default_passwd'] ?><br>
 </div></div>
 </div>
 <?php } ?>
+<?php
+}
+?>
 </div>
 
 </div>
