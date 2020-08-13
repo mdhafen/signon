@@ -12,6 +12,11 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 <div class="panel panel-default panel-body">
 <div class="container-fluid">
 <?php foreach ( $data['object'] as $key => $vals ) { ?>
+<?php
+    if ( empty($data['can_see_password']) && ! in_array($key,['cn','uid','mail','o']) ) {
+      continue;
+    }
+?>
 <div class="row">
 <div class="col-sm-4 text-right"><?= $key ?>:</div>
 <div class="col-sm-8">
