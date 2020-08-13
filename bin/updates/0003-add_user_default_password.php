@@ -3,7 +3,7 @@
 include_once( '../../lib/config.phpm' );
 include_once( '../../lib/data.phpm' );
 
-$db_settings = $config['database']['core'];
+$db_settings = $config['database']['core']['write'];
 $table = $db_settings['schema'];
 
 $dbh = db_connect('core');
