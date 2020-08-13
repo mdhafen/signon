@@ -60,7 +60,7 @@ if ( !empty($user) ) {
 
     if ( ! empty($dn) ) {
       $password = get_default_password($object['dn']);
-      if ( ! @$ldap->do_connect('core',$object['dn'],$password) ) {
+      if ( empty($password) || ! @$ldap->do_connect('core',$object['dn'],$password) ) {
         redirect( 'https://www.washk12.org' );
         exit;
       }
@@ -84,9 +84,9 @@ if ( !empty($user) ) {
           $output['success'] = true;
         }
       }
-      else {
-        $errors[] = 'USER_NOT_FOUND';
-      }
+    }
+    else {
+      $errors[] = 'USER_NOT_FOUND';
     }
   }
   else {
@@ -105,8 +105,11 @@ else {
 		google_oauth_signout();
 		if ( !empty($_SESSION['REFERER']) && stripos($_SESSION['REFERER'],'https://myaccount.google.com') !== False ) {
 			redirect( 'https://myaccount.google.com' );
-			exit;
 		}
+		else {
+		        redirect( 'https://www.washk12.org' );
+		}
+		exit;
 	}
 	output( $output, 'change_password' );
 }
