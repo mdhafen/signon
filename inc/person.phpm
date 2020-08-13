@@ -426,10 +426,10 @@ function log_attr_change( $userdn, $changes ) {
 	$user = !empty($_SESSION['loggedin_user']['username']) ? $_SESSION['loggedin_user']['username'] : $user;
 
 	$dbh = db_connect('core');
-	$sth = $dbh->prepare('REPLACE INTO attribute_changes (dn,user,ip,attr,previous_value,timestamp) VALUES (:dn,:user,:ip,:attr,:prev,NOW())');
+	$sth = $dbh->prepare('REPLACE INTO attribute_changes (dn,user,user_ip,attr,previous_value,timestamp) VALUES (:dn,:user,:ip,:attr,:prev,NOW())');
 	$sth->bindValue( ':dn', $userdn );
 	$sth->bindValue( ':user', $user );
-    $sth->bindValue( ':ip', $ip );
+	$sth->bindValue( ':ip', $ip );
 	foreach ( $changes as $attr => $prev ) {
 		$sth->bindValue( ':attr', $attr );
 		$sth->bindValue( ':prev', $prev );
