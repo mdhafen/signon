@@ -6,7 +6,7 @@ include_once( '../lib/output.phpm' );
 include_once( '../inc/person.phpm' );
 include_once( '../inc/google.phpm' );
 
-authorize( 'set_password' );
+authorize( 'login' );
 
 $errors = array();
 
