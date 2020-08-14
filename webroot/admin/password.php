@@ -42,8 +42,8 @@ $default = input( 'default', INPUT_STR );
 $pwned_bypass = 0;
 
 if ( !empty($default) ) {
-	if ( !empty($object['dn']) ) {
-		$password = get_default_password($object['dn']);
+	if ( !empty($objectdn) ) {
+		$password = get_default_password($objectdn);
 		$confirm = $password;
 		$pwned_bypass = 1;
 	}

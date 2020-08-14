@@ -97,7 +97,7 @@ $config = array(
 		),
 		2 => array(
 			'name' => 'user',
-			'auth' => 2,
+			'auth' => 3,
 		),
 		3 => array(
 			'name' => 'staff',
