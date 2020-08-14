@@ -46,6 +46,11 @@ if ( !empty($default) ) {
 		$password = get_default_password($objectdn);
 		$confirm = $password;
 		$pwned_bypass = 1;
+		if ( empty($password) ) {
+			$output['error'] = 'NO_DEFAULT_PASS';
+			output( $output, 'admin/password.tmpl' );
+			exit;
+		}
 	}
 }
 
