@@ -70,6 +70,7 @@ Success!
 <script>
   Math.log2 = Math.log2 || function(x){ Math.log(x)*Math.LOG2E; };
   function CheckEntropy(value,report_el_id) {
+    $("#entropy_alert").show();
     var guideline = 70;
     var char_sets = {
       lower: { reg: /[a-z]/g, entropy:26 },
@@ -108,6 +109,7 @@ Success!
   $(document).ready(function(){
     var el = document.getElementById('nav-manage');
     $(el).addClass('active');
+    $("#entropy_alert").hide();
   });
 </script>
 <?php include( $data['_config']['base_dir'] .'/view/doc-close.php' ); ?>
