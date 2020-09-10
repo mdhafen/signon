@@ -24,6 +24,19 @@ if ( $is_person ) {
     $user_lock = get_lock_status( $objectdn );
     $default_passwd = get_default_password( $objectdn );
 }
+$is_guest = 0;
+$is_guest_expired = 0;
+$is_guest_send_notice = 0;
+if ( strripos( $objectdn, ",ou=Guest,".$ldap->config['base'] ) !== false ) {
+    $is_guest = 1;
+    $sig = get_guest_signature( $object['uid'][0] );
+    if ( empty($sig) || $sig['aup_expire'] < $sig['now'] ) {
+        $is_guest_expired = 1;
+        if ( $sig['send_notice'] < $sig['now'] && ( empty($sig['aup_sent']) || ( $sig['aup_signed'] && $sig['aup_sent'] < $row['aup_signed'] ) ) ) {
+            $is_guest_send_notice = 1;
+        }
+    }
+}
 
 ksort( $object, SORT_STRING | SORT_FLAG_CASE );
 
@@ -41,6 +54,9 @@ $output = array(
 	'object_dn' => $objectdn,
 	'object' => $object,
 	'is_person' => $is_person,
+	'is_guest' => $is_guest,
+	'is_guest_expired' => $is_guest_expired,
+	'is_guest_send_notice' => $is_guest_send_notice,
 	'object_vpn' => ( $is_person && !empty(array_filter($groups,function($k){return empty($k['cn'])?0:$k['cn'][0]=='vpn2_access';})) ),
 	'parentdn' => $parentdn,
 	'user_lock' => $user_lock,

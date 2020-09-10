@@ -10,6 +10,13 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 
 <h1><?= $data['object_dn'] ?></h1>
 <div class="panel panel-default panel-body">
+<?php if ( $data['is_guest'] && $data['is_guest_expired'] ) { ?>
+<div class="container-fluid bg-danger">
+<p>This is a guest account with an expired Guest AUP signature.  They will not be able to connect to the wireless unless they renew their account (signature).</p>
+<p>Click here to <button type="button" class="btn" onclick="SendNotice('<?= htmlspecialchars($data['object']['uid'][0],ENT_QUOTES|ENT_HTML5|ENT_SUBSTITUTE) ?>')">send the renewal notice</button>.</p>
+<div class="bg-success hidden" id="expired_guest_notice_sent"></div>
+</div>
+<?php } ?>
 <div class="container-fluid">
 <?php foreach ( $data['object'] as $key => $vals ) { ?>
 <?php
@@ -126,5 +133,30 @@ Password: <?= $data['default_passwd'] ?><br>
     var el = document.getElementById('nav-manage');
     $(el).addClass('active');
   });
+
+  function SendNotice(object_uid) {
+    var report_el = document.getElementById('expired_guest_notice_sent');
+    $(report_el).removeClass(['show','bg-warning']).addClass(['hidden','bg-success']);
+    while ( report_el.firstChild ) { report_el.removeChild(report_el.firstChild); }
+    var data = {'uid':object_uid};
+    $.post('<?= $data['_config']['base_url'] ?>api/send_renew_notice.php', data, function(xml_result) { show_guest_notice_report(xml_result,report_el) }, "xml" );
+  }
+
+  function show_guest_notice_report(xml_result,report_el) {
+    var xml_doc = xml_result;
+    var state = $(xml_doc).find('state').text();
+    if ( state == 'Error' ) {
+        $(report_el).removeClass(['hidden','bg-success']).addClass(['show','bg-warning']);
+        $(report_el).append(document.createTextNode("There was an error."));
+    }
+    else if ( state =='NOOP' ) {
+        $(report_el).removeClass(['hidden','bg-success']).addClass(['show','bg-warning']);
+        $(report_el).append(document.createTextNode("Notice NOT sent."));
+    }
+    else {
+        $(report_el).removeClass(['hidden','bg-warning']).addClass(['show','bg-success']);
+        $(report_el).append(document.createTextNode("Notice sent."));
+    }
+  }
 </script>
 <?php include( $data['_config']['base_dir'] .'/view/doc-close.php' ); ?>
