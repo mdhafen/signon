@@ -5,6 +5,16 @@ include_once( 'output.phpm' );
 
 $dbh_cache = array();
 $ldap_cache = array();
+$callbacks = array( 'db' => array(), 'ldap' => array() );
+
+function register_data_callback( $module = 'db', $func = '', $callback ) {
+    $callbacks[$module][$func][] = $callback;
+}
+/*
+ *  Available callbacks
+ *    ldap
+ *      rename($old_dn,$new_dn)
+ */
 
 function db_connect( $module = 'core', $write = 0 ) {
 	global $dbh_cache, $config;
@@ -242,6 +252,13 @@ class LDAP_Wrapper {
 			$result = @ldap_rename( $this->ldap, $dn, $attr, $new_parent, true );
 		}
 		$this->fix_group_memberships( $dn, $attr .','. $new_parent );
+
+		foreach ( $callbacks['ldap']['rename'] as $func ) {
+			if ( is_callable($func) ) {
+				$func( $dn, $attr .','. $new_parent );
+			}
+		}
+
 		return $result;
 	}
 

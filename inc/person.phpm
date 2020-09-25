@@ -10,6 +10,31 @@ $SMS_Renew_Message = "Your WCSD Guest Wifi account has expired, please renew you
 require_once 'Twilio/autoload.php';
 use Twilio\Rest\Client;
 
+include_once("../lib/data.phpm");
+register_data_callback('ldap','rename','fix_dn_in_logs');
+
+function fix_dn_in_logs( $old_dn, $new_dn ) {
+	$dbh = db_connect('core');
+
+        $query = 'UPDATE user_default_password SET dn = :new WHERE dn = :old';
+	$sth = $dbh->prepare($query);
+	$sth->bindValue( ':old', $old_dn );
+	$sth->bindValue( ':new', $new_dn );
+	$sth->execute();
+
+	$query = 'UPDATE user_locks SET dn = :new WHERE dn = :old';
+	$sth = $dbh->prepare($query);
+	$sth->bindValue( ':old', $old_dn );
+	$sth->bindValue( ':new', $new_dn );
+	$sth->execute();
+
+	$query = 'UPDATE attribute_changes SET dn = :new WHERE dn = :old';
+	$sth = $dbh->prepare($query);
+	$sth->bindValue( ':old', $old_dn );
+	$sth->bindValue( ':new', $new_dn );
+	$sth->execute();
+}
+
 function is_person( $o=array() ) {
 	$person = 0;
 	if ( ! empty( $o['objectClass'] ) ) {
