@@ -37,11 +37,11 @@ $reg_loc = $registration['device_home'] ?? "";
 $locations = labs_get_locations();
 $ip = get_remote_ip();
 $curr_loc = lab_get_locationid_for_ip( $ip );
-$selected_loc = !empty($reg_loc) ? $reg_loc : !empty($location) ? $location : $curr_loc;
+$selected_loc = !empty($reg_loc) ? $reg_loc : ( !empty($location) ? $location : $curr_loc );
 
-foreach ( $locations as &$loc ) {
+foreach ( $locations as $key => $loc ) {
   if ( $loc['id'] == $selected_loc ) {
-    $loc['selected'] = true;
+    $locations[$key]['selected'] = true;
   }
 }
 
@@ -68,15 +68,12 @@ if ( !empty($op) ) {  // force other values here too?
         $output['mac_list'] = labs_get_macs($search_term);
         $template = 'admin/mac_list.tmpl';
     } else if ( $op == 'Edit' ) {
-        $output = array(
-            'locations' => $locations,
-            'search_term' => $search_term,
-            'client_mac' => $mac,
+        $output = array_merge( $output, array(
             'desc' => $registration['submitted_desc'],
             'labs_cat' => $registration['labs_category'],
             'fields_cat' => $registration['fields_category'],
             'iot_cat' => $registration['iot_category'],
-        );
+        ) );
         $template = 'admin/registration_edit.tmpl';
     } else if ( $op == 'Save' ) {
         $template = 'admin/registration_edit.tmpl';
