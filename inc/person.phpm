@@ -10,7 +10,8 @@ $SMS_Renew_Message = "Your WCSD Guest Wifi account has expired, please renew you
 require_once 'Twilio/autoload.php';
 use Twilio\Rest\Client;
 
-include_once("../lib/data.phpm");
+global $config;
+include_once( $config['base_dir'] .'/lib/data.phpm' );
 register_data_callback('ldap','rename','fix_dn_in_logs');
 
 function fix_dn_in_logs( $old_dn, $new_dn ) {
