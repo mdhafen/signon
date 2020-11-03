@@ -115,7 +115,7 @@ if ( !empty($op) ) {  // force other values here too?
             $output['error'] = 1;
             $output['err_msg'] = "MAC Address ($mac), Location, or Category invalid";
         }
-    } else if ( $op == 'Import' && !empty($mac_column) ) {
+    } else if ( $op == 'Import' && isset($mac_column) ) {
         $line_number = 0;
         if ( isset($_FILES['importfile']['error']) &&
              $_FILES['importfile']['error'] == UPLOAD_ERR_OK &&
@@ -135,11 +135,11 @@ if ( !empty($op) ) {  // force other values here too?
                 }
 
                 $mac = labs_normalize_mac( $row[ $mac_column - 1 ] );
-                $desc = empty($desc_column) && empty($row[ $desc_column - 1 ]) ? $description : trim($row[ $desc_column - 1 ]);
-                $loc = empty($loc_column) && empty($row[ $loc_column - 1 ]) ? $location : trim($row[ $loc_column - 1 ]);
-                $lab_cat = empty($lab_cat_column) && empty($row[ $lab_cat_column - 1 ]) ? $labs_category : trim($row[ $lab_cat_column - 1 ]);
-                $field_cat = empty($field_cat_column) && empty($row[ $field_cat_column - 1 ]) ? $fields_category : trim($row[ $field_cat_column - 1 ]);
-                $iot_cat = empty($iot_cat_column) && empty($row[ $iot_cat_column - 1 ]) ? $iot_category : trim($row[ $iot_cat_column - 1 ]);
+                $desc = !isset($desc_column) && empty($row[ $desc_column - 1 ]) ? $description : trim($row[ $desc_column - 1 ]);
+                $loc = !isset($loc_column) && empty($row[ $loc_column - 1 ]) ? $location : trim($row[ $loc_column - 1 ]);
+                $lab_cat = !isset($lab_cat_column) || empty($row[ $lab_cat_column - 1 ]) ? $labs_category : trim($row[ $lab_cat_column - 1 ]);
+                $field_cat = !isset($field_cat_column) || empty($row[ $field_cat_column - 1 ]) ? $fields_category : trim($row[ $field_cat_column - 1 ]);
+                $iot_cat = !isset($iot_cat_column) || empty($row[ $iot_cat_column - 1 ]) ? $iot_category : trim($row[ $iot_cat_column - 1 ]);
                 if ( ! in_array( $loc, array_column($locations,'id') ) ) { $loc = 0; }
                 list($lab_cat,$field_cat,$iot_cat) = labs_normalize_categories($lab_cat,$field_cat,$iot_cat);
 
