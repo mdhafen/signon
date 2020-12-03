@@ -14,6 +14,8 @@ require_once( 'Mail/RFC822.php' );  // to validate the email address
 require_once( 'config.phpm' );
 require_once( 'data.phpm' );
 
+require_once( $config['base_dir'] .'/lib/HTMLPurifier.standalone.php' );
+
 load_session();
 
 //  Load session data from the database.
@@ -132,9 +134,9 @@ function input_validation( $output, $type ) {
 		if ( $type == INPUT_HTML_SOME ) {
 			if ( ! is_string( $value ) ) { $error++; }
 			if ( ! $error ) {
-				$parser = new HTML_Safe();
+				$parser = new HTMLPurifier();
 				$value = clean_string( $value );
-				$value = $parser->parse( $value );
+				$value = $parser->purify( $value );
 			}
 		}
 		if ( $type == INPUT_HTML_ALL ) {
