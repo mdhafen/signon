@@ -157,7 +157,7 @@ function populate_static_user_attrs( $ldap, &$object ) {
 	$object['uidNumber'] = end($new_uid);
 	$object['gidNumber'] = '65534';
 	$object['loginShell'] = '/bin/bash';
-	$object['homeDirectory'] = '/Users/'. $object['uid'];
+	if( isset($object['uid']) ) { $object['homeDirectory'] = '/Users/'. $object['uid']; }
 }
 
 function get_groups( $ldap, $userdn ) {
