@@ -186,7 +186,7 @@ function auth_to_google( $redirect = null ) {
         redirect( $auth_url );
         exit;
       }
-      throw $e;
+      error( array('GOOGLE_CLIENT_ERROR'=>$msg) );
     }
 
     if ( !empty($ticket) ) {

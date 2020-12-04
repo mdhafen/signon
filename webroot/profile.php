@@ -9,14 +9,21 @@ include_once( '../inc/google.phpm' );
 authorize( 'login' );
 
 $errors = array();
+$object = array();
 
 $ldap = new LDAP_Wrapper();
 $dn = $_SESSION['userid'];
 $set = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
-$object = $set[0];
 
-if ( ! is_person( $object ) ) {
-	$errors[] = 'PROFILE_NOT_USER';
+if ( empty($set) ) {
+	$errors[] = 'PROFILE_USER_NOT_FOUND';
+}
+else {
+	$object = $set[0];
+
+	if ( ! is_person( $object ) ) {
+		$errors[] = 'PROFILE_NOT_USER';
+	}
 }
 
 if ( ! empty($errors) ) {
