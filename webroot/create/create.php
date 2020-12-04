@@ -65,7 +65,7 @@ if ( !empty($submitted) && ! $error ) {
           $error = 1;
           $result = 'Password to short';
         }
-        if ( $times = is_pwned_password($password) ) {
+        if ( !empty($password) && $times = is_pwned_password($password) ) {
           $error = 1;
           $result = "Password compromised, you can not use this password.  This password has been seen $times times before.  This password has previously appeared in a data breach and should never be used.  If you've ever used it anywhere before, you should change it as soon as possible.";
         }
