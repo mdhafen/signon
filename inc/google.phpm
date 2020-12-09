@@ -197,7 +197,18 @@ function auth_to_google( $redirect = null ) {
   else if ( !empty($_SESSION['google_oauth_token']) ) {
     $g_oauth = new Google_Service_Oauth2( $GOOGLE_A_CLIENT );
     $GOOGLE_A_CLIENT->setAccessToken( $_SESSION['google_oauth_token'] );
-    $data = $g_oauth->userinfo->get();
+    if ( $GOOGLE_A_CLIENT->isAccessTokenExpired() ) {
+      if ( !empty($redirect) ) {
+        $GOOGLE_A_CLIENT->setRedirectUri( $redirect );
+        $auth_url = $GOOGLE_A_CLIENT->createAuthUrl();
+        redirect( $auth_url );
+        exit;
+      }
+      error( array('GOOGLE_CLIENT_TOKEN_EXPIRED'=>1) );
+    }
+    else {
+      $data = $g_oauth->userinfo->get();
+    }
   }
   else if ( !empty($redirect) ) {
     $GOOGLE_A_CLIENT->setRedirectUri( $redirect );
