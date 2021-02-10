@@ -49,7 +49,7 @@ if ( !empty($user) ) {
             $dn = $entry['dn'];
             unset( $entry['dn'] );
             if ( ! $ldap->do_add( $dn, $entry ) ) {
-              $errors[] = 'There was an error creating the account';
+              $errors[] = 'There was an error creating an account for '. $username;
             }
           }
         }

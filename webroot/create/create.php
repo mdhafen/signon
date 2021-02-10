@@ -103,7 +103,7 @@ if ( !empty($submitted) && ! $error ) {
         }
         else {
           $error = 1;
-          $result = 'There was an Error creating your account';
+          $result = 'There was an Error creating an account account for '. $entry['uid'];
         }
       }
     }
