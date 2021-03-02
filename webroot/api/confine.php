@@ -10,7 +10,7 @@ authenticate();
 
 if ( ! ( authorized('reset_password') || ( !empty($_SESSION['loggedin_user']) && strcasecmp($dn,$_SESSION['loggedin_user']['userid']) == 0 ) ) ) {
 	if ( empty($return) ) {
-		output( '<?xml version ="1.0"?><error>ACCESS_DENIED</error>', '', $xml=1 );
+		output( '<?xml version ="1.0"?><result><state>error</state><message>ACCESS_DENIED</message></result>', '', $xml=1 );
 	} else {
 		error(array('ACCESS_DENIED'));
 	}
@@ -73,7 +73,7 @@ if ( ! empty($input) ) {
     case 'Lock':
         if ( ( $object['businessCategory'][0] == 'Student' && !authorized('lock_student') ) || ( $object['businessCategory'][0] == 'Staff' && !authorized('lock_staff') ) ) {
 			if ( empty($return) ) {
-				output( '<?xml version ="1.0"?><error>ACCESS_DENIED</error>', '', $xml=1 );
+				output( '<?xml version ="1.0"?><result><state>error</state><message>ACCESS_DENIED</message></result>', '', $xml=1 );
 			} else {
 				error(array('ACCESS_DENIED'));
 			}
@@ -99,7 +99,7 @@ if ( ! empty($input) ) {
     }
     else {
         if ( empty($return) ) {
-            output( '<?xml version ="1.0"?><error>'. $ldap->get_error() .'</error>', '', $xml=1 );
+            output( '<?xml version ="1.0"?><result><state>error</state><message>'. $ldap->get_error() .'</message></result>', '', $xml=1 );
         } else {
             redirect('admin/object.php?dn='.urlencode($dn) );
         }
