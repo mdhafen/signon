@@ -112,6 +112,9 @@ $config = array(
 			'auth' => 255,
 		),
 	),
+	'api_clients' => array(
+		// client_id => array( 'name' => 'client alias', 'secret' => 'psk', 'no_session' => 1 )
+	),
 );
 
 $config['base_dir'] = realpath( dirname( __FILE__ ) . '/..' );

@@ -173,7 +173,7 @@ function authen_against_db() {
 	$output[ 'DBLOGIN' ] = 1;
 	// Make sure the user is the DB user
 	if ( isset($_SESSION['loggedin_user']) && $_SESSION['loggedin_user']['userid'] != -1 ) {
-		unset( $_SESSION['loggein_user'] );
+		unset( $_SESSION['loggedin_user'] );
 	}
 
 	if ( $op == 'do_login' || ! isset( $_SESSION[ 'loggedin_user' ] ) ) {
@@ -429,6 +429,70 @@ function authen_ldap( $module, $username, $password ) {
 	}
 
 	return $user;
+}
+
+function authenticate_api_client() {
+	global $config;
+
+	$check_token = '';
+	$username = input( '_client_id', INPUT_STR );
+	$password = input( '_client_secret', INPUT_STR );
+
+	if ( isset($_SESSION['loggedin_user']) && $_SESSION['loggedin_user']['userid'] != -1 ) {
+		unset( $_SESSION['loggedin_user'] );
+	}
+
+	if ( ! isset( $_SESSION[ 'loggedin_user' ] ) ) {
+		if ( empty($username) || empty($password) ) {
+			// $output[ 'BADLOGIN' ] = 1;
+		}
+		else {
+			$client_name = $config['api_clients'][$username]['name'];
+			$client_pass = $config['api_clients'][$username]['secret'];
+			$no_session	 = $config['api_clients'][$username]['no_session'];
+			if ( !empty($client_pass) && $password === $client_pass ) {
+				$user = array();
+				$user[ 'userid' ] = -1;
+				$user[ 'username' ] = $client_name;
+
+				unset( $_SESSION[ 'NOSESSION' ] );
+				$token = hash(
+					'sha512',
+					session_id() .','.
+					$_SERVER[ 'REMOTE_ADDR' ] .','.
+					$config[ 'secure_phrase' ]
+				);
+				$check_token = $token;
+				if ( ! $no_session ) {
+					$_SESSION[ 'token' ] = $token;
+					$_SESSION[ 'userid' ] = $user[ 'userid' ];
+					$_SESSION[ 'username' ] = $user[ 'username' ];
+					$_SESSION[ 'loggedin_user' ] = $user;
+					$_SESSION[ 'new_session' ] = 1;
+				}
+			} else {
+				$output[ 'BADLOGIN' ] = 1;
+				if ( ! $no_session ) {
+					$_SESSION[ 'token' ] = '';
+					$_SESSION[ 'username' ] = $username;
+				}
+			}
+		}
+	}
+
+	$my_token = hash(
+		'sha512',
+		session_id() .','.
+		$_SERVER[ 'REMOTE_ADDR' ] .','.
+		$config[ 'secure_phrase' ]
+	);
+
+	isset($check_token) || $check_token = $_SESSION['token'];
+	if ( $my_token == $check_token ) {
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 function roles() {
