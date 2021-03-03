@@ -41,6 +41,9 @@ foreach ( $users as $user ) {
   $change_users[] = $user;
 }
 unset($users);
+if ( empty($change_users) ) {
+  exit;
+}
 
 foreach ( $change_users as $user ) {
   // old password scheme
