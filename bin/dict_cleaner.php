@@ -7,14 +7,30 @@
     $dict_file = $argv[1];
   }
 
-  global $ch,$swears,$bad_swears;
+  global $ch,$swears,$bad_swears,$watchout;
 
   $bad_swears = array(
     'shit','crap','fuck','damn','sex',
   );
   $swears = array(
-    'ass','jackass',
+    'ass','jackass','naked','nude','adult','lesbian','breast','drug','jesus',
+    'christ','lingerie','virgin','strip','livecam','thong','fetish','amateur',
+    'mature','spank','webcam','facial','torture','bikini','suck','deviant',
+    'exotic','explicit','pee','mount','tit','abortion','butt','screw','escort',
+    'breed','mistress','nudist','lick','celeb','prostate','sperm','intimate',
+    'niger','voyuer','erotic','wiley','mating',
   );
+  $watchout = array(
+    'disney','angeles','kill','siemens','nintendo','toyota','cialis','tramadol',
+    'flickr','slave','mozilla','phpbb','xanax','verizon','bizrate','levitra',
+    'freebsd','valium','adidas','suzuki','chrysler','adipex','kelkoo','mazda',
+    'fujitsu','medicaid','minolta','lexmark','hotmail','findlaw','logitech',
+    'belkin','porsche','zshops','worldcat','hitachi','batman','coleman',
+    'warcraft','lexus','expedia','ferrari','hyundai','nextel','nvidia',
+    'propecia','thinkpad','chevy','sparc','cingular','simpsons','subaru',
+    'fioricet','paxil','prozac','sanyo','garmin','barbie','zoloft','ultram',
+    'allah',
+    );
 /*
   $ch = curl_init();
   curl_setopt( $ch, CURLOPT_COOKIEJAR, "/tmp/dc_cookies.txt" );
@@ -50,6 +66,9 @@
       }
     }
     foreach ( $dedup as $word => $count ) {
+/*
+ * Don't worry about plurals and such.
+ *
       if ( substr($word,-1) == 's' ) {
         if ( substr($word,-3) == 'ies' ) {
           if ( !empty($dedup[substr($word,0,-3).'y']) ) {
@@ -62,6 +81,7 @@
           }
         }
       }
+ */
       fwrite( $out, $word ."\n" );
     }
     fclose( $handle );
@@ -69,7 +89,7 @@
   }
 
 function is_offensive( $word ) {
-  global $ch,$swears,$bad_swears;
+  global $ch,$swears,$bad_swears,$watchout;
 
   foreach ( $bad_swears as $s ) {
     if ( stripos( $word, $s ) !== false ) {
@@ -77,6 +97,11 @@ function is_offensive( $word ) {
     }
   }
   foreach ( $swears as $s ) {
+    if ( $word == $s || stripos($word,$s) === 0 ) {
+      return true;
+    }
+  }
+  foreach ( $watchout as $s ) {
     if ( $word == $s || stripos($word,$s) === 0 ) {
       return true;
     }
