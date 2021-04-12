@@ -60,7 +60,8 @@ There was an error! <?= $data['err_msg'] ?>
   <select name="labs_cat" id="cat">
       <option value="">No Access</option>
       <option value="Labs"<?= empty($data['labs_cat']) || $data['labs_cat'] == 'Labs' ? " selected":"" ?>>Lab device</option>
-      <option value="Lan"<?= !empty($data['labs_cat']) && $data['labs_cat'] == 'Lan' ? " selected":""?>>Staff device</option>
+      <option value="Lan"<?= !empty($data['labs_cat']) && $data['labs_cat'] == 'Lan' ? " selected":""?>>Lan device</option>
+      <option value="Staff"<?= !empty($data['labs_cat']) && $data['labs_cat'] == 'Staff' ? " selected":""?>>Staff device</option>
       <option value="Facilities"<?= !empty($data['labs_cat']) && $data['labs_cat'] == 'Facilities' ? " selected":""?>>Facilities device</option>
       <option value="AV"<?= !empty($data['labs_cat']) && $data['labs_cat'] == 'AV' ? " selected":""?>>Audio / Visual Devices</option>
       <option value="Phone"<?= !empty($data['labs_cat']) && $data['labs_cat'] == 'Phone' ? " selected":""?>>Phone</option>
