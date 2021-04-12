@@ -77,7 +77,7 @@ if ( !empty($op) ) {  // force other values here too?
         $template = 'admin/registration_edit.tmpl';
     } else if ( $op == 'Save' ) {
         $template = 'admin/registration_edit.tmpl';
-        if ( !empty($mac) && !empty($location) &&
+        if ( !empty($mac) && !empty($location) && !empty($description) &&
              ( !empty($labs_category) || !empty($fields_category) || !empty($iot_category) ) ) {
             $mac = labs_normalize_mac( $mac );
             $error = labs_update_mac( $mac, $location, $description, $labs_category, $fields_category, $iot_category, $user, $ip );
@@ -95,10 +95,10 @@ if ( !empty($op) ) {  // force other values here too?
         }
         else {
             $output['error'] = 1;
-            $output['err_msg'] = "MAC Address ($mac), Location, or Category invalid";
+            $output['err_msg'] = "MAC Address ($mac), Location, Description, or Category invalid";
         }
     } else if ( $op == 'Register' ) {
-        if ( !empty($mac) && !empty($location) &&
+        if ( !empty($mac) && !empty($location) && !empty($description) &&
              ( !empty($labs_category) || !empty($fields_category) || !empty($iot_category) ) ) {
             $mac = labs_normalize_mac( $mac );
             $error = labs_register_mac( $mac, $location, $description, $labs_category, $fields_category, $iot_category, $user, $ip );
@@ -113,7 +113,7 @@ if ( !empty($op) ) {  // force other values here too?
         }
         else {
             $output['error'] = 1;
-            $output['err_msg'] = "MAC Address ($mac), Location, or Category invalid";
+            $output['err_msg'] = "MAC Address ($mac), Location, Description, or Category invalid";
         }
     } else if ( $op == 'Import' && isset($mac_column) ) {
         $line_number = 0;
@@ -143,7 +143,7 @@ if ( !empty($op) ) {  // force other values here too?
                 if ( ! in_array( $loc, array_column($locations,'id') ) ) { $loc = 0; }
                 list($lab_cat,$field_cat,$iot_cat) = labs_normalize_categories($lab_cat,$field_cat,$iot_cat);
 
-                if ( !empty($mac) && !empty($loc) && ( !empty($lab_cat) || !empty($field_cat) || !empty($iot_cat) ) ) {
+                if ( !empty($mac) && !empty($loc) && !empty($desc) && ( !empty($lab_cat) || !empty($field_cat) || !empty($iot_cat) ) ) {
                     $error = labs_register_mac( $mac, $loc, $desc, $lab_cat, $field_cat, $iot_cat, $user, $ip );
                     if ( !$error ) {
                         $registered++;
@@ -155,7 +155,7 @@ if ( !empty($op) ) {  // force other values here too?
                 }
                 else {
                     $output['error'] = 1;
-                    $output['err_msg'] = "Import file contains a line with an invalid value.  Line $line_number: ". implode( ',', $row );
+                    $output['err_msg'] = "Import file contains a line with an invalid or missing value.  Line $line_number: ". implode( ',', $row );
                 }
             }
             $output['registered'] = $registered;
