@@ -150,7 +150,9 @@ There was an error!
       grecaptcha.execute('<?= $data['recaptcha_key'] ?>', {action: 'createguest'}).then(function(token) {
         var data = {
           'g-recaptcha-response': token,
-          'op': 'recaptcha-verify'
+          'op': 'recaptcha-verify',
+          'cache': false,
+          'headers': { 'cache-control': 'no-cache' }
         };
         $.post('<?= $data['_config']['base_url'] ?>api/recaptcha_verify.php', data, function(result){
           var status = $(result).find('state').text();
@@ -171,7 +173,9 @@ There was an error!
     var token = $("#captcha_code").val();
     var data = {
       'captcha_code': token,
-      'op': 'sicaptcha-verify'
+      'op': 'sicaptcha-verify',
+      'cache': false,
+      'headers': { 'cache-control': 'no-cache' }
     };
     $.post('<?= $data['_config']['base_url'] ?>api/recaptcha_verify.php', data, function(result){
       var status = $(result).find('state').text();
@@ -187,6 +191,7 @@ There was an error!
   }
 
   $(document).ready(function(){
+    $.ajaxSetup({ cache: false});
     var el = document.getElementById('nav-home');
     $(el).addClass('active');
     $('#generic-modal').modal({'show':false});
