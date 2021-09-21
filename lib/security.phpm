@@ -439,7 +439,8 @@ function authenticate_api_client() {
 	$password = input( '_client_secret', INPUT_STR );
 
 	if ( isset($_SESSION['loggedin_user']) && $_SESSION['loggedin_user']['userid'] != -1 ) {
-		unset( $_SESSION['loggedin_user'] );
+		// client api call on top of user session - return false.
+		return 0;
 	}
 
 	if ( ! isset( $_SESSION[ 'loggedin_user' ] ) ) {

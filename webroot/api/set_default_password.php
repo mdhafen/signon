@@ -6,7 +6,7 @@ include_once( '../../lib/output.phpm' );
 include_once( '../../inc/person.phpm' );
 include_once( '../../inc/google.phpm' );
 
-if ( ! authenticate_api_client() ) {
+if ( ! authorized('reset_password') or ! authenticate_api_client() ) {
   output( '<?xml version ="1.0"?><result><state>error</state><flag>ACCESS_DENIED</flag></result>', '', $xml=1 );
   exit;
 }
@@ -16,6 +16,8 @@ $ldap = new LDAP_Wrapper();
 $users = array();
 $output = '<?xml version ="1.0"?><result>';
 $dn = input( 'dn', INPUT_STR );
+$override = input( 'override', INPUT_STR );
+$new_passwd = input( 'password', INPUT_STR );
 if ( !empty($dn) ) {
   $users = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
 } else {
@@ -27,16 +29,17 @@ $change_users = array();
 foreach ( $users as $user ) {
   if ( empty($user['givenName']) || empty($user['sn']) || empty($user['employeeNumber']) ) {
     output( '<?xml version ="1.0"?><result><state>error</state><flag>DOES_NOT_COMPUTE</flag><message>'. htmlspecialchars($user['dn'],ENT_QUOTES|ENT_XML1|ENT_SUBSTITUTE) .'</message></result>', '', $xml=1 );
-    continue;
+    exit;
   }
   if ( empty($user['employeeType']) || $user['employeeType'][0] != 'Student' ) {
     // limit to students for now.
-    continue;
+    output( '<?xml version ="1.0"?><result><state>error</state><flag>NOT_STUDENT</flag><message>'. htmlspecialchars($user['dn'],ENT_QUOTES|ENT_XML1|ENT_SUBSTITUTE) .'</message></result>', '', $xml=1 );
+    exit;
   }
   $password = get_default_password($user['dn']);
-  if ( ! empty($password) ) {
+  if ( ! empty($password) && ! $override ) {
     output( '<?xml version ="1.0"?><result><state>error</state><flag>ALREADY_SET</flag><message>'. htmlspecialchars($user['dn'],ENT_QUOTES|ENT_XML1|ENT_SUBSTITUTE) .'</message></result>', '', $xml=1 );
-    continue;
+    exit;
   }
   $change_users[] = $user;
 }
@@ -50,6 +53,10 @@ foreach ( $change_users as $user ) {
   $password = mb_strtolower(mb_substr($user['givenName'][0],0,1))
 	 . mb_strtolower(mb_substr($user['sn'][0],0,1))
 	 . $user['employeeNumber'][0];
+
+  if ( $override && $new_passwd ) {
+    $password = $new_passwd;
+  }
 
 /*
   $password = create_password();
