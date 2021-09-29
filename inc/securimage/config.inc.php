@@ -50,6 +50,8 @@ return array(
 
     //'display_value' => 'ABC 123', // Draws custom text on captcha
 */
+'charset' => 'ABCDEFGHJKLMNPQRSTUVWXZY123456789',
+'case_sensitive' => false,
 
     /**** Code Storage & Database Options ****/
 

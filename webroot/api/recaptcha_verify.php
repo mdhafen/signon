@@ -10,6 +10,8 @@ global $RECAPTCHA_SECRET;
 
 $passed = false;
 $op = input( 'op', INPUT_HTML_NONE );
+$token = '';
+$code = '';
 $output = '<?xml version="1.0"?>
 <result>';
 
@@ -42,6 +44,7 @@ else if ( $op == 'sicaptcha-verify' ) {
     include_once( '../../inc/securimage/securimage.php' );
     $si = new Securimage();
     $token = input( 'captcha_code', INPUT_STR );
+    $code = $si->getCode(false);
     if ( $si->check($token) == true ) {
         $passed = true;
     }
@@ -56,7 +59,8 @@ if ( $passed ) {
     $output .= '<state>success</state><message>Captcha passed!</message></result>';
 }
 else {
-    $output .= '<state>error</state><message>Captcha failed!</message></result>';
+    $checked = ''; // "<captcha><code>$code</code><input>$token</input></captcha>";
+    $output .= '<state>error</state><message>Captcha failed!</message>'.$checked.'</result>';
 }
 
 output( $output, '', $xml=1 );
