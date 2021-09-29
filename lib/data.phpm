@@ -117,16 +117,16 @@ class LDAP_Wrapper {
         return ldap_error( $this->ldap );
     }
 
-	public function quick_search( $filter = array('objectclass' => '*'), $attrs = array('cn'), $scope = 2, $base = '' ) {
+	public function quick_search( $filter = '(objectclass=*)', $attrs = array('cn'), $scope = 2, $base = '' ) {
 		$results = array();
 
-		$filter_str = "";
-		if ( empty($filter) ) {
-			$filter_str = "";
+		$filter_str = '';
+		if ( empty($filter) || ( is_array($filter) && count($filter) == 0 ) ) {
+			$filter_str = '(objectclass=*)';
 		}
 		else if ( is_array($filter) ) {
 			foreach ( $filter as $attr => $value ) {
-				$filter_str .= "($attr=$value)";
+				$filter_str .= "($attr=". ldap_escape($value,'*',LDAP_ESCAPE_FILTER) .")";
 			}
 			if ( count($filter) > 1 ) {
 				$filter_str = "(&$filter_str)";
@@ -141,19 +141,31 @@ class LDAP_Wrapper {
 		}
 
 		$paged_cookie = '';
+		$page_control = [['oid'=>LDAP_CONTROL_PAGEDRESULTS, 'value' => ['size'=>100,'cookie'=>$paged_cookie]]];
 		do {
-			ldap_control_paged_result( $this->ldap, 100, false, $paged_cookie );
+			$returned_control = '';
 			if ( $scope == 0 ) {
-				$search = @ldap_read( $this->ldap, $base, $filter_str, $attrs );
+				// Don't page a read
+				$search = @ldap_read( $this->ldap, $base, $filter_str, $attrs, 0, 0, 0, LDAP_DEREF_NEVER );
 			}
 			else if ( $scope == 1 ) {
-				$search = @ldap_list( $this->ldap, $base, $filter_str, $attrs );
+				$search = @ldap_list( $this->ldap, $base, $filter_str, $attrs, 0, 0, 0, LDAP_DEREF_NEVER, $page_control );
 			}
 			else {
-				$search = @ldap_search( $this->ldap, $base, $filter_str, $attrs );
+				$search = @ldap_search( $this->ldap, $base, $filter_str, $attrs, 0, 0, 0, LDAP_DEREF_NEVER, $page_control );
 			}
 			if ( empty($search) ) {
 				return $results;
+			}
+			if ( $scope != 0 ) {
+				ldap_parse_result($this->ldap, $search, $errcode, $matcheddn, $errmsg, $referrals, $returned_control );
+				if ( isset($returned_control[LDAP_CONTROL_PAGEDRESULTS]['value']['cookie']) ) {
+					$paged_cookie = $returned_control[LDAP_CONTROL_PAGEDRESULTS]['value']['cookie'];
+					$page_control = [['oid'=>LDAP_CONTROL_PAGEDRESULTS, 'value' => ['size'=>100,'cookie'=>$paged_cookie]]];
+				}
+				else {
+					$paged_cookie = '';
+				}
 			}
 
 			$entry = ldap_first_entry( $this->ldap, $search );
@@ -172,8 +184,7 @@ class LDAP_Wrapper {
 					$results[] = $result;
 				} while ( $entry = ldap_next_entry( $this->ldap, $entry ) );
 			}
-			ldap_control_paged_result_response( $this->ldap, $search, $paged_cookie );
-		} while ( $paged_cookie !== null && $paged_cookie != '' );
+		} while ( $paged_cookie != '' );
 
 		return $results;
 	}

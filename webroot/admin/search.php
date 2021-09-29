@@ -10,7 +10,6 @@ authorize( 'set_password' );
 
 $attr = input( 'attrib', INPUT_STR );
 $query = input( 'query', INPUT_STR );
-$query = ldap_escape($query,'',LDAP_ESCAPE_FILTER);
 $results = array();
 $filter = "";
 $attrs = array(
