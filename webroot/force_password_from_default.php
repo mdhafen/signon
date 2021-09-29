@@ -59,7 +59,7 @@ if ( !empty($user) ) {
     }
 
     if ( ! empty($dn) ) {
-      $password = get_default_password($object['dn']);
+      $password = get_default_password($object['uid'][0]);
       if ( empty($password) || ! @$ldap->do_connect('core',$object['dn'],$password) ) {
         redirect( 'https://www.washk12.org' );
         exit;

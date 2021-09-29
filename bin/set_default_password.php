@@ -35,9 +35,9 @@ foreach ( $users as $user ) {
     // limit to students for now.
     continue;
   }
-  $password = get_default_password($user['dn']);
+  $password = get_default_password($user['uid'][0]);
   if ( ! empty($password) ) {
-    print "default password already set for ". $user['dn'] ."\n";
+    print "default password already set for ". $user['uid'][0] ."\n";
     continue;
   }
   $change_users[] = $user;
@@ -62,7 +62,7 @@ foreach ( $change_users as $user ) {
 
   print "Setting default password for ". $user['dn'] ."\n";
 
-  set_default_password( $user['dn'], $password );
+  set_default_password( $user['uid'][0], $password );
 }
 
 ?>

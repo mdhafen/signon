@@ -74,10 +74,10 @@ DROP TABLE IF EXISTS `user_default_password`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `user_default_password` (
-  dn varchar(256) NOT NULL,
+  uid varchar(40) NOT NULL,
   default_password varchar(39) DEFAULT NULL,
   timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  INDEX (dn)
+  PRIMARY KEY (uid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 --
 -- Table structure for table `pwned_passwords`

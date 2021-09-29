@@ -36,7 +36,7 @@ foreach ( $users as $user ) {
     output( '<?xml version ="1.0"?><result><state>error</state><flag>NOT_STUDENT</flag><message>'. htmlspecialchars($user['dn'],ENT_QUOTES|ENT_XML1|ENT_SUBSTITUTE) .'</message></result>', '', $xml=1 );
     exit;
   }
-  $password = get_default_password($user['dn']);
+  $password = get_default_password($user['uid'][0]);
   if ( ! empty($password) && ! $override ) {
     output( '<?xml version ="1.0"?><result><state>error</state><flag>ALREADY_SET</flag><message>'. htmlspecialchars($user['dn'],ENT_QUOTES|ENT_XML1|ENT_SUBSTITUTE) .'</message></result>', '', $xml=1 );
     exit;
@@ -64,7 +64,7 @@ foreach ( $change_users as $user ) {
   $password = substr( $password, 0, strrpos($s,'-') );
  */
 
-  set_default_password( $user['dn'], $password );
+  set_default_password( $user['uid'][0], $password );
 }
 
 $output .= '<state>success</state></result>';

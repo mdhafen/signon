@@ -5,6 +5,7 @@ $updates = array(
   '0002-add_userPass_NTPass_to_user_locks',
   '0003-add_user_default_password',
   '0004-add_ip_to_attribute_change_log',
+  '0005-change_user_default_password_to_uid',
 );
 $results = array();
 

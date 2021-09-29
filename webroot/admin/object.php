@@ -22,7 +22,7 @@ $is_person = is_person( $object );
 if ( $is_person ) {
     $groups = get_groups( $ldap, $objectdn );
     $user_lock = get_lock_status( $objectdn );
-    $default_passwd = get_default_password( $objectdn );
+    $default_passwd = get_default_password( $object['uid'][0] );
 }
 $is_guest = 0;
 $is_guest_expired = 0;

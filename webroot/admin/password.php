@@ -43,7 +43,7 @@ $pwned_bypass = 0;
 
 if ( !empty($default) ) {
 	if ( !empty($objectdn) ) {
-		$password = get_default_password($objectdn);
+		$password = get_default_password($object['uid'][0]);
 		$confirm = $password;
 		$pwned_bypass = 1;
 		if ( empty($password) ) {

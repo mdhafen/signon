@@ -17,10 +17,12 @@ register_data_callback('ldap','rename','fix_dn_in_logs');
 function fix_dn_in_logs( $old_dn, $new_dn ) {
 	$dbh = db_connect('core');
 
-        $query = 'UPDATE user_default_password SET dn = :new WHERE dn = :old';
+	$new_uid = substr( $new_dn, 4, strpos($new_dn,',')-4 );
+	$old_uid = substr( $old_dn, 4, strpos($old_dn,',')-4 );
+	$query = 'UPDATE user_default_password SET uid = :new WHERE uid = :old';
 	$sth = $dbh->prepare($query);
-	$sth->bindValue( ':old', $old_dn );
-	$sth->bindValue( ':new', $new_dn );
+	$sth->bindValue( ':old', $old_uid );
+	$sth->bindValue( ':new', $new_uid );
 	$sth->execute();
 
 	$query = 'UPDATE user_locks SET dn = :new WHERE dn = :old';
@@ -47,10 +49,10 @@ function is_person( $o=array() ) {
 	return $person;
 }
 
-function get_default_password( $objectdn ) {
+function get_default_password( $uid ) {
 	$dbh = db_connect('core');
-	$sth = $dbh->prepare('SELECT * FROM user_default_password WHERE dn = :dn');
-	$sth->bindValue( ':dn', $objectdn );
+	$sth = $dbh->prepare('SELECT * FROM user_default_password WHERE uid = :uid');
+	$sth->bindValue( ':uid', $uid );
 	$sth->execute();
 	$pass = '';
 
@@ -62,10 +64,10 @@ function get_default_password( $objectdn ) {
 	return $pass;
 }
 
-function set_default_password( $dn, $password ) {
+function set_default_password( $uid, $password ) {
 	$dbh = db_connect('core');
-	$sth = $dbh->prepare('REPLACE INTO user_default_password (dn,default_password,timestamp) VALUES (:dn,:passwd,NOW())');
-	$sth->bindValue( ':dn', $dn );
+	$sth = $dbh->prepare('REPLACE INTO user_default_password (uid,default_password,timestamp) VALUES (:uid,:passwd,NOW())');
+	$sth->bindValue( ':uid', $dn );
 	$sth->bindValue( ':passwd', $password );
 	$sth->execute();
 }

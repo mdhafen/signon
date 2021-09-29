@@ -31,9 +31,9 @@ foreach ( $users as $user ) {
     print "Could not compute old default password for ". $user['dn'] ."\n";
     continue;
   }
-  $password = get_default_password($user['dn']);
+  $password = get_default_password($user['uid'][0]);
   if ( empty($password) ) {
-    print "No default password for ". $user['dn'] ."\n";
+    print "No default password for ". $user['uid'][0] ."\n";
     continue;
   }
 
@@ -54,7 +54,7 @@ foreach ( $change_users as $user ) {
 
   print "Changing password for ". $user['dn'] ."\n";
 
-  set_default_password( $user['dn'], $password );
+  set_default_password( $user['uid'][0], $password );
   if ( !empty($user['employeeType'][0]) && strtolower(strstr($email,'@')) == '@'.$GOOGLE_DOMAIN ) {
     $result = google_set_password( $user['mail'][0], $password );
   }
