@@ -16,10 +16,13 @@ $ldap = new LDAP_Wrapper();
 $users = array();
 $output = '<?xml version ="1.0"?><result>';
 $dn = input( 'dn', INPUT_STR );
+$uid = input( 'uid', INPUT_STR );
 $override = input( 'override', INPUT_STR );
 $new_passwd = input( 'password', INPUT_STR );
 if ( !empty($dn) ) {
   $users = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
+} else if ( !empty($uid) ) {
+  $users = $ldap->quick_search( array( 'uid' => $uid ), array() );
 } else {
   output( '<?xml version ="1.0"?><result><state>error</state><flag>NO_INPUT</flag></result>', '', $xml=1 );
   exit;
