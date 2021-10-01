@@ -22,12 +22,12 @@ global $GOOGLE_DOMAIN;
 
 $dn = input( 'dn', INPUT_STR );
 
-$set = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
+$set = $ldap->quick_search( '(objectClass=*)', array(), 0, $dn );
 $object = $set[0];
 $objectdn = $object['dn'];
 unset( $object['dn'] );
 
-$set = $ldap->quick_search( array( 'objectClass' => 'posixGroup', 'cn' => 'vpn2_access' ), array() );
+$set = $ldap->quick_search( '(&(objectClass=posixGroup)(cn=vpn2_access))', array() );
 $group = $set[0];
 $groupdn = $group['dn'];
 unset( $group['dn'] );
@@ -107,7 +107,7 @@ if ( ! empty($input) ) {
     }
 }
 
-$set = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
+$set = $ldap->quick_search( '(objectClass=*)', array(), 0, $dn );
 $object = $set[0];
 $state = !empty($object['businessCategory'])?$object['businessCategory'][0]:"";
 $output .= "\n<state>$state</state>\n";

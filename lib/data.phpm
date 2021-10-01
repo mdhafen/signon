@@ -294,7 +294,7 @@ class LDAP_Wrapper {
 			}
 			else {
 				$dn = $ou .','. $dn;
-				$set = $this->quick_search( array('objectClass'=>'*'), array(), 0, $dn.$base );
+				$set = $this->quick_search( '(objectClass=*)', array(), 0, $dn.$base );
 				if ( empty($set) ) {
 					$result = $this->create_ou( $dn.$base );
 				}
@@ -342,10 +342,10 @@ class LDAP_Wrapper {
 		$prefix = '';
 		switch ( $attrib ) {
 		case 'sambaSID':
-			$set = $this->quick_search( array('objectClass'=>'sambaSamAccount'), array('sambaSID') );
+			$set = $this->quick_search( '(objectClass=sambaSamAccount)', array('sambaSID') );
 			break;
 		case 'uidNumber':
-			$set = $this->quick_search( array('objectClass'=>'posixAccount'), array('uidNumber') );
+			$set = $this->quick_search( '(objectClass=posixAccount)', array('uidNumber') );
 			break;
 		default:
 			$set = array();

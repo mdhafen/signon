@@ -18,7 +18,7 @@ if ( $op == 'Add' ) {
 	$objectdn = input( 'dn', INPUT_HTML_NONE );
 }
 else {
-	$set = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
+	$set = $ldap->quick_search( '(objectClass=*)', array(), 0, $dn );
 	$object = $set[0];
 	$objectdn = $object['dn'];
 	unset( $object['dn'] );

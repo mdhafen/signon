@@ -11,7 +11,7 @@ global $GOOGLE_DOMAIN;
 
 $dn = input( 'dn', INPUT_STR );
 
-$set = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
+$set = $ldap->quick_search( '(objectClass=*)', array(), 0, $dn );
 $object = $set[0];
 $objectdn = $object['dn'];
 unset( $object['dn'] );

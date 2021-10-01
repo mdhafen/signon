@@ -17,7 +17,7 @@ foreach ( $groups as $group ) {
 }
 
 foreach ( $dns as $dn => $count ) {
-  $user = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
+  $user = $ldap->quick_search( '(objectClass=*)', array(), 0, $dn );
   if ( empty($user) ) {
     $user = preg_split('/(?<!\\\\),/',$dn);
     $user = explode( '=', $user[0] );

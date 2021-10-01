@@ -381,7 +381,7 @@ function authen_ldap( $module, $username, $password ) {
 		$role = $ldap->config['sysadmin_role'];
 	}
 	else if ( strripos( $username, $ldap->config['base'] ) > 0 ) {
-		$set = $ldap->quick_search( array('objectClass'=>'*'), array(), 0, $username );
+		$set = $ldap->quick_search( '(objectClass=*)', array(), 0, $username );
 	}
 	else {
 		$set = $ldap->quick_search( array( 'uid' => $username ), array() );
@@ -398,7 +398,7 @@ function authen_ldap( $module, $username, $password ) {
 		if ( $ldap->do_connect( $module, $userdn, $password ) ) {
 			if ( ! empty($ldap->config['roles']) ) {
 				foreach ( $ldap->config['roles'] as $group_dn => $role_id ) {
-					$group = $ldap->quick_search( array('objectClass'=>'groupOfNames'), array(), 0, $group_dn );
+					$group = $ldap->quick_search( '(objectClass=groupOfNames)', array(), 0, $group_dn );
 					if ( ! empty($group[0]) && ! empty($group[0]['member']) ) {
 						foreach ( $group[0]['member'] as $member_dn ) {
 							if ( strcasecmp($member_dn,$userdn) == 0 ) {

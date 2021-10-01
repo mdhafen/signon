@@ -11,7 +11,7 @@ if ( ! authenticate() ) {
 }
 
 $dn = input( 'dn', INPUT_STR );
-$set = $ldap->quick_search( array( 'objectClass' => 'organizationalUnit' ), array(), 1, $dn );
+$set = $ldap->quick_search( '(objectClass=organizationalUnit)', array(), 1, $dn );
 $folders = array();
 foreach ( $set as $ou ) {
 	$folders[] = array( 'ou' => $ou['ou'][0], 'dn' => $ou['dn'] );

@@ -10,7 +10,7 @@ authorize( 'set_password' );
 
 $dn = input( 'dn', INPUT_STR );
 
-$set = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
+$set = $ldap->quick_search( '(objectClass=*)', array(), 0, $dn );
 $object = $set[0];
 $objectdn = $object['dn'];
 unset( $object['dn'] );
@@ -47,7 +47,7 @@ if ( $parentdn == $ldap->config['base'] ) {
 	$parentdn = '';
 }
 
-$children = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 1, $dn );
+$children = $ldap->quick_search( '(objectClass=*)', array(), 1, $dn );
 usort( $children, 'sorter' );
 
 $output = array(

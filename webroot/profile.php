@@ -13,7 +13,7 @@ $object = array();
 
 $ldap = new LDAP_Wrapper();
 $dn = $_SESSION['userid'];
-$set = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
+$set = $ldap->quick_search( '(objectClass=*)', array(), 0, $dn );
 
 if ( empty($set) ) {
 	$errors[] = 'PROFILE_USER_NOT_FOUND';

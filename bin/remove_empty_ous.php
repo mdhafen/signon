@@ -13,7 +13,7 @@ foreach ( $ous as $ou ) {
     if ( stripos($ou['ou'][0],'ou=wcsd,ou=technology') !== false {
         continue;
     }
-    $children = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 1, $dn );
+    $children = $ldap->quick_search( '(objectClass=*)', array(), 1, $dn );
     if ( ! count($children) ) {
         $dns[] = $dn;
     }

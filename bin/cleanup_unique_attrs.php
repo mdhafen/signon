@@ -28,7 +28,7 @@ foreach ( $matches as $attr => $values ) {
         $objects = array();
         $passwd_set = array();
         foreach ( $vals['dns'] as $dn => $val ) {
-            $set = $ldap->quick_search( array( 'objectClass' => 'sambaSamAccount' ), array(), 0, $dn );
+            $set = $ldap->quick_search( '(objectClass=sambaSamAccount)', array(), 0, $dn );
             if ( !empty($set[0]['userPassword']) ) {
                 $passwd_set[ $set[0]['dn'] ] = 1;
             }

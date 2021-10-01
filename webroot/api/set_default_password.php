@@ -20,7 +20,7 @@ $uid = input( 'uid', INPUT_STR );
 $override = input( 'override', INPUT_STR );
 $new_passwd = input( 'password', INPUT_STR );
 if ( !empty($dn) ) {
-  $users = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
+  $users = $ldap->quick_search( '(objectClass=*)', array(), 0, $dn );
 } else if ( !empty($uid) ) {
   $users = $ldap->quick_search( array( 'uid' => $uid ), array() );
 } else {

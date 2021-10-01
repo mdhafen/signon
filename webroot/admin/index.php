@@ -7,7 +7,7 @@ include_once( '../../lib/output.phpm' );
 $ldap = new LDAP_Wrapper();
 authorize( 'set_password' );
 
-$children = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 1, $ldap->config['base'] );
+$children = $ldap->quick_search( '(objectClass=*)', array(), 1, $ldap->config['base'] );
 usort( $children, 'sorter' );
 
 $output = array(

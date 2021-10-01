@@ -57,7 +57,7 @@ $output = array(
 
 if ( !empty($op) ) {  // force other values here too?
     $dn = $_SESSION['userid'];
-    $set = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $dn );
+    $set = $ldap->quick_search( '(objectClass=*)', array(), 0, $dn );
     $object = $set[0];
     $user = $object['uid'][0];
     if ( ! in_array( $location, array_column($locations,'id') ) ) { $location = 0; }

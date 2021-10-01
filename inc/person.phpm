@@ -77,7 +77,7 @@ function set_password( $ldap, $userdn, $password ) {
 	$entropy = get_entropy( $password );
 	$ip = get_remote_ip();
 	if ( ! empty($userdn) && ! empty($password) ) {
-		$set = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $userdn );
+		$set = $ldap->quick_search( '(objectClass=*)', array(), 0, $userdn );
 		if ( !empty($set) ) {
 			$object = $set[0];
 		}
@@ -165,7 +165,7 @@ function populate_static_user_attrs( $ldap, &$object ) {
 function get_groups( $ldap, $userdn ) {
 	$result = [];
 	if ( !empty($userdn) ) {
-		$set = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $userdn );
+		$set = $ldap->quick_search( '(objectClass=*)', array(), 0, $userdn );
 		if ( !empty($set) ) {
 			$object = $set[0];
 		}
@@ -189,7 +189,7 @@ function get_groups( $ldap, $userdn ) {
 function remove_from_groups( $ldap, $userdn ) {
 	$result = 0;
 	if ( !empty($userdn) ) {
-		$set = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 0, $userdn );
+		$set = $ldap->quick_search( '(objectClass=*)', array(), 0, $userdn );
 		if ( !empty($set) ) {
 			$object = $set[0];
 		}

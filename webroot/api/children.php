@@ -11,7 +11,7 @@ if ( ! authenticate() ) {
 }
 
 $dn = input( 'dn', INPUT_STR );
-$objects = $ldap->quick_search( array( 'objectClass' => '*' ), array(), 1, $dn );
+$objects = $ldap->quick_search( '(objectClass=*)', array(), 1, $dn );
 
 usort( $objects, "sorter" );
 
