@@ -67,7 +67,7 @@ function get_default_password( $uid ) {
 function set_default_password( $uid, $password ) {
 	$dbh = db_connect('core');
 	$sth = $dbh->prepare('REPLACE INTO user_default_password (uid,default_password,timestamp) VALUES (:uid,:passwd,NOW())');
-	$sth->bindValue( ':uid', $dn );
+	$sth->bindValue( ':uid', $uid );
 	$sth->bindValue( ':passwd', $password );
 	$sth->execute();
 }
