@@ -7,16 +7,29 @@ $dbh_cache = array();
 $ldap_cache = array();
 $callbacks = array( 'db' => array(), 'ldap' => array() );
 
-function register_data_callback( $module = 'db', $func = '', $callback ) {
-	if ( !empty($module) && !empty($func) ) {
-		$callbacks[$module][$func][] = $callback;
-	}
-}
 /*
  *  Available callbacks
  *    ldap
  *      rename($old_dn,$new_dn)
  */
+function register_data_callback( $module = 'db', $func = '', $callback ) {
+	if ( !empty($module) && !empty($func) ) {
+		if ( empty($callbacks[$module][$func]) ) {
+			$callbacks[$module][$func] = array();
+		}
+		$callbacks[$module][$func][] = $callback;
+	}
+}
+
+function call_data_callback( $module, $func, ...$vars ) {
+	if ( !empty($callbacks[$module][$func]) ) {
+		foreach ( $callbacks[$module][$func] as $code ) {
+			if ( is_callable($code) ) {
+				$code( $vars );
+			}
+		}
+	}
+}
 
 function db_connect( $module = 'core', $write = 0 ) {
 	global $dbh_cache, $config;
@@ -266,13 +279,7 @@ class LDAP_Wrapper {
 		}
 		$this->fix_group_memberships( $dn, $attr .','. $new_parent );
 
-		if ( !empty($callbacks['ldap']['rename']) ) {
-			foreach ( $callbacks['ldap']['rename'] as $func ) {
-				if ( is_callable($func) ) {
-					$func( $dn, $attr .','. $new_parent );
-				}
-			}
-		}
+		call_data_callback( 'ldap', 'rename', $dn, $attr .','. $new_parent );
 
 		return $result;
 	}
