@@ -8,7 +8,9 @@ $ldap_cache = array();
 $callbacks = array( 'db' => array(), 'ldap' => array() );
 
 function register_data_callback( $module = 'db', $func = '', $callback ) {
-    $callbacks[$module][$func][] = $callback;
+	if ( !empty($module) && !empty($func) ) {
+		$callbacks[$module][$func][] = $callback;
+	}
 }
 /*
  *  Available callbacks
@@ -264,9 +266,11 @@ class LDAP_Wrapper {
 		}
 		$this->fix_group_memberships( $dn, $attr .','. $new_parent );
 
-		foreach ( $callbacks['ldap']['rename'] as $func ) {
-			if ( is_callable($func) ) {
-				$func( $dn, $attr .','. $new_parent );
+		if ( !empty($callbacks['ldap']['rename']) ) {
+			foreach ( $callbacks['ldap']['rename'] as $func ) {
+				if ( is_callable($func) ) {
+					$func( $dn, $attr .','. $new_parent );
+				}
 			}
 		}
 
