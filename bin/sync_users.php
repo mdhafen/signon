@@ -50,10 +50,11 @@ while ( !empty($users) ) {
 unset($users);
 
 foreach ( $google_cache as $g_user ) {
+  if ( !$g_user ) continue;  // empty array - user not in google
   if ( stripos($g_user['orgUnitPath'],'nonusers') !== FALSE ) continue; //service account
   $entry = google_user_hash_for_ldap( $g_user );
   $output = "";
-  if ( ( !empty($entry['employeeNumber']) && !empty($users_lookup[ $entry['employeeNumber'] ]) ) || !empty($users_lookup[ $entry['mail'] ]) ) {
+  if ( ( !empty($entry['employeeNumber']) && !empty($users_lookup[ $entry['employeeNumber'] ]) ) || ( !empty($entry['mail']) && !empty($users_lookup[ $entry['mail'] ]) ) ) {
     if ( empty($entry['employeeNumber']) || empty($users_lookup[ $entry['employeeNumber'] ]) ) {
       $thisUser = $users_lookup[ $entry['mail'] ];
       unset($users_lookup[ $entry['mail'] ]);

@@ -238,7 +238,9 @@ function get_user_google( $email ) {
   if ( !empty($user['error']['errors']) ) {
     error( array('GOOGLE_CLIENT_ERROR'=>$user['error']['errors'][0]['reason']) );
   }
-
+  if ( !empty($user['suspended']) || $user['suspended'] != false ) {
+    return array();
+  }
   return $user;
 }
 
