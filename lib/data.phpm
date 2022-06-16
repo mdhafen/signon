@@ -478,7 +478,7 @@ class LDAP_Wrapper {
 			$asn_str = substr( $asn_str, $end_pos + 1 );
 
 			reset( $values );
-			while ( list($k,$v) = each($values) ) {
+			foreach ( $values as $k => $v ) {
 				$values[$k] = trim( $values[$k], " '" );
 			}
 
