@@ -6,6 +6,9 @@ $updates = array(
   '0003-add_user_default_password',
   '0004-add_ip_to_attribute_change_log',
   '0005-change_user_default_password_to_uid',
+  '0006-change_user_lock_to_uid',
+  '0007-add_password_reset_tokens_table',
+  '0008-add_staff_to_mac_registry',
 );
 $results = array();
 

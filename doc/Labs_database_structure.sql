@@ -26,7 +26,7 @@ CREATE TABLE `authorized_macs` (
   `macaddress` varchar(18) NOT NULL,
   `submitted_desc` text,
   `device_home` varchar(4) DEFAULT '000',
-  `labs_category` enum('','Lan','Labs','Facilities','AV','Phone','TechOffice','Guest') NOT NULL DEFAULT 'Labs',
+  `labs_category` enum('','Lan','Labs','Staff','Facilities','AV','Phone','TechOffice','Guest') NOT NULL DEFAULT 'Labs',
   `fields_category` enum('','Facilities') NOT NULL DEFAULT '',
   `iot_category` enum('','Lan','Labs','Facilities','AV','TechOffice') NOT NULL DEFAULT '',
   UNIQUE KEY `uk_macaddress` (`macaddress`)
