@@ -80,10 +80,10 @@ foreach ( $google_cache as $g_user ) {
     foreach ( $entry as $field => $value ) {
         if ( array_search($field,$ignored_fields) !== false ) { continue; }
         if ( array_search($field,$dynamic_fields) !== false ) { continue; }
-        if ( empty($thisUser[$field]) ) {
+        if ( empty($thisUser[$field]) && !empty($value) ) {
             $mod_add[$field] = $value;
         }
-        else if ( $thisUser[$field][0] != $value ) {
+        else if ( !empty($value) && $thisUser[$field][0] != $value ) {
             $mod_rep[$field] = $value;
         }
     }
