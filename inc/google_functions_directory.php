@@ -1,36 +1,36 @@
 <?php
 function errorTraps($n,$e,$ecode,$emessage){
-	//echo 'An error occurred: ' . $emessage . "\r\n";
+	//error_log( 'An error occurred: ' . $emessage );
 	if($ecode == 403 && (strpos($emessage, 'Rate Limit Exceeded')>0 || strpos($emessage,'RateLimitExceeded')>0)) {
 		//Apply exponential backoff.
-		echo 'Rate Limit Exceeded Backoff ' . $n . "\r\n";
+		error_log( 'Rate Limit Exceeded Backoff ' . $n );
 		usleep((1 << $n) * 1000 + rand(0, 1000));
 	}elseif($ecode == 404 && (strpos($emessage, 'Permission not found'))){
 		//Apply exponential backoff.
-		echo 'Permission Error Backoff ' . $n . "\r\n";
+		error_log( 'Permission Error Backoff ' . $n );
 		usleep((1 << $n) * 1000 + rand(0, 1000));
 	}elseif($ecode == 503 && (strpos($emessage, 'Backend Error'))){
 		//Apply exponential backoff.
-		echo 'Backend Error Backoff ' . $n . "\r\n";
+		error_log( 'Backend Error Backoff ' . $n );
 		usleep((1 << $n) * 1000 + rand(0, 1000));
 	}elseif($ecode == 503 && (strpos($emessage, 'Service unavailable'))){
 		//Apply exponential backoff.
-		echo 'Service unavailable Backoff ' . $n . "\r\n";
+		error_log( 'Service unavailable Backoff ' . $n );
 		usleep((1 << $n) * 1000 + rand(0, 1000));
 	}elseif($ecode == 500 && (strpos($emessage, 'Internal Error'))){
 		//Apply exponential backoff.
-		echo 'Internal Error Backoff ' . $n . "\r\n";
+		error_log( 'Internal Error Backoff ' . $n );
 		usleep((1 << $n) * 1000 + rand(0, 1000));
 	}elseif($ecode == 403 && (strpos($emessage, 'Insufficient permissions'))){
 		//Apply exponential backoff.
-		echo 'Insufficient permissions Error Backoff ' . $n . "\r\n";
+		error_log( 'Insufficient permissions Error Backoff ' . $n );
 		//usleep((1 << $n) * 1000 + rand(0, 1000));
 	}elseif($ecode == 401 && (strpos($emessage, 'Unauthorized'))){
 		//Apply exponential backoff.
-		echo 'Unauthorized Error Backoff ' . $n . "\r\n";
+		error_log( 'Unauthorized Error Backoff ' . $n );
 		//usleep((1 << $n) * 1000 + rand(0, 1000));
 	}elseif($ecode == 400){
-		echo $emessage . "\r\n";
+		error_log( $emessage );
 		exit(222);
 	}else{
 		// Other error, re-throw.
@@ -209,6 +209,9 @@ function getAllUsers($client,$email,$pageToken=null){
 						'Content-type'=>'application/atom+xml');
 			$req->setRequestHeaders($headers);
 			$val		= $client->getAuth()->authenticatedRequest($req);
+			if(@$val->error){
+				throw new Exception($val->error);
+			}
 			return $val->getResponseBody();
 		}catch (Exception $e){
 			errorTraps($n, $e, $e->getCode(), $e->getMessage());

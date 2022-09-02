@@ -50,9 +50,7 @@ print "Continuing\n";
 
 foreach ( $change_users as $user ) {
   // old password scheme
-  $password = mb_strtolower(mb_substr($user['givenName'][0],0,1))
-	 . mb_strtolower(mb_substr($user['sn'][0],0,1))
-	 . $user['employeeNumber'][0];
+  $password = generate_default_password($user);
 
 /*
   $password = create_password();

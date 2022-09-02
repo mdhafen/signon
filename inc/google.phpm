@@ -248,6 +248,7 @@ function google_get_all_users() {
     global $GOOGLE_S_CLIENT;
     $pageToken = null;
     $google_cache = array();
+    $pages = 0;
     do {
         $cache = getAllUsers( $GOOGLE_S_CLIENT, '', $pageToken );
         $cache = json_decode( $cache, true );
@@ -261,9 +262,13 @@ function google_get_all_users() {
         if ( !empty($cache['nextPageToken']) ) {
             $pageToken = $cache['nextPageToken'];
         }
+        else if ( !empty($cache['error']) ) {
+            error_log("Non-exception Google error: ". $cache['error']['code'] ." : ". $cache['error']['message']);
+        }
         else {
             $pageToken = null;
         }
+        $pages++;
     } while ( $pageToken );
     return $google_cache;
 }

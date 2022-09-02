@@ -5,6 +5,7 @@ include_once( '../inc/person.phpm' );
 include_once( '../inc/google.phpm' );
 
 $email = "";
+$google_cache = array();
 if ( !empty($argv[1]) ) {
   if ( !empty($argv[1]) ) {
     $email = $argv[1];
@@ -16,20 +17,29 @@ if ( !empty($argv[1]) ) {
   $google_cache = array( get_user_google( $email ) );
 }
 else {
-  $google_cache = google_get_all_users();
+  $tmp_array = google_get_all_users();
+
+  foreach ( $tmp_array as $g_user ) {
+    if ( stripos($g_user['orgUnitPath'],'nonusers') !== FALSE ) continue; // service account
+    if ( stripos($g_user['orgUnitPath'],'/student') !== 0 ) continue; // only mass sync students for now
+    if ( stripos($g_user['orgUnitPath'],'/students/graduates') !== FALSE ) continue; // don't sync graduated students
+    if ( stripos($g_user['orgUnitPath'],'/students/lego users') !== FALSE ) continue; // don't sync lego non-users
+
+    $google_cache[] = $g_user;
+  }
 }
 
-$students = array();
+$st_passwds = array();
 //$in_file = 'PowerSchool_QuickInfo_Export_Students-to-Google-Apps.csv';
 if ( !empty($argv[2]) ) {
   $in_file = $argv[2];
   $h = fopen( $in_file, 'r' );
   while ( ! feof($h) ) {
     $row = fgetcsv($h);
-    $students[ strtolower($row[0]) ] = $row[3];
+    $st_passwds[ strtolower($row[0]) ] = $row[3];
   }
-  array_shift($students);  // drop the csv header
-  $students = array_filter($students);
+  array_shift($st_passwds);  // drop the csv header
+  $st_passwds = array_filter($st_passwds);
 }
 
 $ldap = new LDAP_Wrapper();
@@ -38,30 +48,33 @@ if ( !empty($argv[1]) ) {
   $uid = substr($email,0,strpos($email,'@'));
   $users = $ldap->quick_search( "(|(mail=$email)(uid=$uid))" , array() );
 } else {
-  $users = $ldap->quick_search( '(&(!(|(employeeType=Guest)(employeeType=Trusted)))(objectClass=inetOrgPerson))' , array() );
+  $users = $ldap->quick_search( '(&(!(|(employeeType=Guest)(employeeType=Trusted)))(objectClass=inetOrgPerson))' , array(), 2, 'ou=Students,dc=wcsd' );
 }
 $users_lookup = array();
+$users_cache = array();
 
 while ( !empty($users) ) {
   $thisUser = array_shift($users);
-  $lookup = empty($thisUser['employeeNumber']) ? $thisUser['mail'][0] : $thisUser['employeeNumber'][0];
-  $users_lookup[ $lookup ] = $thisUser;
+  $users_cache[ mb_strtolower($thisUser['dn']) ] = $thisUser;
+  $users_lookup[ mb_strtolower($thisUser['uid'][0]) ] = mb_strtolower($thisUser['dn']);
 }
 unset($users);
 
 foreach ( $google_cache as $g_user ) {
   if ( !$g_user ) continue;  // empty array - user not in google
-  if ( stripos($g_user['orgUnitPath'],'nonusers') !== FALSE ) continue; //service account
   $entry = google_user_hash_for_ldap( $g_user );
   $output = "";
-  if ( ( !empty($entry['employeeNumber']) && !empty($users_lookup[ $entry['employeeNumber'] ]) ) || ( !empty($entry['mail']) && !empty($users_lookup[ $entry['mail'] ]) ) ) {
-    if ( empty($entry['employeeNumber']) || empty($users_lookup[ $entry['employeeNumber'] ]) ) {
-      $thisUser = $users_lookup[ $entry['mail'] ];
-      unset($users_lookup[ $entry['mail'] ]);
+  $thisUser = array();
+  if ( ( !empty($entry['dn']) && !empty($users_cache[ mb_strtolower($entry['dn']) ]) ) ||
+       ( !empty($entry['uid']) && !empty($users_lookup[ mb_strtolower($entry['uid']) ]) ) ) {
+    if ( !empty($entry['dn']) && !empty($users_cache[ mb_strtolower($entry['dn']) ]) ) {
+      $thisUser = $users_cache[ mb_strtolower($entry['dn']) ];
+      unset( $users_cache[ mb_strtolower($entry['dn']) ] );
     }
     else {
-      $thisUser = $users_lookup[ $entry['employeeNumber'] ];
-      unset($users_lookup[ $entry['employeeNumber'] ]);
+      $thisDN = $users_lookup[ mb_strtolower($entry['uid']) ];
+      $thisUser = $users_cache[ $thisDN ];
+      unset( $users_cache[ $thisDN ] );
     }
 
     $entry['objectClass'] = array('top','inetOrgPerson','posixAccount','sambaSamAccount');
@@ -129,8 +142,8 @@ foreach ( $google_cache as $g_user ) {
       $output .= "move ";
     }
 
-    if ( $entry['employeeType'] == 'Student' && empty($thisUser['userPassword']) && !empty($students[ $entry['mail'] ]) ) {
-      set_password( $ldap, $entry['dn'], $students[ $entry['mail'] ] );
+    if ( $entry['employeeType'] == 'Student' && empty($thisUser['userPassword']) && !empty($st_passwds[ $entry['mail'] ]) ) {
+      set_password( $ldap, $entry['dn'], $st_passwds[ $entry['mail'] ] );
       $output .= "And set Password ";
     }
   }
@@ -149,22 +162,28 @@ foreach ( $google_cache as $g_user ) {
     $entry['homeDirectory'] = '/Users/'. $entry['uid'];
     $entry['loginShell'] = '/bin/bash';
 
-    $ldap->do_add( $dn, $entry );
+    $result = $ldap->do_add( $dn, $entry );
     $entry['dn'] = $dn;
     $output .= "Add ";
 
-    if ( $entry['employeeType'] == 'Student' && !empty($students[ $entry['mail'] ]) ) {
-      set_password( $ldap, $dn, $students[ $entry['mail'] ] );
-      $output .= "And set Password ";
+    if ( $result ) {
+      $def_passwd = get_default_password( $entry['uid'] ) ?? generate_default_password($entry);
+      if ( $entry['employeeType'] == 'Student' && ( !empty($st_passwds[ $entry['mail'] ]) || !empty($def_passwd) ) ) {
+        $passwd = $st_passwds[ $entry['mail'] ] ?? $def_passwd;
+        set_password( $ldap, $dn, $passwd );
+        $output .= "And set Password ";
+      }
+    }
+    else {
+      error_log( $ldap->get_error() );
     }
   }
   if ( !empty($output) ) {
     print "Update ". $entry['mail'] ." : ". $output ."\n";
   }
 }
-foreach ( $users_lookup as $lookup => $thisUser ) {
-  print "Update ". $thisUser['mail'][0] ." : isn't in google! ";
-  $dn = $thisUser['dn'];
+foreach ( $users_cache as $dn => $thisUser ) {
+  print "Update ". $dn ." : isn't in google! ";
   $ldap->do_delete( $dn );
   print "Deleted\n";
 }

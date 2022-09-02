@@ -19,17 +19,19 @@ function fix_dn_in_logs( $old_dn, $new_dn ) {
 
 	$new_uid = substr( $new_dn, 4, strpos($new_dn,',')-4 );
 	$old_uid = substr( $old_dn, 4, strpos($old_dn,',')-4 );
-	$query = 'UPDATE user_default_password SET uid = :new WHERE uid = :old';
-	$sth = $dbh->prepare($query);
-	$sth->bindValue( ':old', $old_uid );
-	$sth->bindValue( ':new', $new_uid );
-	$sth->execute();
+	if ( $new_uid != $old_uid ) {
+		$query = 'UPDATE user_default_password SET uid = :new WHERE uid = :old';
+		$sth = $dbh->prepare($query);
+		$sth->bindValue( ':old', $old_uid );
+		$sth->bindValue( ':new', $new_uid );
+		$sth->execute();
 
-	$query = 'UPDATE user_locks SET dn = :new WHERE dn = :old';
-	$sth = $dbh->prepare($query);
-	$sth->bindValue( ':old', $old_dn );
-	$sth->bindValue( ':new', $new_dn );
-	$sth->execute();
+		$query = 'UPDATE user_locks SET dn = :new WHERE dn = :old';
+		$sth = $dbh->prepare($query);
+		$sth->bindValue( ':old', $old_dn );
+		$sth->bindValue( ':new', $new_dn );
+		$sth->execute();
+	}
 
 	$query = 'UPDATE attribute_changes SET dn = :new WHERE dn = :old';
 	$sth = $dbh->prepare($query);
@@ -70,6 +72,14 @@ function set_default_password( $uid, $password ) {
 	$sth->bindValue( ':uid', $uid );
 	$sth->bindValue( ':passwd', $password );
 	$sth->execute();
+}
+
+function generate_default_password($entry) {
+	$password = mb_strtolower(mb_substr($entry['givenName'][0],0,1))
+	. mb_strtolower(mb_substr($entry['sn'][0],0,1))
+	. $entry['employeeNumber'][0];
+
+	return $password;
 }
 
 function set_password( $ldap, $userdn, $password ) {
