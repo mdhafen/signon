@@ -130,9 +130,17 @@ There was an error! <?= $data['err_msg'] ?>
 </div>
 
 <div class="row form-group">
+<label for="loc_column" class="col-sm-4 control-label">Column of Location Number</label>
+<div class="col-sm-8">
+  <input type="text" id="loc_column" name="loc_column" placeholder="for example: 2" class="form-control">
+  <span class="help-block">Uses Location drop-down above as a default value.</span>
+</div>
+</div>
+
+<div class="row form-group">
 <label for="desc_column" class="col-sm-4 control-label">Column of Description</label>
 <div class="col-sm-8">
-  <input type="text" id="desc_column" name="desc_column" placeholder="for example: 2" class="form-control">
+  <input type="text" id="desc_column" name="desc_column" placeholder="for example: 3" class="form-control">
   <span class="help-block">Uses Description field above as a default value.</span>
 </div>
 </div>
@@ -141,7 +149,7 @@ There was an error! <?= $data['err_msg'] ?>
 <div class="row form-group">
 <label for="lab_cat_column" class="col-sm-4 control-label">Column of Labs Category</label>
 <div class="col-sm-8">
-  <input type="text" id="lab_cat_column" name="lab_cat_column" placeholder="for example: 3" class="form-control">
+  <input type="text" id="lab_cat_column" name="lab_cat_column" placeholder="for example: 4" class="form-control">
   <span class="help-block">Uses labs category field above as a default value.</span>
 </div>
 </div>
@@ -150,7 +158,7 @@ There was an error! <?= $data['err_msg'] ?>
 <div class="row form-group">
 <label for="field_cat_column" class="col-sm-4 control-label">Column of Fields Category</label>
 <div class="col-sm-8">
-  <input type="text" id="field_cat_column" name="field_cat_column" placeholder="for example: 3" class="form-control">
+  <input type="text" id="field_cat_column" name="field_cat_column" placeholder="for example: 5" class="form-control">
   <span class="help-block">Uses fields category field above as a default value.</span>
 </div>
 </div>
@@ -158,16 +166,8 @@ There was an error! <?= $data['err_msg'] ?>
 <div class="row form-group">
 <label for="iot_cat_column" class="col-sm-4 control-label">Column of IoT Category</label>
 <div class="col-sm-8">
-  <input type="text" id="iot_cat_column" name="iot_cat_column" placeholder="for example: 3" class="form-control">
+  <input type="text" id="iot_cat_column" name="iot_cat_column" placeholder="for example: 6" class="form-control">
   <span class="help-block">Uses iot category field above as a default value.</span>
-</div>
-</div>
-
-<div class="row form-group">
-<label for="loc_column" class="col-sm-4 control-label">Column of Location Number</label>
-<div class="col-sm-8">
-  <input type="text" id="loc_column" name="loc_column" placeholder="for example: 3" class="form-control">
-  <span class="help-block">Uses Location drop-down above as a default value.</span>
 </div>
 </div>
 
