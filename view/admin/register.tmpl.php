@@ -19,6 +19,7 @@ There was an error! <?= $data['err_msg'] ?>
 </div>
 <?php } ?>
 
+<!--
 <?php if ( ! empty($data['success']) ) { ?>
 <div class="alert alert-info alert-dismissible" role="alert">
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -26,6 +27,7 @@ There was an error! <?= $data['err_msg'] ?>
 <p>Now you can connect to the WCSDlabs wireless network with the pass-phrase "theskyisfalling2day!".</p>
 </div>
 <?php } ?>
+-->
 
 <form method="post" action="register.php" class="form-horizontal" method="post" enctype="multipart/form-data">
 <div class="panel panel-default panel-body">
@@ -54,6 +56,7 @@ There was an error! <?= $data['err_msg'] ?>
 </div>
 </div>
 
+<!--
 <div class="row form-group">
   <label for="labs_cat" class="col-sm-4 control-label">Labs Category</label>
   <div class="col-sm-8">
@@ -71,6 +74,7 @@ There was an error! <?= $data['err_msg'] ?>
   <span class="help-block">This field effects device access to school and district networks.  Only change this if you have been told to by Technology Department staff.</span>
   </div>
 </div>
+-->
 
 <div class="row form-group">
   <label for="fields_cat" class="col-sm-4 control-label">Fields Category</label>
@@ -133,6 +137,7 @@ There was an error! <?= $data['err_msg'] ?>
 </div>
 </div>
 
+<!--
 <div class="row form-group">
 <label for="lab_cat_column" class="col-sm-4 control-label">Column of Labs Category</label>
 <div class="col-sm-8">
@@ -140,6 +145,7 @@ There was an error! <?= $data['err_msg'] ?>
   <span class="help-block">Uses labs category field above as a default value.</span>
 </div>
 </div>
+-->
 
 <div class="row form-group">
 <label for="field_cat_column" class="col-sm-4 control-label">Column of Fields Category</label>
