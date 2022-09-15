@@ -111,7 +111,7 @@ if ( !empty($adds) || !empty($dels) || !empty($reps) ) {
 		if ( $ldap->do_add( $objectdn, $adds ) ) {
 			if ( !empty($password) ) {
 				if ( strlen($password) < 8 ) {
-					$errors[] = "The password is to short";
+					$errors[] = "The password is too short";
 				}
                 else if ( $times = is_pwned_password($password) ) {
 					$errors[] = "Password compromised, you can not use this password.  This password has been seen $times times before.  This password has previously appeared in a data breach and should never be used.  If you've ever used it anywhere before, you should change it as soon as possible.";
@@ -157,7 +157,7 @@ if ( !empty($adds) || !empty($dels) || !empty($reps) ) {
 
 		if ( !empty($password) ) {
 			if ( strlen($password) < 8 ) {
-				$errors[] = "The password is to short";
+				$errors[] = "The password is too short";
 			}
             else if ( $times = is_pwned_password($password) ) {
                 $errors[] = "Password compromised, you can not use this password.  This password has been seen $times times before.  This password has previously appeared in a data breach and should never be used.  If you've ever used it anywhere before, you should change it as soon as possible.";

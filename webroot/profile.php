@@ -40,10 +40,10 @@ else {
 
 	if ( !empty($password) && !empty($password2) ) {
 		if ( strlen($password) < 8 ) {
-			$output['error'] = 'Password is to short';
+			$output['error'] = 'Password is too short';
 		}
         else if ( $times = is_pwned_password($password) ) {
-			$output['error'] = 'PASS_TO_COMMON';
+			$output['error'] = 'PASS_TOO_COMMON';
             $output['error_times'] = $times;
         }
         else if ( ! empty($user_lock) ) {

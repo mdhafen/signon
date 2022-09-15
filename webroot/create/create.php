@@ -63,7 +63,7 @@ if ( !empty($submitted) && ! $error ) {
         if ( empty($password) || strlen($password) < 8 ) {
           unset($password);
           $error = 1;
-          $result = 'Password to short';
+          $result = 'Password too short';
         }
         if ( !empty($password) && $times = is_pwned_password($password) ) {
           $error = 1;

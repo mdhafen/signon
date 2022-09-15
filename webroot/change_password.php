@@ -63,9 +63,9 @@ if ( !empty($user) ) {
         if ( $password !== $password2 ) {
           $errors[] = 'PASSWORDS_NO_MATCH';
         } else if ( strlen($password) < 8 ) {
-          $errors[] = 'PASSWORDS_TO_SHORT';
+          $errors[] = 'PASS_TOO_SHORT';
         } else if ( $times = is_pwned_password($password) ) {
-          $errors[] = 'PASSWORDS_TO_COMMON';
+          $errors[] = 'PASS_TOO_COMMON';
           $output['error_times'] = $times;
         } else if ( !empty($user_lock) ) {
           $errors[] = 'USER_LOCKED';
