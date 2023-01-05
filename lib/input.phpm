@@ -147,7 +147,8 @@ function input_validation( $output, $type ) {
 		}
 		if ( $type == INPUT_EMAIL ) {
 			$valid = 0;
-			$str = Mail_RFC822::parseAddressList( $value, '', FALSE, TRUE );
+			$parser = new Mail_RFC822();
+			$str = $parser->parseAddressList( $value, '', FALSE, TRUE );
 			if ( PEAR::isError( $str ) ) {
 				$error++;
 			}
