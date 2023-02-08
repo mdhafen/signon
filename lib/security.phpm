@@ -237,86 +237,33 @@ function authen_db( $module, $username, $password ) {
 	$user = user_by_username( $username, $module );
 	if ( $user && $user['username'] && $user['password'] ) {
 		$success = 0;
-		$old = 1;
-		if ( $user['password_mode'] ) {
-			if ( empty($config['password_modes'][ $user['password_mode'] ]) ) {
+		$mode = array();
+		if ( !empty($user['password_mode']) ) {
+			if ( empty($config['password_modes'][ $user['password_mode'] ]) || empty($config['password_modes'][ $user['password_mode'] ]['active']) ) {
 				output( array( 'PASSWORD_EXPIRED' => 1 ), 'login' );
 				exit;
 			}
 
-			switch ($user['password_mode']) {
-				case 'openssl_bf_cbc_sha512' :
-					$success = check_password( $password, 'openssl_bf_cbc', 'ssha512', $user );
-					$old = 0;
-					break;
-				case 'openssl_bf_cbc_noiv_sha512' :
-					$success = check_password( $password, 'openssl_bf_cbc_noiv', 'ssha512', $user );
-					break;
-				case 'mcrypt_bf_ecb_sha512' :
-					$success = check_password( $password, 'mcrypt_bf_ecb', 'ssha512', $user );
-					break;
-				case 'openssl_bf_cbc' :
-					$success = check_password( $password, 'openssl_bf_cbc', '', $user );
-					break;
-				case 'openssl_bf_cbc_noiv' :
-					$success = check_password( $password, 'openssl_bf_cbc_noiv', '', $user );
-					break;
-				case 'mcrypt_bf_ecb' :
-					$success = check_password( $password, 'mcrypt_bf_ecb', '', $user );
-					break;
-				case 'salted_sha512' :
-					$success = check_password( $password, '', 'ssha512', $user );
-					break;
-				case 'md5' :
-					$success = check_password( $password, '', 'md5', $user );
-					break;
-			}
+			$mode = $config['password_modes'][ $user['password_mode'] ];
+			$success = check_password( $password, $mode, $user );
 		}
 		else {
-			if ( !$success && !empty($config['password_modes']['openssl_bf_cbc_sha512']) ) {
-				$success = check_password( $password, 'openssl_bf_cbc', 'ssha512', $user );
-			}
-
-			if ( !$success && !empty($config['password_modes']['openssl_bf_cbc']) ) {
-				$success = check_password( $password, 'openssl_bf_cbc', '', $user );
-				$old = $success && !empty($config['password_modes']['openssl_bf_cbc_sha512']);
-			}
-
-			if ( !$success && !empty($config['password_modes']['openssl_bf_cbc_noiv_sha512']) ) {
-				$success = check_password( $password, 'openssl_bf_cbc_noiv', 'ssha512', $user );
-				$old = $success;
-			}
-
-			if ( !$success && !empty($config['password_modes']['openssl_bf_cbc_noiv']) ) {
-				$success = check_password( $password, 'openssl_bf_cbc_noiv', '', $user );
-				$old = $success;
-			}
-
-			if ( !$success && !empty($config['password_modes']['mcrypt_bf_ecb_sha512']) ) {
-				$success = check_password( $password, 'mcrypt_bf_ecb', 'ssha512', $user );
-				$old = $success;
-			}
-
-			if ( !$success && !empty($config['password_modes']['mcrypt_bf_ecb']) ) {
-				$success = check_password( $password, 'mcrypt_bf_ecb', '', $user );
-				$old = $success;
-			}
-
-			if ( !$success && !empty($config['password_modes']['salted_sha512']) ) {
-				$success = check_password( $password, '', 'ssha512', $user );
-				$old = $success;
-			}
-
-			if ( !$success && !empty($config['password_modes']['md5']) ) {
-				$success = check_password( $password, '', 'md5', $user );
-				$old = $success;
+			foreach ( $config['password_modes'] as $try_mode ) {
+				if ( empty($try_mode['active']) ) {
+					continue;
+				}
+				$success = check_password( $password, $try_mode, $user );
+				if ( $success ) {
+					$mode = $try_mode;
+					break;
+				}
 			}
 		}
 
 		if ( $success ) {
 			// dont need these anymore
 			unset( $user['salt'], $user['password'] );
-			if ( $old && !empty($config['password_modes']['upgrade_from_old']) ) {
+			if ( !empty($mode['old']) && !empty($config['password_modes']['upgrade_from_old']) ) {
 				list($new_pass,$new_salt,$new_mode) = new_password($password);
 				$updated['salt'] = $new_salt;
 				$updated['password'] = $new_pass;
@@ -329,33 +276,32 @@ function authen_db( $module, $username, $password ) {
 	return 0;
 }
 
-function check_password( $password, $cipher, $hash, $user ) {
+function check_password( $password, $mode, $user ) {
 	global $config;
 	$user_password = $user['password'];
 	$key = base64_decode( $user['salt'] ) . $config['secure_phrase'];
 	$iv = '';
 	$options = 0;
 
-	switch ( $cipher ) {
-		case 'openssl_bf_cbc': $cipher = 'BF-CBC'; $iv = substr( $key, 0, openssl_cipher_iv_length($cipher) ); break;
-		case 'openssl_bf_cbc_noiv': $cipher = 'BF-CBC'; $iv = ''; break;
-		case 'mcrypt_bf_ecb':
-			$cipher = 'BF-ECB';
+	if ( !empty($mode['cipher']) ) {
+		if ( empty($mode['noiv']) ) {
+			$iv = substr( $key, 0, openssl_cipher_iv_length($mode['cipher']) );
+		}
+		if ( !empty($mode['mcrypt']) ) {
 			$user_password = base64_decode($user_password);
 			$key = substr($key,0,56); // mcrypt_enc_get_key_size('bf-ecb') = 56
 			$iv = '';
 			$options = OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING;
-			break;
-		default: $cipher = ''; $iv = '';
-	}
-	switch ( $hash ) {
-		case 'ssha512': $password = hash( 'sha512', $password . $key ); break;
-		case 'md5': $password = md5( $password );
-	}
+		}
 
-	if ( $cipher ) {
-		$user_password = openssl_decrypt( $user_password, $cipher, $key, $options, $iv );
+		$user_password = openssl_decrypt( $user_password, $mode['cipher'], $key, $options, $iv );
 		$user_password = rtrim($user_password, "\0" );
+	}
+	if ( !empty($mode['hash']) ) {
+		switch ( $mode['hash'] ) {
+			case 'ssha512': $password = hash( 'sha512', $password . $key ); break;
+			case 'md5': $password = md5( $password );
+		}
 	}
 
 	if ( strcmp( $user_password, $password ) === 0 ) {
@@ -505,8 +451,7 @@ function roles() {
 function new_password( $new_password ) {
 	global $config;
 
-	$mode = 'openssl_bf_cbc';
-	$cipher = 'BF-CBC';
+	$mode = $config['password_modes'][ $config['password_modes']['prefered'] ];
 	$key_size = 72;
 	$phrase_size = min( strlen($config['secure_phrase']), 8 );
 
@@ -514,15 +459,36 @@ function new_password( $new_password ) {
 	$salt = openssl_random_pseudo_bytes($rand_length);
 
 	$key = $salt . $config['secure_phrase'];
-	$iv = substr( $key, 0, openssl_cipher_iv_length($cipher) );
+	$iv = '';
+	$options = 0;
 
-	if ( !empty($config['password_modes']['openssl_bf_cbc_sha512']) ) {
-		$new_password = hash( 'sha512', $new_password . $key );
-		$mode .= '_sha512';
+	if ( !empty($mode['hash']) ) {
+		switch ( $mode['hash'] ) {
+			case 'ssha512': $new_password = hash( 'sha512', $new_password . $key ); break;
+			case 'md5': $new_password = md5( $new_password );
+		}
 	}
-	$user_password = openssl_encrypt( $new_password, $cipher, $key, $options=0, $iv );
 
-	return array( $user_password, base64_encode( $salt ), $mode );
+	if ( empty($mode['cipher']) ) {
+		$user_password = $new_password;
+	}
+	else {
+		if ( empty($mode['noiv']) ) {
+			$iv = substr( $key, 0, openssl_cipher_iv_length($mode['cipher']) );
+		}
+		if ( !empty($mode['mcrypt']) ) {
+			$key = substr($key,0,56); // mcrypt_enc_get_key_size('bf-ecb') = 56
+			$iv = '';
+			$options = OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING;
+		}
+
+		$user_password = openssl_encrypt( $new_password, $mode['cipher'], $key, $options, $iv );
+		if ( !empty($mode['mcrypt']) ) {
+			$user_password = base64_encode($user_password);
+		}
+	}
+
+	return array( $user_password, base64_encode( $salt ), $config['password_modes']['prefered'] );
 }
 
 /*
