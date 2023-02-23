@@ -8,7 +8,9 @@ include_once( '../../inc/google.phpm' );
 
 authenticate();
 
-if ( ! ( authorized('set_password') || ( !empty($_SESSION['loggedin_user']) && strcasecmp($dn,$_SESSION['loggedin_user']['userid']) == 0 ) ) ) {
+$return = input( 'return', INPUT_STR );
+
+if ( ! ( authorized('reset_password') || ( !empty($_SESSION['loggedin_user']) && strcasecmp($dn,$_SESSION['loggedin_user']['userid']) == 0 ) ) ) {
 	if ( empty($return) ) {
 		output( '<?xml version ="1.0"?><result><state>error</state><message>ACCESS_DENIED</message></result>', '', $xml=1 );
 	} else {
@@ -27,6 +29,15 @@ $object = $set[0];
 $objectdn = $object['dn'];
 unset( $object['dn'] );
 
+if ( ! authorized('manage_objects') && ! ldap_can_edit( $ldap, $objectdn ) ) {
+    if ( empty($return) ) {
+        output( '<?xml version ="1.0"?><result><state>error</state><message>ACCESS_DENIED</message></result>', '', $xml=1 );
+    } else {
+        error(array('ACCESS_DENIED'));
+    }
+    exit;
+}
+
 $set = $ldap->quick_search( '(&(objectClass=posixGroup)(cn=vpn2_access))', array() );
 $group = $set[0];
 $groupdn = $group['dn'];
@@ -37,7 +48,6 @@ $output = '<?xml version="1.0"?>
 
 $input = input( 'toggle', INPUT_STR );
 ( $class = input( 'class', INPUT_STR ) ) || ( $class = 'Confinement' );
-$return = input( 'return', INPUT_STR );
 
 if ( ! empty($input) ) {
     switch ($class) {
@@ -71,12 +81,12 @@ if ( ! empty($input) ) {
         break;
 
     case 'Lock':
-        if ( ( $object['businessCategory'][0] == 'Student' && !authorized('lock_student') ) || ( $object['businessCategory'][0] == 'Staff' && !authorized('lock_staff') ) ) {
-			if ( empty($return) ) {
-				output( '<?xml version ="1.0"?><result><state>error</state><message>ACCESS_DENIED</message></result>', '', $xml=1 );
-			} else {
-				error(array('ACCESS_DENIED'));
-			}
+        if ( ( $object['employeeType'][0] == 'Student' && !authorized('lock_student') ) || ( $object['employeeType'][0] == 'Staff' && !authorized('lock_staff') ) ) {
+            if ( empty($return) ) {
+                output( '<?xml version ="1.0"?><result><state>error</state><message>ACCESS_DENIED</message></result>', '', $xml=1 );
+            } else {
+                error(array('ACCESS_DENIED'));
+            }
             exit;
         }
 
@@ -85,10 +95,10 @@ if ( ! empty($input) ) {
         }
         else {
             $password = create_password();
-            lock_user( $objectdn, $password, $object['userPassword'][0], $object['sambaNTPassword'][0] );
-			if ( !empty($object['employeeType'][0]) && strripos($object['mail'][0],'@'.$GOOGLE_DOMAIN) !== False ) {
-				google_set_password( $object['mail'][0], $password );
-			}
+            lock_user( $ldap, $objectdn, $password );
+            if ( !empty($object['employeeType'][0]) && strripos($object['mail'][0],'@'.$GOOGLE_DOMAIN) !== False ) {
+                google_set_password( $object['mail'][0], $password );
+            }
             $results = set_password( $ldap, $objectdn, $password );
         }
         break;

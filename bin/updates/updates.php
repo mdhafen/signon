@@ -7,6 +7,9 @@ $updates = array(
   '0004-add_ip_to_attribute_change_log',
   '0005-change_user_default_password_to_uid',
   '0006-add_message_tables',
+  '0007-add_password_reset_tokens_table',
+  '0008-change_user_lock_to_uid',
+  '0009-add_staff_to_mac_registry_labs_cat',
 );
 $results = array();
 

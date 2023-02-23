@@ -17,13 +17,18 @@ unset( $object['dn'] );
 $groups = array();
 $user_lock = array();
 $default_passwd = '';
+$can_edit = authorized('manage_objects');
 
 $is_person = is_person( $object );
+$reset_token = '';
 if ( $is_person ) {
     $groups = get_groups( $ldap, $objectdn );
     $user_lock = get_lock_status( $objectdn );
     $default_passwd = get_default_password( $object['uid'][0] );
+    $can_edit = ( $can_edit ?: ldap_can_edit( $ldap, $objectdn ) );
+    $reset_token = get_password_reset_token(userid:$object['uid'][0]);
 }
+
 $is_guest = 0;
 $is_guest_expired = 0;
 $is_guest_send_notice = 0;
@@ -61,10 +66,11 @@ $output = array(
 	'parentdn' => $parentdn,
 	'user_lock' => $user_lock,
 	'default_passwd' => $default_passwd,
+    'password_reset_token' => $reset_token,
 	'attr_changes' => $attr_changes,
 	'children' => $children,
-	'can_edit' => authorized('manage_objects'),
-	'can_lock' => ( !empty($object['businessCategory']) && ( ( $object['businessCategory'][0] == 'Student' && authorized('lock_student') ) || ( $object['businessCategory'][0] == 'Staff' && authorized('lock_staff') ) ) ),
+	'can_edit' => $can_edit,
+	'can_lock' => ( !empty($object['employeeType']) && ( ( $object['employeeType'][0] == 'Student' && authorized('lock_student') ) || ( $object['employeeType'][0] == 'Staff' && authorized('lock_staff') ) ) ),
 	'can_set_password' => authorized('set_password') || ($objectdn == $_SESSION['userid']),
 	'can_see_password' => authorized('reset_password') || ($objectdn == $_SESSION['userid']),
 );

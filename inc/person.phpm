@@ -26,18 +26,20 @@ function fix_dn_in_logs( $old_dn, $new_dn ) {
 		$sth->bindValue( ':new', $new_uid );
 		$sth->execute();
 
-		$query = 'UPDATE user_locks SET dn = :new WHERE dn = :old';
+		$query = 'UPDATE user_locks SET uid = :new WHERE uid = :old';
+		$sth = $dbh->prepare($query);
+		$sth->bindValue( ':old', $old_uid );
+		$sth->bindValue( ':new', $new_uid );
+		$sth->execute();
+	}
+
+	if ( $new_dn != $old_dn ) {
+		$query = 'UPDATE attribute_changes SET dn = :new WHERE dn = :old';
 		$sth = $dbh->prepare($query);
 		$sth->bindValue( ':old', $old_dn );
 		$sth->bindValue( ':new', $new_dn );
 		$sth->execute();
 	}
-
-	$query = 'UPDATE attribute_changes SET dn = :new WHERE dn = :old';
-	$sth = $dbh->prepare($query);
-	$sth->bindValue( ':old', $old_dn );
-	$sth->bindValue( ':new', $new_dn );
-	$sth->execute();
 }
 
 function is_person( $o=array() ) {
@@ -80,6 +82,58 @@ function generate_default_password($entry) {
 	. $entry['employeeNumber'][0];
 
 	return $password;
+}
+
+function create_password_reset_token($uid) {
+    $token = new_uuid();
+	$ip = get_remote_ip();
+	$user = $uid;
+	$user = !empty($_SESSION['loggedin_user']['username']) ? $_SESSION['loggedin_user']['username'] : $user;
+
+	$dbh = db_connect('core');
+	$sth = $dbh->prepare('REPLACE INTO password_reset_tokens (uid,token,user,ip,timestamp) VALUES (:uid,:token,:user,:ip,NOW())');
+	$sth->bindValue( ':uid', $uid );
+	$sth->bindValue( ':token', $token );
+	$sth->bindValue( ':user', $user );
+	$sth->bindValue( ':ip', $ip );
+	$sth->execute();
+
+    return get_password_reset_token(userid:$uid);
+}
+
+function get_password_reset_token( $token = null, $userid = null ) {
+	clean_password_reset_tokens();
+
+	$dbh = db_connect('core');
+	$query = 'SELECT * FROM password_reset_tokens WHERE ';
+	if ( !empty($token) ) {
+		$query .= 'token = :token';
+		$sth = $dbh->prepare($query);
+		$sth->bindValue( ':token', $token );
+	}
+	else if ( !empty($userid) ) {
+		$query .= 'uid = :uid';
+		$sth = $dbh->prepare($query);
+		$sth->bindValue( ':uid', $userid );
+	}
+	$sth->execute();
+	$result = array();
+
+	while ( $row = $sth->fetch() ) {
+		$result = stripslashes_array( $row );
+	}
+	return $result;
+}
+
+function clean_password_reset_tokens($token = null) {
+	$dbh = db_connect('core');
+	$dbh->exec('DELETE FROM password_reset_tokens WHERE timestamp < DATE_SUB(NOW(), INTERVAL 5 MINUTE)');
+
+	if ( !empty($token) ) {
+		$sth = $dbh->prepare('DELETE FROM password_reset_tokens WHERE token = :token');
+		$sth->bindValue( ':token', $token );
+		$sth->execute();
+	}
 }
 
 function set_password( $ldap, $userdn, $password ) {
@@ -194,6 +248,27 @@ function get_groups( $ldap, $userdn ) {
 		}
 	}
 	return $result;
+}
+
+function ldap_can_edit( $ldap, $objectdn ) {
+	$groups;
+    $userdn = $_SESSION['userid'];
+	if ( !empty($userdn) ) {
+		$groups = $ldap->quick_search( array('member'=>$userdn), array(), 2, 'ou=ACLGroups,'. $ldap->config['base'] );
+	}
+
+	foreach ( $groups as $group ) {
+        if ( empty($group['ou']) ) {
+            continue;
+        }
+		foreach ( $group['ou'] as $ou ) {
+			if ( stripos($objectdn,$ou) !== false ) {
+				return 1;
+			}
+		}
+	}
+
+    return 0;
 }
 
 function remove_from_groups( $ldap, $userdn ) {
@@ -393,11 +468,11 @@ function is_pwned_password( $password ) {
     return 0;
 }
 
-function get_lock_status( $userdn ) {
+function get_lock_status( $username ) {
     $locked = array();
 	$dbh = db_connect('core');
-	$sth = $dbh->prepare('SELECT * FROM user_locks WHERE dn = :dn');
-	$sth->bindValue( ':dn', $userdn );
+	$sth = $dbh->prepare('SELECT * FROM user_locks WHERE uid = :uid');
+	$sth->bindValue( ':uid', $username );
 	$sth->execute();
 
 	while ( $row = $sth->fetch() ) {
@@ -408,53 +483,41 @@ function get_lock_status( $userdn ) {
 	return $locked;
 }
 
-function lock_user( $userdn, $password, $userpass, $ntpass ) {
-	$user = !empty($_SESSION['loggedin_user']['username']) ? $_SESSION['loggedin_user']['username'] : $userdn;
+function lock_user( $ldap, $userdn, $password ) {
+	$set = $ldap->quick_search( '(objectClass=*)', array(), 0, $userdn );
+	$object = $set[0];
+	$objectdn = $object['dn'];
+	unset( $object['dn'] );
+	$username = $object['uid'][0];
+
+	$user = !empty($_SESSION['loggedin_user']['username']) ? $_SESSION['loggedin_user']['username'] : $username;
 
 	$dbh = db_connect('core');
-	$sth = $dbh->prepare('REPLACE INTO user_locks (dn,passwd,user,userPass,NTPass) VALUES (:dn,:passwd,:user,:userPass,:NTPass)');
-	$sth->bindValue( ':dn', $userdn );
+	$sth = $dbh->prepare('REPLACE INTO user_locks (uid,passwd,user) VALUES (:uid,:passwd,:user)');
+	$sth->bindValue( ':uid', $username );
 	$sth->bindValue( ':passwd', $password );
 	$sth->bindValue( ':user', $user );
-	$sth->bindValue( ':userPass', $userpass );
-	$sth->bindValue( ':NTPass', $ntpass );
 	$sth->execute();
 
-	append_log( "$userdn Locked by $user", 'auth' );
+	append_log( "$username Locked by $user", 'auth' );
 }
 
 function unlock_user( $ldap, $userdn ) {
 	$dbh = db_connect('core');
 
-	$user = !empty($_SESSION['loggedin_user']['username']) ? $_SESSION['loggedin_user']['username'] : $userdn;
-	$locked = array();
-	$entry = array();
+	$set = $ldap->quick_search( '(objectClass=*)', array(), 0, $userdn );
+	$object = $set[0];
+	$objectdn = $object['dn'];
+	unset( $object['dn'] );
+	$username = $object['uid'][0];
 
-	$sth = $dbh->prepare('SELECT * FROM user_locks WHERE dn = :dn');
-	$sth->bindValue( ':dn', $userdn );
+	$user = !empty($_SESSION['loggedin_user']['username']) ? $_SESSION['loggedin_user']['username'] : $username;
+
+	$sth = $dbh->prepare('DELETE FROM user_locks WHERE uid = :uid');
+	$sth->bindValue( ':uid', $username );
 	$sth->execute();
 
-	while ( $row = $sth->fetch() ) {
-		$row = stripslashes_array( $row );
-		$locked = $row;
-	}
-
-	$sth = $dbh->prepare('DELETE FROM user_locks WHERE dn = :dn');
-	$sth->bindValue( ':dn', $userdn );
-	$sth->execute();
-
-	if ( !empty($locked['userPass']) ) {
-		$entry['userPassword'] = $locked['userPass'];
-	}
-	if ( !empty($locked['NTPass']) ) {
-		$entry['sambaNTPassword'] = $locked['NTPass'];
-		$entry['sambaPwdLastSet'] = time();
-	}
-	if ( !empty($entry) ) {
-		$result = $ldap->do_modify( $userdn, $entry );
-	}
-
-	append_log( "$userdn Unlocked by $user", 'auth' );
+	append_log( "$username Unlocked by $user", 'auth' );
 }
 
 function log_attr_change( $userdn, $changes ) {

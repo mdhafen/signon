@@ -57,15 +57,41 @@ Add:
   } ?>
 
 <?php
-if ( ! empty($data['can_set_password']) && ! empty($data['is_person']) ) {
-  if ( empty($data['user_lock']) ) {
+if ( ! empty($data['can_edit']) && ! empty($data['is_person']) ) {
 ?>
 <a class="btn btn-default" href="password.php?dn=<?= urlencode($data['object_dn']) ?>">Reset Password</a>
-<?php   if ( stripos($data['object_dn'],',ou=students,') !== FALSE ) { ?>
+<?php
+    if ( !empty($data['default_passwd']) ) { ?>
 <a class="btn btn-default" href="password.php?default=1&amp;dn=<?= urlencode($data['object_dn']) ?>">Set Password to Default</a>
-<?php   } ?>
-<?php }
-      else if ( !empty($data['can_lock']) ) {
+<?php
+    }
+?>
+<button type="button" class="btn btn-default" id="reset_link_btn" data-toggle="collapse" data-target="#reset_link_details">Password Reset Link</button>
+<div class="collapse" id="reset_link_details"><div class="well">
+<?php if ( !empty($data['object']['labeledURI'][0]) ) { ?>
+<div>
+<label for="reset_verify"><input type="checkbox" name="reset_verify" id="reset_verify"> I have verified the users personal email address, and that they can still access it.</label>
+</div>
+<div>
+  <button onclick="send_password_reset()" type="button" class="btn btn-warning">Send new password reset link email to <?= $data['object']['labeledURI'][0] ?></button>
+  <span class="help-block" id="reset_link">
+<?php if ( !empty($data['password_reset_token']) ) { ?>
+<?= $data['_config']['base_url'] ?>change_password.php?op=Reset&amp;token=<?= htmlentities(rawurlencode($data['password_reset_token']['token'])) ?> (active until <?= date('F j, Y, g:i a',strtotime($data['password_reset_token']['timestamp'])) ?>)
+<?php } ?>
+  </span>
+</div>
+<div id="reset_verify_modal" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-content" role="document">
+    <div class="modal-body">
+      <p class="alert alert-danger" role="alert">Please verify the users personal email address.</p>
+      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+    </div>
+  </div>
+</div> <!-- modal -->
+<?php } ?>
+</div></div>
+<?php
+    if ( !empty($data['user_lock']) ) {
 ?>
 <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#lock_details">Show/Hide Lock Details</button>
 <div class="collapse" id="lock_details"><div class="well">
@@ -84,6 +110,7 @@ Locked on: <?= $data['user_lock']['timestamp'] ?><br>
       <a href="../api/confine.php?dn=<?= urlencode($data['object_dn']) ?>&amp;return=1&amp;toggle=on&amp;class=Lock" class="btn btn-success">User is Unlocked</a>
 <?php } else { ?>
 <a href="../api/confine.php?dn=<?= urlencode($data['object_dn']) ?>&amp;return=1&amp;toggle=off&amp;class=Lock" class="btn btn-danger">User is Locked</a>
+<span class="help-block">After unlocking share the lock password with the user.</span>
 <?php } } ?>
 </div>
 
@@ -132,7 +159,34 @@ Password: <?= $data['default_passwd'] ?><br>
   $(document).ready(function(){
     var el = document.getElementById('nav-manage');
     $(el).addClass('active');
+
   });
+
+  function send_password_reset() {
+    if ( ! $('#reset_verify').prop('checked') ) {
+      $('#reset_verify_modal').modal('show');
+      return;
+    }
+    var data = {'dn':<?= json_encode($data['object_dn']) ?>};
+    $.post('<?= $data['_config']['base_url'] ?>api/send_password_reset_token.php', data, function(xml_result) { show_password_reset_link(xml_result) }, "xml" );
+  }
+
+  function show_password_reset_link( xml_result ) {
+      var el = $('#reset_link');
+      var xml_doc = xml_result;
+      var state = $(xml_doc).find('state').text();
+      el.empty();
+      if ( state == 'Success' ) {
+        $('#reset_verify').prop('checked', false);
+        var token = $(xml_doc).find('token').text();
+        var expire = new Date($(xml_doc).find('expire').text());
+        el.append(document.createTextNode("<?= $data['_config']['base_url'] ?>change_password.php?op=Reset&uid=<?= rawurlencode( !empty($data['is_person']) ? $data['object']['uid'][0] : '' ) ?>&token="+token));
+        el.append(document.createTextNode( " (active until "+ expire.toLocaleString("en-US", {dateStyle:"long",timeStyle:"short"}) +")" ));
+      }
+      else {
+        el.append(document.createTextNode("Error: "+ $(xml_doc).find('message').text()));
+      }
+  }
 
   function SendNotice(object_uid) {
     var report_el = document.getElementById('expired_guest_notice_sent');

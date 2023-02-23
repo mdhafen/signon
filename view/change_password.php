@@ -14,6 +14,11 @@ include( 'doc-header.php' );
 <?php } else { ?>
 <h1 class="modal-title" id="password_modal_label">Change Password</h1>
 <form action="<?= $data['op'] == 'ChangeFromDefault' ? 'force_password_from_default.php' : 'change_password.php' ?>" method="post" class="form-horizontal">
+<?php if ( $data['op'] == 'Reset' ) { ?>
+  <input type="hidden" name="op" value="<?= $data['op'] ?>">
+  <input type="hidden" name="uid" value="<?= $data['uid'] ?>">
+  <input type="hidden" name="token" value="<?= $data['token'] ?>">
+<?php } ?>
   <div class="panel panel-default panel-body">
     <div class="container-fluid">
       <div class="row form-group">

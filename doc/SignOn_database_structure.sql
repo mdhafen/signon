@@ -70,11 +70,11 @@ CREATE TABLE `attribute_changes` (
 
 DROP TABLE IF EXISTS `user_locks`;
 CREATE TABLE `user_locks` (
-  `dn` varchar(256) NOT NULL,
+  `uid` varchar(40) NOT NULL,
   `passwd` mediumtext NULL,
   `user` mediumtext,
   `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`dn`)
+  PRIMARY KEY (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -92,15 +92,29 @@ CREATE TABLE `guest_signatures` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
+-- Table structure for table `password_reset_tokens`
+--
+
+DROP TABLE IF EXISTS `password_reset_tokens`;
+CREATE TABLE `password_reset_tokens` (
+  `uid` varchar(40) NOT NULL,
+  `token` varchar(40) NOT NULL,
+  `user` mediumtext,
+  `ip` varchar(40) NOT NULL DEFAULT '0.0.0.0',
+  `timestamp` datetime DEFAULT NULL,
+  PRIMARY KEY (`uid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
 -- Table structure for table `user_default_password`
 --
 
 DROP TABLE IF EXISTS `user_default_password`;
 CREATE TABLE `user_default_password` (
-  uid varchar(40) NOT NULL,
-  default_password varchar(39) DEFAULT NULL,
-  timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (uid)
+  `uid` varchar(40) NOT NULL,
+  `default_password` varchar(39) DEFAULT NULL,
+  `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
