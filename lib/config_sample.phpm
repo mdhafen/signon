@@ -1,6 +1,7 @@
 <?php
 $config = array(
 	'site_title'        => 'WCSDsignon System',
+	'postmaster'        => 'sysadmin@washk12.org',
 	'base_dir'          => '/var/www/',  // sane defaults
 	'base_url'          => '/', // these are set below
 	'secure_phrase'     => 'Pick Your Own Salt',

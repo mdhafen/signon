@@ -94,7 +94,7 @@ function output_build( $data, $filename ) {
 
 		if ( ! is_readable( $filename ) ) {
 			print "Couldn't read template file for output: $filename";
-			return;
+			return array( null, null );
 		}
 
 	}
@@ -105,7 +105,6 @@ function output_build( $data, $filename ) {
 function output_transmit( $output, $xml ) {
 	if ( ! $output ) { return; }
 
-	global $data;
 	$data = $output[0];
 	$filename = $output[1];
 
@@ -114,21 +113,135 @@ function output_transmit( $output, $xml ) {
 	} else {
 		$type = 'text/html';
 	}
-	header( "Content-type: $type" );
 
 	if ( $filename ) {
+		header( "Content-type: $type" );
 		include_once( $filename );
 	}
 	else if ( isset( $data ) && ! is_array( $data ) ) {
 		// read first couple lines ( up to <html>? ) to guess type?
 		if ( preg_match( '/^[\s\v]*<\?xml.*?>[\s\v]*(?:<!doctype.*?>[\s\v]*)?(?!<html.*?>)/is', $data ) ) {
-			header( "Content-type: application/xml" );
+			$type = "application/xml";
 		}
+		header( "Content-type: $type" );
 		print $data;
 	}
 	else {
+		header( "Content-type: $type" );
 		header( "HTTP/1.1 500 Internal Server Error" );
-		print "<html><body>Page could not be generated.  Sorry.</body></html>";
+		print "<html><body>Internal error.  Page could not be generated.  Sorry.</body></html>";
 	}
+}
+
+function send_message( $code = '', $data = array(), $to = '', $from = '' ) {
+    if ( empty($code) ) {
+        return;
+    }
+
+    $prefs = get_message_prefs( $to );
+    $prefs = $prefs[$code];
+    if ( !empty($from) ) {
+        $prefs['from'] = $from;
+    }
+
+    if ( !empty($prefs['subject']) ) {
+        $prefs['subject'] = _parse_message( $prefs['subject'], $data );
+    }
+    $prefs['body'] = _parse_message( $prefs['body'], $data );
+
+    $result = array();
+    switch ( $prefs['transport'] ) {
+        case 'EMail' : $result = _send_email( $to, $from, $prefs['subject'], $prefs['body'] ); break;
+        default : $result['status'] = 'failed'; $result['reason'] = "INVALID_TRANSPORT"; error_log("User $to has invalid transport for ${prefs['code']}: ${prefs['transport']}"); break;
+    }
+
+    _store_message( $prefs, $result );
+}
+
+function _parse_message( $message = '', $data = array() ) {
+    global $config;
+    if ( empty($message) ) {
+        return "";
+    }
+    if ( empty($data) ) {
+        return $message;
+    }
+
+    /* eval:
+     * eval( '?>'. $message .'<?php ');
+     * or include:
+     * if ( is_readable($message) ) { ob_start(); include '../message_templates/' . $message; $message = ob_get_clean(); }
+     * or:
+     */
+    $tokens = array(
+        '_BASE_URL' => $config['base_url'],
+        'UID' => $data['uid'] ?? '',
+        'TOKEN' => $data['token'] ?? '',
+    );
+    foreach ( $tokens as $key => $value ) {
+        $message = str_replace( "[[$key]]", $value, $message );
+    }
+    return $message;
+}
+
+function _send_email( $to = '', $from = '', $subject = '', $body = '' ) {
+    global $config;
+    $headers = array();
+    $options = '';
+    $result = array();
+    if ( !empty($to) ) {
+        if ( strpos($to,'@') === false ) {
+            $user = user_by_userid( $to );
+            $result['to_address'] = $user['email'];
+        }
+        else {
+            $result['to_address'] = $to;
+        }
+    }
+    else {
+        $result['status'] = 'failed';
+        $result['reason'] = 'USER_NO_EMAIL';
+        return $result;
+    }
+
+    if ( !empty($from) ) {
+        $user = user_by_userid( $from );
+        $result['from_address'] = $user['email'];
+    }
+    $result['from_address'] ??= $config['postmaster'] ?? $config['admin_email'] ?? 'noreply@invalid';
+    $headers['From'] = $result['from_address'];
+    $options .= '-f'. $result['from_address'];
+    $headers['MIME-Version'] = '1.0';
+    mb_internal_encoding("UTF-8");
+
+    if ( preg_match( '/^[\s\v]*<html.*?>[\s\v]*/is', $body ) ) {
+        $headers['Content-type'] = 'text/html; charset=UTF-8';
+    }
+
+    $status = mb_send_mail( $result['to_address'], $subject, $body, $headers, $options );
+    if ( $status ) {
+        $result['status'] = 'sent';
+    }
+    else {
+        $result['reason'] = 'mb_send_mail failed: '. error_get_last()['message'];
+        $result['status'] = 'failed';
+    }
+
+    return $result;
+}
+
+function _store_message( $prefs, $result ) {
+    $dbh = db_connect();
+
+    $query = "INSERT INTO message_queue (to_uid,from_uid,template_id,status,status_metadata,subject,body) VALUES ( :to, :from, :tid, :status, :meta, :subject, :body )";
+    $sth = $dbh->prepare( $query );
+    $sth->bindParam( ':to', $prefs['userid'] );
+    $sth->bindValue( ':from', $prefs['from'] ?? '' );
+    $sth->bindParam( ':tid', $prefs['template_id'] );
+    $sth->bindParam( ':status', $result['status'] );
+    $sth->bindValue( ':meta', json_encode($result) );
+    $sth->bindValue( ':subject', $prefs['subject'] ?? null );
+    $sth->bindParam( ':body', $prefs['body'] );
+    $sth->execute();
 }
 ?>

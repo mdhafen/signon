@@ -31,6 +31,19 @@ function call_data_callback( $module, $func, ...$vars ) {
 	}
 }
 
+function new_uuid() {
+	# v4 UUID according to RFC 4122
+	#  taken from https://stackoverflow.com/a/54372862
+	$token = sprintf('%s-%s-%04x-%04x-%s',
+		bin2hex(random_bytes(4)),
+		bin2hex(random_bytes(2)),
+		hexdec(bin2hex(random_bytes(2))) & 0x0fff | 0x4000,
+		hexdec(bin2hex(random_bytes(2))) & 0x3fff | 0x8000,
+		bin2hex(random_bytes(6))
+	);
+	return $token;
+}
+
 function db_connect( $module = 'core', $write = 0 ) {
 	global $dbh_cache, $config;
 	$mode = 'read';
@@ -388,7 +401,8 @@ class LDAP_Wrapper {
 
 		$objects = array();
 		foreach ( $schema as $entry ) {
-			for ( $i = 0; $i < $entry['objectclasses']['count']; $i++ ) {
+            $count = ( !empty($entry['objectclasses']['count']) ? $entry['objectclasses']['count'] : 0 );
+			for ( $i = 0; $i < $count; $i++ ) {
 				$oC_str = $entry['objectclasses'][$i];
 				$o = $this->parse_asn_schema( $oC_str );
 				if ( ! empty( $o ) && ! empty($o['NAME']) && ! empty($o['NAME'][0]) ) {
@@ -408,7 +422,8 @@ class LDAP_Wrapper {
 
 		$attrs = array();
 		foreach ( $schema as $entry ) {
-			for ( $i = 0; $i < $entry['attributetypes']['count']; $i++ ) {
+            $count = ( !empty($entry['attributetypes']['count']) ? $entry['attributetypes']['count'] : 0 );
+			for ( $i = 0; $i < $count; $i++ ) {
 				$attr_str = $entry['attributetypes'][$i];
 				$a = $this->parse_asn_schema( $attr_str );
 				if ( ! empty( $a ) && ! empty($a['NAME']) ) {

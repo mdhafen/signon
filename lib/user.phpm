@@ -184,4 +184,39 @@ function delete_location( $locationid, $module = 'core' ) {
   }
 }
 
+function get_message_prefs( $userid, $module = 'core' ) {
+  $result = array();
+  $set_codes = array();
+  $dbh = db_connect( $module );
+
+  if ( $userid ) {
+    $query = "SELECT * FROM user_message_settings LEFT JOIN message_templates USING (template_id) WHERE userid = :uid";
+    $sth = $dbh->prepare( $query );
+    $sth->bindParam( ':uid', $userid );
+    $sth->execute();
+
+    while ( $row = $sth->fetch( PDO::FETCH_ASSOC ) ) {
+      $row = stripslashes_array( $row );
+      $result[ $row['code'] ] = $row;
+      $set_codes[] = $row['code'];
+    }
+  }
+
+  $params = null;
+  $query = "SELECT * FROM user_message_settings LEFT JOIN message_templates USING (template_id) WHERE userid IS NULL";
+  if ( count($set_codes) ) {
+      $query .= " AND code NOT IN (". implode(',',array_fill(0,count($set_codes),'?')) .")";
+      $params = $set_codes;
+  }
+  $sth = $dbh->prepare( $query );
+  $sth->execute($params);
+  while ( $row = $sth->fetch( PDO::FETCH_ASSOC ) ) {
+    $row = stripslashes_array( $row );
+    $result[ $row['code'] ] = $row;
+    $set_codes[] = $row['code'];
+  }
+
+  return $result;
+}
+
 ?>
