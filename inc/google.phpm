@@ -2,6 +2,15 @@
 global $config;
 include_once( $config['base_dir'].'/lib/output.phpm' );
 
+global $Twilio_From, $Twilio_Account, $Twilio_Token, $SMS_Message;
+$Twilio_From = '+1...';
+$Twilio_Account = '';
+$Twilio_Token = '';
+$SMS_Message = "Your login for WiFi access follows, username: {{USERNAME}} password: {{PASSWORD}} Please don't reply, for help contact a Tech.";
+
+require_once 'Twilio/autoload.php';
+use Twilio\Rest\Client;
+
 global $GOOGLE_DOMAIN;
 global $GOOGLE_A_CLIENT,$GOOGLE_S_CLIENT;
 $GOOGLE_DOMAIN = 'washk12.org';
