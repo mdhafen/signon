@@ -48,7 +48,7 @@ if ( $row['count'] == 0 ) {
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
   $dbh->exec( $query );
 
-  $query = "INSERT INTO `user_message_settings` (`userid`,`template_id`) VALUES
+  $query = "INSERT INTO `user_message_settings` (`userid`,`template_id`)
   ( SELECT NULL,`template_id` FROM `message_templates` WHERE `code` = 'PASSWD_RESET' AND `transport` = 'EMail' AND `lang` = 'en-us' )";
   $dbh->exec( $query );
 
