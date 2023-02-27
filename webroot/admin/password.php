@@ -27,7 +27,7 @@ if ( ! ( authorized('set_password') || ( !empty($_SESSION['loggedin_user']) && s
 	output( $output, 'admin/password.tmpl' );
 	exit;
 }
-$user_lock = get_lock_status( $objectdn );
+$user_lock = get_lock_status( $object['uid'][0] );
 if ( !empty($user_lock) && (
    ( $object['businessCategory'][0] == 'Student' && !authorized('lock_student') ) || ( $object['businessCategory'][0] == 'Staff' && !authorized('lock_staff')
 ) ) ) {

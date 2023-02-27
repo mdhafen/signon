@@ -497,9 +497,10 @@ function lock_user( $ldap, $userdn, $password ) {
 	$sth->bindValue( ':uid', $username );
 	$sth->bindValue( ':passwd', $password );
 	$sth->bindValue( ':user', $user );
-	$sth->execute();
+	$result = $sth->execute();
 
 	append_log( "$username Locked by $user", 'auth' );
+	return $result;
 }
 
 function unlock_user( $ldap, $userdn ) {
@@ -515,9 +516,10 @@ function unlock_user( $ldap, $userdn ) {
 
 	$sth = $dbh->prepare('DELETE FROM user_locks WHERE uid = :uid');
 	$sth->bindValue( ':uid', $username );
-	$sth->execute();
+	$result = $sth->execute();
 
 	append_log( "$username Unlocked by $user", 'auth' );
+	return $result;
 }
 
 function log_attr_change( $userdn, $changes ) {

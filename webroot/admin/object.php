@@ -23,7 +23,7 @@ $is_person = is_person( $object );
 $reset_token = '';
 if ( $is_person ) {
     $groups = get_groups( $ldap, $objectdn );
-    $user_lock = get_lock_status( $objectdn );
+    $user_lock = get_lock_status( $object['uid'][0] );
     $default_passwd = get_default_password( $object['uid'][0] );
     $can_edit = ( $can_edit ?: ldap_can_edit( $ldap, $objectdn ) );
     $reset_token = get_password_reset_token(userid:$object['uid'][0]);

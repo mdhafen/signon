@@ -66,6 +66,9 @@ if ( ! empty($data['can_edit']) && ! empty($data['is_person']) ) {
 <?php
     }
 ?>
+<?php
+    if ( !empty($data['object']['labeledURI']) && !empty($data['object']['employeeType']) && $data['object']['employeeType'][0] == 'Staff' ) {
+?>
 <button type="button" class="btn btn-default" id="reset_link_btn" data-toggle="collapse" data-target="#reset_link_details">Password Reset Link</button>
 <div class="collapse" id="reset_link_details"><div class="well">
 <?php if ( !empty($data['object']['labeledURI'][0]) ) { ?>
@@ -89,16 +92,15 @@ if ( ! empty($data['can_edit']) && ! empty($data['is_person']) ) {
   </div>
 </div> <!-- modal -->
 <?php } ?>
+<?php } ?>
 </div></div>
-<?php
-    if ( !empty($data['user_lock']) ) {
-?>
-<button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#lock_details">Show/Hide Lock Details</button>
-<div class="collapse" id="lock_details"><div class="well">
-Password: <?= $data['user_lock']['passwd'] ?><br>
-Locked by: <?= $data['user_lock']['user'] ?><br>
-Locked on: <?= $data['user_lock']['timestamp'] ?><br>
+<?php if ( ! empty($data['can_see_password']) ) { ?>
+<div class="form-group">
+<button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#default_passwd_details">Show/Hide Default Password</button>
+<div class="collapse" id="default_passwd_details"><div class="well">
+Password: <?= $data['default_passwd'] ?><br>
 </div></div>
+</div>
 <?php } ?>
 <div class="form-group">
 <h4>Security</h4>
@@ -114,13 +116,15 @@ Locked on: <?= $data['user_lock']['timestamp'] ?><br>
 <?php } } ?>
 </div>
 
-<?php if ( ! empty($data['can_see_password']) ) { ?>
-<div class="form-group">
-<button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#default_passwd_details">Show/Hide Default Password</button>
-<div class="collapse" id="default_passwd_details"><div class="well">
-Password: <?= $data['default_passwd'] ?><br>
+<?php
+    if ( !empty($data['user_lock']) ) {
+?>
+<button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#lock_details">Show/Hide Lock Details</button>
+<div class="collapse" id="lock_details"><div class="well">
+Password: <?= $data['user_lock']['passwd'] ?><br>
+Locked by: <?= $data['user_lock']['user'] ?><br>
+Locked on: <?= $data['user_lock']['timestamp'] ?><br>
 </div></div>
-</div>
 <?php } ?>
 <?php
 }

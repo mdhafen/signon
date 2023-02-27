@@ -111,7 +111,7 @@ if ( ! empty($input) ) {
         if ( empty($return) ) {
             output( '<?xml version ="1.0"?><result><state>error</state><message>'. $ldap->get_error() .'</message></result>', '', $xml=1 );
         } else {
-            redirect('admin/object.php?dn='.urlencode($dn) );
+            error(array('LDAP_MODIFY_FAILED'));
         }
         exit;
     }

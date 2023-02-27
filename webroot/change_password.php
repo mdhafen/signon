@@ -87,7 +87,7 @@ if ( !empty($password) && !empty($password2) ) {
 			}
 
 			if ( ! empty($dn) ) {
-				$user_lock = get_lock_status( $dn );
+				$user_lock = get_lock_status( $username );
 				if ( $password !== $password2 ) {
 					$errors[] = 'PASSWORDS_DONT_MATCH';
 				} else if ( strlen($password) < 8 ) {

@@ -66,7 +66,7 @@ if ( !empty($user) ) {
       $ldap->do_connect( 'core', $ldap->config['userdn'], $ldap->config['passwd'] );
 
       if ( !empty($password) && !empty($password2) ) {
-        $user_lock = get_lock_status( $dn );
+        $user_lock = get_lock_status( $object['uid'][0] );
         if ( $password !== $password2 ) {
           $errors[] = 'PASSWORDS_NO_MATCH';
         } else if ( strlen($password) < 8 ) {

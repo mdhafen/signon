@@ -54,7 +54,7 @@ if ( !empty($submitted) && ! $error ) {
         $entry = google_user_hash_for_ldap( $user );
         $password = input( 'password', INPUT_STR );
         $password2 = input( 'password2', INPUT_STR );
-        $user_lock = get_lock_status( $entry['dn'] );
+        $user_lock = get_lock_status( $entry['uid'] );
         if ( $password != $password2 ) {
           unset($password);
           $error = 1;

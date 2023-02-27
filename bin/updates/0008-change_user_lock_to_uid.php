@@ -17,13 +17,13 @@ if ( $row['count'] == 0 ) {
   $query = "UPDATE user_locks SET uid = SUBSTRING(dn, 5, LOCATE(',',dn) - 5)";
   $dbh->exec( $query );
 
-  $query = "ALTER TABLE user_locks DROP COLUMN dn";
+  $query = "ALTER TABLE user_locks DROP COLUMN dn, DROP COLUMN userPass, DROP COLUMN NTPass";
   $dbh->exec( $query );
 
   $query = "DELETE FROM user_locks WHERE uid = :uid LIMIT 1";
   $sth2 = $dbh->prepare($query);
 
-  $query = "SELECT uid AS num FROM user_locks GROUP BY uid HAVING count(*) > 1 LIMIT 1";
+  $query = "SELECT uid FROM user_locks GROUP BY uid HAVING count(*) > 1 LIMIT 1";
   $sth = $dbh->prepare($query);
   $sth->execute();
   $row = $sth->fetch();
