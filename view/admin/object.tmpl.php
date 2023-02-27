@@ -56,16 +56,19 @@ Add:
 <?php }
   } ?>
 
+<div class="form-group">
+<h4>Password</h4>
 <?php
 if ( ! empty($data['can_edit']) && ! empty($data['is_person']) ) {
 ?>
-<a class="btn btn-default" href="password.php?dn=<?= urlencode($data['object_dn']) ?>">Reset Password</a>
 <?php
     if ( !empty($data['default_passwd']) ) { ?>
 <a class="btn btn-default" href="password.php?default=1&amp;dn=<?= urlencode($data['object_dn']) ?>">Set Password to Default</a>
 <?php
     }
 ?>
+<a class="btn btn-default" href="password.php?dn=<?= urlencode($data['object_dn']) ?>">Reset Password</a>
+<?php } ?>
 <?php
     if ( !empty($data['object']['labeledURI']) && !empty($data['object']['employeeType']) && $data['object']['employeeType'][0] == 'Staff' ) {
 ?>
@@ -92,14 +95,14 @@ if ( ! empty($data['can_edit']) && ! empty($data['is_person']) ) {
   </div>
 </div> <!-- modal -->
 <?php } ?>
-<?php } ?>
 </div></div>
-<?php if ( ! empty($data['can_see_password']) ) { ?>
+<?php if ( !empty($data['can_see_password']) && !empty($data['default_passwd']) ) { ?>
 <div class="form-group">
 <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#default_passwd_details">Show/Hide Default Password</button>
 <div class="collapse" id="default_passwd_details"><div class="well">
 Password: <?= $data['default_passwd'] ?><br>
 </div></div>
+</div>
 </div>
 <?php } ?>
 <div class="form-group">
