@@ -29,7 +29,7 @@ CREATE TABLE `authorized_macs` (
   `labs_category` enum('','Lan','Labs','Staff','Facilities','AV','Phone','TechOffice','Guest') NOT NULL DEFAULT 'Labs',
   `fields_category` enum('','Facilities') NOT NULL DEFAULT '',
   `iot_category` enum('','Lan','Labs','Facilities','AV','TechOffice') NOT NULL DEFAULT '',
-  UNIQUE KEY `uk_macaddress` (`macaddress`)
+  PRIMARY KEY `uk_macaddress` (`macaddress`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -43,6 +43,17 @@ CREATE TABLE `macs_log` (
   `submitted_user` varchar(32) DEFAULT NULL,
   `submitted_date` date DEFAULT NULL,
   INDEX (`macaddress`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+DROP TABLE IF EXISTS `macs_last_access`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `macs_last_access` (
+  `macaddress` varchar(18) NOT NULL,
+  `ssid` varchar(18) NOT NULL DEFAULT '',
+  `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`macaddress`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
