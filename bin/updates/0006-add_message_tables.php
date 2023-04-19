@@ -30,7 +30,7 @@ if ( $row['count'] == 0 ) {
   $query = "CREATE TABLE `message_queue` (
   `queue_id` INT NOT NULL AUTO_INCREMENT,
   `to_uid` varchar(40) NOT NULL,
-  `from_uid` varchar(40) NOT NULL,
+  `from_uid` varchar(40) NULL DEFAULT NULL,
   `template_id` INT,
   `status` ENUM('pending','failed','sent','cancelled') NOT NULL DEFAULT 'pending',
   `status_metadata` mediumtext,
@@ -42,9 +42,9 @@ if ( $row['count'] == 0 ) {
   $dbh->exec( $query );
 
   $query = "CREATE TABLE `user_message_settings` (
-  `userid` varchar(40),
+  `userid` varchar(40) NULL DEFAULT NULL,
   `template_id` INT NOT NULL,
-  PRIMARY KEY (`userid`,`template_id`)
+  UNIQUE KEY (`userid`,`template_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
   $dbh->exec( $query );
 

@@ -155,7 +155,7 @@ function send_message( $code = '', $data = array(), $to = '', $from = '' ) {
         default : $result['status'] = 'failed'; $result['reason'] = "INVALID_TRANSPORT"; error_log("User $to has invalid transport for ${prefs['code']}: ${prefs['transport']}"); break;
     }
 
-    _store_message( $prefs, $result );
+    _store_message( $to, $from, $prefs, $result );
 }
 
 function _parse_message( $message = '', $data = array() ) {
@@ -230,13 +230,13 @@ function _send_email( $to = '', $from = '', $subject = '', $body = '' ) {
     return $result;
 }
 
-function _store_message( $prefs, $result ) {
+function _store_message( $to, $from, $prefs, $result ) {
     $dbh = db_connect();
 
     $query = "INSERT INTO message_queue (to_uid,from_uid,template_id,status,status_metadata,subject,body) VALUES ( :to, :from, :tid, :status, :meta, :subject, :body )";
     $sth = $dbh->prepare( $query );
-    $sth->bindParam( ':to', $prefs['userid'] );
-    $sth->bindValue( ':from', $prefs['from'] ?? '' );
+    $sth->bindParam( ':to', $to );
+    $sth->bindValue( ':from', $from );
     $sth->bindParam( ':tid', $prefs['template_id'] );
     $sth->bindParam( ':status', $result['status'] );
     $sth->bindValue( ':meta', json_encode($result) );
