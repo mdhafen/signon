@@ -103,8 +103,10 @@ if ( ! empty($data['can_edit']) && ! empty($data['is_person']) ) {
 Password: <?= $data['default_passwd'] ?><br>
 </div></div>
 </div>
+<?php } ?>
 </div>
 <?php } ?>
+<?php if ( ! empty($data['can_edit']) && ! empty($data['is_person']) ) { ?>
 <div class="form-group">
 <h4>Security</h4>
 <a href="../api/confine.php?dn=<?= urlencode($data['object_dn']) ?>&amp;return=1&amp;toggle=<?= ($data['object']['businessCategory'][0] != 'Confinement' && $data['object']['businessCategory'][0] != 'Banned' ? 'on' : 'off') ?>" <?= ($data['object']['businessCategory'][0] != 'Confinement' && $data['object']['businessCategory'][0] != 'Banned' ? 'class="btn btn-success">WiFi Access Enabled' : 'class="btn btn-danger">WiFi Access Disabled' ) ?></a>
