@@ -70,11 +70,10 @@ if ( ! empty($data['can_edit']) && ! empty($data['is_person']) ) {
 <a class="btn btn-default" href="password.php?dn=<?= urlencode($data['object_dn']) ?>">Reset Password</a>
 <?php } ?>
 <?php
-    if ( !empty($data['object']['labeledURI']) && !empty($data['object']['employeeType']) && $data['object']['employeeType'][0] == 'Staff' ) {
+    if ( !empty($data['can_send_token']) ) {
 ?>
 <button type="button" class="btn btn-default" id="reset_link_btn" data-toggle="collapse" data-target="#reset_link_details">Password Reset Link</button>
 <div class="collapse" id="reset_link_details"><div class="well">
-<?php if ( !empty($data['object']['labeledURI'][0]) ) { ?>
 <div>
 <label for="reset_verify"><input type="checkbox" name="reset_verify" id="reset_verify"> I have verified the users personal email address, and that they can still access it.</label>
 </div>
@@ -94,8 +93,8 @@ if ( ! empty($data['can_edit']) && ! empty($data['is_person']) ) {
     </div>
   </div>
 </div> <!-- modal -->
-<?php } ?>
 </div></div>
+<?php } ?>
 <?php if ( !empty($data['can_see_password']) && !empty($data['default_passwd']) ) { ?>
 <div class="form-group">
 <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#default_passwd_details">Show/Hide Default Password</button>
@@ -105,7 +104,6 @@ Password: <?= $data['default_passwd'] ?><br>
 </div>
 <?php } ?>
 </div>
-<?php } ?>
 <?php if ( ! empty($data['can_edit']) && ! empty($data['is_person']) ) { ?>
 <div class="form-group">
 <h4>Security</h4>
