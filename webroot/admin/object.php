@@ -66,7 +66,6 @@ $output = array(
 	'is_guest' => $is_guest,
 	'is_guest_expired' => $is_guest_expired,
 	'is_guest_send_notice' => $is_guest_send_notice,
-	'object_vpn' => ( $is_person && !empty(array_filter($groups,function($k){return empty($k['cn'])?0:$k['cn'][0]=='vpn2_access';})) ),
 	'parentdn' => $parentdn,
 	'user_lock' => $user_lock,
 	'default_passwd' => $default_passwd,

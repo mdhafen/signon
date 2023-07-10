@@ -38,11 +38,6 @@ if ( ! authorized('manage_objects') && ! ldap_can_edit( $ldap, $objectdn ) ) {
     exit;
 }
 
-$set = $ldap->quick_search( '(&(objectClass=posixGroup)(cn=vpn2_access))', array() );
-$group = $set[0];
-$groupdn = $group['dn'];
-unset( $group['dn'] );
-
 $output = '<?xml version="1.0"?>
 <confine>';
 
@@ -66,17 +61,6 @@ if ( ! empty($input) ) {
 
         if ( empty($object['businessCategory'][0]) || $state != $object['businessCategory'][0] ) {
             $results = $ldap->do_modify( $objectdn, array('businessCategory'=>$state) );
-        }
-        break;
-
-    case 'VPN':
-        if ( $input == 'off' ) {
-            if ( array_search($object['uid'][0],$group['memberUid']) !== false ) {
-                $results = $ldap->do_attr_del( $groupdn, array('memberUid'=>$object['uid'][0]) );
-            }
-        }
-        else if ( array_search($object['uid'][0],$group['memberUid']) === false ) {
-            $results = $ldap->do_attr_add( $groupdn, array('memberUid'=>$object['uid'][0]) );
         }
         break;
 

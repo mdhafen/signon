@@ -109,7 +109,6 @@ Password: <?= $data['default_passwd'] ?><br>
 <h4>Security</h4>
 <a href="../api/confine.php?dn=<?= urlencode($data['object_dn']) ?>&amp;return=1&amp;toggle=<?= ($data['object']['businessCategory'][0] != 'Confinement' && $data['object']['businessCategory'][0] != 'Banned' ? 'on' : 'off') ?>" <?= ($data['object']['businessCategory'][0] != 'Confinement' && $data['object']['businessCategory'][0] != 'Banned' ? 'class="btn btn-success">WiFi Access Enabled' : 'class="btn btn-danger">WiFi Access Disabled' ) ?></a>
 <a href="../api/confine.php?dn=<?= urlencode($data['object_dn']) ?>&amp;return=1&amp;class=Banned&amp;toggle=<?= ($data['object']['businessCategory'][0] != 'Banned' ? 'on' : 'off') ?>" <?= ($data['object']['businessCategory'][0] != 'Banned' ? 'class="btn btn-success">GinaAccess Logins Enabled' : 'class="btn btn-danger">GinaAccess Logins Disabled' ) ?></a>
-     <a href="../api/confine.php?dn=<?= urlencode($data['object_dn']) ?>&amp;return=1&amp;class=VPN&amp;toggle=<?= (!empty($data['object_vpn']) ? 'off' : 'on') ?>" <?= (!empty($data['object_vpn']) ? 'class="btn btn-success">VPN Access Enabled' : 'class="btn btn-danger">VPN Access Disabled' ) ?></a>
 <?php if ( !empty($data['can_lock']) ) { ?>
 <?php if ( empty($data['user_lock']) ) { ?>
       <a href="../api/confine.php?dn=<?= urlencode($data['object_dn']) ?>&amp;return=1&amp;toggle=on&amp;class=Lock" class="btn btn-success">User is Unlocked</a>
