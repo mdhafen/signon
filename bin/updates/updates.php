@@ -10,6 +10,7 @@ $updates = array(
   '0007-add_password_reset_tokens_table',
   '0008-change_user_lock_to_uid',
   '0009-add_staff_to_mac_registry_labs_cat',
+  '0010-increase_password_token_lifespan_in_message',
 );
 $results = array();
 

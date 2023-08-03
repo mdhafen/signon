@@ -15,7 +15,7 @@ CREATE TABLE `message_templates` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO `message_templates` (`code`,`transport`,`lang`,`subject`,`body`) VALUES
-  ('PASSWD_RESET','EMail','en-us','WCSD SignOn / Google password reset','Click this link to reset your WCSD SignOn / Google password : [[_BASE_URL]]/change_password.php?op=Reset&amp;uid=[[UID]]&amp;token=[[TOKEN]].  This link will expire after 5 minutes.');
+  ('PASSWD_RESET','EMail','en-us','WCSD SignOn / Google password reset','Click this link to reset your WCSD SignOn / Google password : [[_BASE_URL]]/change_password.php?op=Reset&uid=[[UID]]&token=[[TOKEN]].  This link will expire after 10 minutes.');
 
 --
 -- Table structure for table `message_queue`

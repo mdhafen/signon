@@ -81,7 +81,7 @@ if ( ! empty($data['can_edit']) && ! empty($data['is_person']) ) {
   <button onclick="send_password_reset()" type="button" class="btn btn-warning">Send new password reset link email to <?= $data['object']['labeledURI'][0] ?></button>
   <span class="help-block" id="reset_link">
 <?php if ( !empty($data['password_reset_token']) ) { ?>
-<?= $data['_config']['base_url'] ?>change_password.php?op=Reset&amp;token=<?= htmlentities(rawurlencode($data['password_reset_token']['token'])) ?> (active until <?= date('F j, Y, g:i a',strtotime($data['password_reset_token']['timestamp'])) ?>)
+<?= $data['_config']['base_url'] ?>change_password.php?op=Reset&amp;token=<?= htmlentities(rawurlencode($data['password_reset_token']['token'])) ?> (activated at <?= date('F j, Y, g:i a',strtotime($data['password_reset_token']['timestamp'])) ?>)
 <?php } ?>
   </span>
 </div>
