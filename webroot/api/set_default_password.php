@@ -6,7 +6,7 @@ include_once( '../../lib/output.phpm' );
 include_once( '../../inc/person.phpm' );
 include_once( '../../inc/google.phpm' );
 
-if ( ! authorized('reset_password') or ! authenticate_api_client() ) {
+if ( ! authorized('reset_password') && ! authenticate_api_client() ) {
   output( '<?xml version ="1.0"?><result><state>error</state><flag>ACCESS_DENIED</flag></result>', '', $xml=1 );
   exit;
 }
