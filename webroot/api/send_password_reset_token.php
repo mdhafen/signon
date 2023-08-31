@@ -41,8 +41,9 @@ if ( empty($token_obj) ) {
 }
 
 $message_data = array(
-    'uid' => $object['uid'][0],
-    'token' => $token_obj['token'],
+    'UID' => $object['uid'][0],
+    'TOKEN' => $token_obj['token'],
+    'TOKEN_INTERVAL' => $token_obj['expire_interval'],
 );
 send_message( 'PASSWD_RESET', $message_data, $object['labeledURI'][0] );
 
@@ -55,7 +56,7 @@ $output = '<?xml version="1.0"?>
 <reset_token>
 <state>Success</state>
 <token>'. $token_obj['token'] .'</token>
-<expire>'. date('Y-m-d\TH:i:s', strtotime($token_obj['timestamp'])) .'</expire>
+<expire>'. date('Y-m-d\TH:i:s', $token_obj['expire_timestamp']) .'</expire>
 </reset_token>';
 
 if ( empty($return) ) {

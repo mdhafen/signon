@@ -173,12 +173,8 @@ function _parse_message( $message = '', $data = array() ) {
      * if ( is_readable($message) ) { ob_start(); include '../message_templates/' . $message; $message = ob_get_clean(); }
      * or:
      */
-    $tokens = array(
-        '_BASE_URL' => $config['base_url'],
-        'UID' => $data['uid'] ?? '',
-        'TOKEN' => $data['token'] ?? '',
-    );
-    foreach ( $tokens as $key => $value ) {
+    $data['_BASE_URL'] = $config['base_url'];
+    foreach ( $data as $key => $value ) {
         $message = str_replace( "[[$key]]", $value, $message );
     }
     return $message;

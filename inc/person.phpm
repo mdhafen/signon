@@ -121,13 +121,18 @@ function get_password_reset_token( $token = null, $userid = null ) {
 
 	while ( $row = $sth->fetch() ) {
 		$result = stripslashes_array( $row );
+        // token expires after 12 hours
+        $result['expire_interval'] = '12 hours';
+        // $result['expire_timestamp'] = strtotime('+12 hour', strtotime($row['timestamp']));
+        $result['expire_timestamp'] = date_create($row['timestamp'])->add(new DateInterval('PT12H'))->getTimestamp();
 	}
 	return $result;
 }
 
 function clean_password_reset_tokens($token = null) {
 	$dbh = db_connect('core');
-	$dbh->exec('DELETE FROM password_reset_tokens WHERE timestamp < DATE_SUB(NOW(), INTERVAL 10 MINUTE)');
+    // token expires after 12 hours
+	$dbh->exec('DELETE FROM password_reset_tokens WHERE timestamp < DATE_SUB(NOW(), INTERVAL 12 HOUR)');
 
 	if ( !empty($token) ) {
 		$sth = $dbh->prepare('DELETE FROM password_reset_tokens WHERE token = :token');
