@@ -34,10 +34,26 @@ switch ( $class ) {
   case 'folder': $class = array('organizationalUnit');
     $rid = 'ou';
     break;
+  case 'object':
+    $class = input( 'objects', INPUT_HTML_NONE );
+    if ( ! is_array($class) ) {
+      $class = array($class);
+    }
+	list( $must, $may ) = $ldap->schema_get_object_requirements($class);
+	foreach ( array('uid','cn','ou') as $attr ) {
+		if ( in_array( $attr, $must ) ) {
+			$rid = $attr;
+			break;
+		}
+	}
+	if ( empty($rid) ) {
+		error( 'ADD_OBJECT_NO_RID' );
+	}
+    break;
 }
 
 if ( $class ) {
-   list( $must, $may ) = $ldap->schema_get_object_requirements($class);
+	list( $must, $may ) = $ldap->schema_get_object_requirements($class);
 }
 
 $output['rid'] = $rid;

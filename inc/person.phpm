@@ -43,13 +43,28 @@ function fix_dn_in_logs( $old_dn, $new_dn ) {
 }
 
 function is_person( $o=array() ) {
+    // based on is_person() usage as of 2023-11-27
+    // this guarentees certain attributes:
+    //  uid, userPassword, businessCategory
+    // there are also optional attributes:
+    //  labeledURI, mail, employeeType
 	$person = 0;
 	if ( ! empty( $o['objectClass'] ) ) {
 		if ( in_array('inetOrgPerson',$o['objectClass']) ||
-		     in_array('person',$o['objectClass']) ) {
+		     in_array('posixAccount',$o['objectClass']) ) {
 			$person = 1;
 		}
+
+		$required = array( 'uid', 'userPassword', 'businessCategory' );
+		$optional = array( 'labeledURI', 'mail', 'employeeType' );
+		foreach ( $required as $attr ) {
+			if ( empty($o[$attr]) ) {
+				$person = 0;
+				return $person;
+			}
+		}
 	}
+
 	return $person;
 }
 
@@ -247,7 +262,10 @@ function get_groups( $ldap, $userdn ) {
 			$result[] = $group;
 		}
 
-		$groups = $ldap->quick_search( array( 'memberUid' => $object['uid'][0] ) );
+		if ( !empty($object['uid']) ) {
+			$groups = $ldap->quick_search( array( 'memberUid' => $object['uid'][0] ) );
+		}
+
 		foreach ( $groups as $group ) {
 			$result[] = $group;
 		}

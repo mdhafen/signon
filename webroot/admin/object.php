@@ -16,7 +16,7 @@ $set = $ldap->quick_search( '(objectClass=*)', array(), 0, $dn );
 $object = $set[0];
 $objectdn = $object['dn'];
 unset( $object['dn'] );
-$groups = array();
+$groups = get_groups( $ldap, $objectdn );
 $user_lock = array();
 $default_passwd = '';
 $can_edit = authorized('manage_objects');
@@ -25,7 +25,6 @@ $is_person = is_person( $object );
 $can_send_token = false;
 $reset_token = '';
 if ( $is_person ) {
-    $groups = get_groups( $ldap, $objectdn );
     $user_lock = get_lock_status( $object['uid'][0] );
     $default_passwd = get_default_password( $object['uid'][0] );
     $can_edit = ( $can_edit ?: ldap_can_edit( $ldap, $objectdn ) );

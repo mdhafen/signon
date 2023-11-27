@@ -20,7 +20,7 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 <div class="container-fluid">
 <?php foreach ( $data['object'] as $key => $vals ) { ?>
 <?php
-    if ( empty($data['can_see_password']) && ! in_array($key,['cn','uid','mail','o']) ) {
+    if ( empty($data['can_see_password']) && ! in_array($key,['employeeType','businessCategory','cn','uid','mail','labeledURI','homePhone','o']) ) {
       continue;
     }
 ?>
@@ -51,7 +51,8 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 Add:
 <a class="btn btn-default" href="add.php?class=security&amp;parent=<?= urlencode($data['object_dn']) ?>">Security Account</a>
 <a class="btn btn-default" href="add.php?class=user&amp;parent=<?= urlencode($data['object_dn']) ?>">User</a>
-<a class="btn btn-default" href="add.php?class=group&amp;parent=<?= urlencode($data['object_dn']) ?>">Group</a>
+<a class="btn btn-default" href="add.php?class=group&amp;parent=<?= urlencode($data['object_dn']) ?>">Group of DNs</a>
+<a class="btn btn-default" href="add.php?class=group2&amp;parent=<?= urlencode($data['object_dn']) ?>">Group of uids</a>
 <a class="btn btn-default" href="add.php?class=folder&amp;parent=<?= urlencode($data['object_dn']) ?>">Folder</a>
 <?php }
   } ?>
