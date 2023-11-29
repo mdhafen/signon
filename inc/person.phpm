@@ -46,6 +46,7 @@ function is_person( $o=array() ) {
     // based on is_person() usage as of 2023-11-27
     // this guarentees certain attributes:
     //  uid, userPassword, businessCategory
+    //    (userPassword not visible to users per ldap acl)
     // there are also optional attributes:
     //  labeledURI, mail, employeeType
 	$person = 0;
@@ -55,7 +56,7 @@ function is_person( $o=array() ) {
 			$person = 1;
 		}
 
-		$required = array( 'uid', 'userPassword', 'businessCategory' );
+		$required = array( 'uid', 'businessCategory' );
 		$optional = array( 'labeledURI', 'mail', 'employeeType' );
 		foreach ( $required as $attr ) {
 			if ( empty($o[$attr]) ) {
