@@ -24,6 +24,7 @@ else {
     if ( stripos($g_user['orgUnitPath'],'/student') !== 0 ) continue; // only mass sync students for now
     if ( stripos($g_user['orgUnitPath'],'/students/graduates') !== FALSE ) continue; // don't sync graduated students
     if ( stripos($g_user['orgUnitPath'],'/students/lego users') !== FALSE ) continue; // don't sync lego non-users
+    if ( stripos($g_user['orgUnitPath'],'/students/transfer pending') !== FALSE ) continue; // don't sync transfered students
 
     $google_cache[] = $g_user;
   }
@@ -46,7 +47,7 @@ $ldap = new LDAP_Wrapper();
 $users = array();
 if ( !empty($argv[1]) ) {
   $uid = substr($email,0,strpos($email,'@'));
-  $users = $ldap->quick_search( "(|(mail=$email)(uid=$uid))" , array() );
+  $users = $ldap->quick_search( "(&(|(mail=$email)(uid=$uid))(!(|(employeeType=Guest)(employeeType=Trusted))))" , array() );
 } else {
   $users = $ldap->quick_search( '(&(!(|(employeeType=Guest)(employeeType=Trusted)))(objectClass=inetOrgPerson))' , array(), 2, 'ou=Students,dc=wcsd' );
 }
