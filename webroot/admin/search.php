@@ -20,6 +20,7 @@ $attrs = array(
     'businessCategory' => 'WiFi Category',
     'sn' => 'Last Name',
     'givenName' => 'First Name',
+    'phoneNumber' => 'Phone Number',
     'o' => 'Building Abbreviation',
 );
 
@@ -32,6 +33,7 @@ if ( !empty($attr) ) {
     case 'employeeNumber':
     case 'businessCategory': $filter = "($attr=$query*)"; break;
     case 'uidNumber': $filter = "($attr=$query)"; break;
+    case 'phoneNumber': $filter = "(|(homePhone=*$query)(telephoneNumber=*$query))"; break;
     case 'member':
       $set = $ldap->quick_search( array( 'uid' => $query ), array() );
       if ( !empty($set) ) {
