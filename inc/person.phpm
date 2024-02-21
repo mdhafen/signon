@@ -235,16 +235,21 @@ function get_entropy( $password ) {
 	return $entropy;
 }
 
-function populate_static_user_attrs( $ldap, &$object ) {
+function populate_static_user_attrs( &$object ) {
 	$object['objectClass'] = array('top','inetOrgPerson','posixAccount','sambaSamAccount');
-	$object['sambaSID'] = $ldap->get_next_num('sambaSID');
-	$object['sambaPwdLastSet'] = time();
 	$object['sambaAcctFlags'] = '[U ]';
-	$new_uid = explode('-',$object['sambaSID']);
-	$object['uidNumber'] = end($new_uid);
 	$object['gidNumber'] = '65534';
 	$object['loginShell'] = '/bin/bash';
 	if( isset($object['uid']) ) { $object['homeDirectory'] = '/Users/'. $object['uid']; }
+}
+
+function populate_dynamic_user_attrs( $ldap, &$object ) {
+	if ( empty($object['sambaSID']) ) {
+		$object['sambaSID'] = $ldap->get_next_num('sambaSID');
+	}
+	$object['sambaPwdLastSet'] = time();
+	$new_uid = explode('-',$object['sambaSID']);
+	$object['uidNumber'] = end($new_uid);
 }
 
 function get_groups( $ldap, $userdn ) {

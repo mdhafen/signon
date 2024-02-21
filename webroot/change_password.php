@@ -72,7 +72,8 @@ if ( !empty($password) && !empty($password2) ) {
 					}
 
 					if ( !empty($entry['dn']) ) {
-						populate_static_user_attrs($ldap,$entry);
+						populate_static_user_attrs($entry);
+						populate_dynamic_user_attrs($ldap,$entry);
 						$dn = $entry['dn'];
 						unset( $entry['dn'] );
 						if ( ! $ldap->do_add( $dn, $entry ) ) {

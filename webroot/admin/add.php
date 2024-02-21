@@ -16,7 +16,8 @@ $rid = '';
 $must = array();
 $may = array();
 $defaults = array();
-populate_static_user_attrs($ldap,$defaults);
+populate_static_user_attrs($defaults);
+populate_dynamic_user_attrs($ldap,$defaults);
 
 switch ( $class ) {
   case 'security': $class = array('person');

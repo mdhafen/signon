@@ -78,11 +78,7 @@ foreach ( $google_cache as $g_user ) {
       unset( $users_cache[ $thisDN ] );
     }
 
-    $entry['objectClass'] = array('top','inetOrgPerson','posixAccount','sambaSamAccount');
-    $entry['gidNumber'] = '65534';
-    $entry['homeDirectory'] = '/Users/'. $entry['uid'];
-    $entry['loginShell'] = '/bin/bash';
-    $entry['sambaAcctFlags'] = '[U ]';
+    populate_static_user_attrs($entry);
 
     $dn = $thisUser['dn'];
     $rdn_attr = substr( $dn, 0, strpos($dn,'=') );
@@ -105,15 +101,7 @@ foreach ( $google_cache as $g_user ) {
     foreach ( $dynamic_fields as $field ) {
         if ( empty($thisUser[$field]) ) {
             if ( empty($dynamic_generated) ) {
-                if ( empty($thisUser['sambaSID']) ) {
-                    $entry['sambaSID'] = $ldap->get_next_num('sambaSID');
-                }
-                else {
-                    $entry['sambaSID'] = $thisUser['sambaSID'][0];
-                }
-                $entry['sambaPwdLastSet'] = time();
-                $new_uid = explode('-',$entry['sambaSID']);
-                $entry['uidNumber'] = end($new_uid);
+                populate_dynacic_user_attrs($ldap,$entry);
                 $dynamic_generated = 1;
             }
             if ( !empty($entry[$field]) ) {
@@ -149,19 +137,11 @@ foreach ( $google_cache as $g_user ) {
     }
   }
   else {
-    $entry['objectClass'] = array('top','inetOrgPerson','posixAccount','sambaSamAccount');
-
     $dn = $entry['dn'];
     unset( $entry['dn'] );
 
-    $entry['sambaSID'] = $ldap->get_next_num( 'sambaSID' );
-    $entry['sambaPwdLastSet'] = time();
-    $entry['sambaAcctFlags'] = '[U ]';
-    $new_uid = explode('-', $entry['sambaSID']);
-    $entry['uidNumber'] = end($new_uid);
-    $entry['gidNumber'] = '65534';
-    $entry['homeDirectory'] = '/Users/'. $entry['uid'];
-    $entry['loginShell'] = '/bin/bash';
+    populate_static_user_attrs($entry);
+    populate_dynamic_user_attrs($ldap,$entry);
 
     $result = $ldap->do_add( $dn, $entry );
     $entry['dn'] = $dn;
