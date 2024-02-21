@@ -42,10 +42,11 @@ function labs_normalize_categories( $labs_cat = null, $fields_cat = null, $iot_c
 
     switch ( $iot_cat ) {
         case 'Lan' :
-        case 'Labs' :
+        case 'Staff' :
         case 'Facilities' :
-        case 'AV' :
-        case 'TechOffice' :
+        case 'Student' :
+        case 'Phone' :
+        case 'Camera' :
             break;
         default : $iot_cat = '';
     }
