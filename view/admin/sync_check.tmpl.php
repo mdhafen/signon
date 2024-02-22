@@ -48,7 +48,7 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 </table>
 
 <div class="row">
-<a class="btn btn-default" href="object.php?dn=<?= urlencode($data['object_dn']) ?>">Back</a>
+<a class="btn btn-default" href="object.php?dn=<?= urlencode($data['object_dn']) ?>">Up</a>
 
 <?php if ( ! empty( $data['can_edit'] ) ) { ?>
 <input type="submit" class="btn btn-default" value="Sync">
