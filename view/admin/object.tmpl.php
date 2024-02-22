@@ -47,7 +47,9 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 <?php if ( ! empty( $data['can_edit'] ) ) { ?>
 <a class="btn btn-default" href="edit.php?dn=<?= urlencode($data['object_dn']) ?>">Edit</a>
 <a class="btn btn-warning" href="delete.php?dn=<?= urlencode($data['object_dn']) ?>">Delete</a>
-<?php if ( empty($data['is_person']) ) { ?>
+<?php if ( !empty($data['is_person']) ) { ?>
+<a class="btn btn-default" href="sync_check.php?dn=<?= urlencode($data['object_dn']) ?>">Sync Check</a>
+<?php } else { ?>
 Add:
 <a class="btn btn-default" href="add.php?class=security&amp;parent=<?= urlencode($data['object_dn']) ?>">Security Account</a>
 <a class="btn btn-default" href="add.php?class=user&amp;parent=<?= urlencode($data['object_dn']) ?>">User</a>

@@ -300,6 +300,188 @@ function ldap_can_edit( $ldap, $objectdn ) {
     return 0;
 }
 
+function check_google_sync( $ldap, $object ) {
+    $errors = array();
+    $objects = array();
+    $keys = array();
+    $diff_keys = array();
+    $keys_to_ignore = array('_source'=>1,'dn'=>1,'objectClass'=>1,'userPassword'=>1,'shadowLastChange'=>1,'sambaNTPassword'=>1,'sambaPwdLastSet'=>1,'sambaSID'=>1,'sambaAcctFlags'=>1,'loginShell'=>1,'homeDirectory'=>1,'uidNumber'=>1,'gidNumber'=>1);
+    $set = array();
+    $users = array();
+
+    $uid = !empty($object['uid']) ? $object['uid'][0] : "";
+    $num = !empty($object['employeeNumber']) ? $object['employeeNumber'][0] : "";
+
+    if ( $uid && $num ) {
+        $set = $ldap->quick_search( "(|(uid=$uid)(employeeNumber=$num))", array() );
+    }
+    else if ( $uid ) {
+        $errors[] = 'NO_EMPLOYEENUMBER';
+        $set = $ldap->quick_search( "(uid=$uid)", array() );
+    }
+    else if ( $num ) {
+        $errors[] = 'NO_UID';
+        $set = $ldap->quick_search( "(employeeNumber=$num)", array() );
+    }
+    else {
+        $errors[] = 'CHECK_OBJECT_NO_UID_EMPLOYEENUMBER';
+        return array($errors);
+    }
+
+    $emails = array();
+    foreach ( $set as $obj ) {
+        $obj['_source'] = 'LDAP';
+        $objects[] = $obj;
+        $keys = array_merge( $keys, array_keys($obj) );
+        if ( !empty( $obj['mail'] ) ) {
+            foreach ( $obj['mail'] as $email ) {
+                array_push( $emails, $email );
+            }
+        }
+    }
+    $emails = array_unique($emails);
+    foreach ( $emails as $mail ) {
+        $user = get_user_google( $mail );
+        if ( !empty($user) ) {
+            $hash = google_user_hash_for_ldap( $user );
+            populate_static_user_attrs($hash);
+            $hash['_source'] = 'Google';
+            $users[] = $hash;
+            array_unshift( $objects, $hash );
+            $keys = array_merge( $keys, array_keys($hash) );
+        }
+    }
+    if ( empty($users) ) {
+        $errors[] = 'CHECK_OBJECT_NO_GOOGLE';
+        return array($errors);
+    }
+    if ( count($users) > 1 ) {
+        $errors[] = 'CHECK_OBJECT_GOOGLE_DUPLICATES';
+    }
+    if ( count($set) > 1 ) {
+        $errors[] = 'CHECK_OBJECT_LDAP_DUPLICATES';
+    }
+    unset($users);
+
+    $keys = array_unique($keys);
+    sort($keys);
+    foreach ( $keys as $key ) {
+        if ( !empty($keys_to_ignore[$key]) ) {
+            continue;
+        }
+        unset($check);
+        $is_diff = 0;
+        foreach ( $objects as $obj ) {
+            $val = '';
+            switch ($obj['_source']) {
+                case 'Google':
+                    $val = !empty($obj[$key]) ? $obj[$key] : "";
+                    break;
+                case 'LDAP':
+                    $val = implode( ' | ', (!empty($obj[$key]) ? $obj[$key] : array() ) );
+                    break;
+            }
+            if ( ! isset($check) ) {
+                $check = $val;
+            }
+            else {
+                if ( $val != $check ) {
+                    $is_diff = 1;
+                }
+            }
+        }
+        if ( $is_diff ) {
+            $diff_keys[] = $key;
+        }
+    }
+    return array($errors,$objects,$keys,$diff_keys);
+}
+
+function do_google_sync( $ldap, $object, $entry ) {
+    $mods = array();
+    $move = 0;
+    $add = 0;
+    $passwd_set = 0;
+
+    populate_static_user_attrs($entry);
+
+    if ( !empty($object) ) {
+        $dn = $object['dn'];
+        $rdn_attr = substr( $dn, 0, strpos($dn,'=') );
+        $ignored_fields = array($rdn_attr,'dn','objectClass','userPassword','sambaNTPassword','shadowLastChange','sambaPwdLastSet');
+        $dynamic_fields = array('sambaSID','uidNumber');
+        $mod_add = array();
+        $mod_del = array();
+        $mod_rep = array();
+        foreach ( $entry as $field => $value ) {
+            if ( array_search($field,$ignored_fields) !== false ) { continue; }
+            if ( array_search($field,$dynamic_fields) !== false ) { continue; }
+            if ( empty($object[$field]) && !empty($value) ) {
+                $mod_add[$field] = $value;
+            }
+            else if ( !empty($value) && $object[$field][0] != $value ) {
+                $mod_rep[$field] = $value;
+            }
+        }
+        $dynamic_generated = false;
+        foreach ( $dynamic_fields as $field ) {
+            if ( empty($object[$field]) ) {
+                if ( empty($dynamic_generated) ) {
+                    populate_dynamic_user_attrs($ldap,$entry);
+                    $dynamic_generated = 1;
+                }
+                if ( !empty($entry[$field]) ) {
+                    $mod_add[$field] = $entry[$field];
+                }
+            }
+        }
+        foreach ( $object as $field => $values ) {
+            if ( array_search($field,$ignored_fields) !== false ) { continue; }
+            if ( array_search($field,$dynamic_fields) !== false ) { continue; }
+            if ( empty($entry[$field]) ) {
+                $mod_del[$field] = array();
+            }
+        }
+
+        if ( !empty($mod_add) || !empty($mod_del) || !empty($mod_rep) ) {
+            $ldap->do_attr_del( $dn, $mod_del );
+            $ldap->do_modify( $dn, $mod_add );
+            $ldap->do_attr_replace( $dn, $mod_rep );
+            $mods = array_keys(array_merge($mod_del,$mod_add,$mod_rep));
+            sort($mods);
+        }
+
+        if ( strcasecmp( $dn, $entry['dn'] ) != 0 ) {
+            $ldap->do_rename( $dn, "$rdn_attr=". ldap_escape($entry[$rdn_attr],'',LDAP_ESCAPE_DN), $ldap->dn_get_parent($entry['dn']) );
+            $move = 1;
+        }
+    }
+    else {
+        $dn = $entry['dn'];
+        unset( $entry['dn'] );
+
+        populate_dynamic_user_attrs($ldap,$entry);
+
+        $result = $ldap->do_add( $dn, $entry );
+        $add = 1;
+
+        if ( $entry['employeeType'] == 'Student' ) {
+            $passwd = get_default_password( $entry['uid'] );
+            if ( empty($passwd) ) {
+                $passwd = generate_default_password($entry);
+                if ( !empty($passwd) ) {
+                    set_default_password( $entry['uid'], $passwd );
+                }
+            }
+            if ( !empty($passwd) ) {
+                set_password( $ldap, $dn, $passwd );
+                $passwd_set = 1;
+            }
+        }
+    }
+    return array( $mods, $move, $add, $passwd_set );
+}
+
 function remove_from_groups( $ldap, $userdn ) {
 	$result = 0;
 	if ( !empty($userdn) ) {

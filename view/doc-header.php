@@ -17,6 +17,7 @@
 <?php if ( ! empty($data['_session']['CAN_set_password']) ) { ?>
           <li id="nav-search"><a href="<?= $data['_config']['base_url'] ?>admin/search.php">Search</a></li>
           <li id="nav-manage"><a href="<?= $data['_config']['base_url'] ?>admin/">Manage Users</a></li>
+          <li id="nav-sync_check"><a href="<?= $data['_config']['base_url'] ?>admin/sync_check.php">Check user google sync</a></li>
 <!--          <li id="nav-register"><a href="<?= $data['_config']['base_url'] ?>admin/register.php">Register an IOT/Fields Device</a></li> -->
 <?php } ?>
 
