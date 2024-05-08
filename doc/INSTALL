@@ -1,17 +1,19 @@
 PHP Modules required for this to work:
 
-php5-ldap
-php-mcrypt?
+php-ldap
+php-openssl
 php-google-api-php-client
-php5-imap
+php-imap
 
-And make sure the imap module is getting loaded.
-
-Edit lib/config.phpm with settings for the site title, secure phrase, and
+Copy the lib/config_sample.phpm file to lib/config.phpm and edit
+lib/config.phpm with settings for the site title, secure phrase, and
 LDAP settings.  The roles mapping in that file maps members of an LDAP group
 to security roles for access to the 'Manage Users' section.
 
 Also edit the inc/google.phpm file to make sure the correct settings
-are in that file for api access, a GoogleVoice account, the LDAP base,
-and the various location to LDAP base mappings.  And you will need to
-put the private key file in the same directory and include the filename.
+are in that file for Google api access, a Twilio account, the LDAP base,
+and the various location to LDAP mappings.  And you will need to put the
+Google api private key file in the same directory and include the  filename.
+
+You will need to setup a database for attribute history, owned passwords,
+and user locks.
