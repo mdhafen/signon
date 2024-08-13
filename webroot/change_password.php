@@ -42,7 +42,7 @@ if ( $op == 'Reset' && !empty($uid) && !empty($token) ) {
 		$email = $user['mail'][0];
 	}
 }
-if ( $op != 'Reset' ) {
+else if ( $op != 'Reset' ) {
 	$GOOGLE_A_CLIENT->setState( urlencode('{"op":"'. $op .'"}') );
 	$user = auth_to_google( $config['base_url'] .'change_password.php' );
 }
