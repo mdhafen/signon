@@ -31,7 +31,7 @@ if ( $op == 'Reset' && !empty($uid) && !empty($token) ) {
 		$user = $set[0];
 	}
 	$token_info = get_password_reset_token($token);
-	if ( empty($user) || $token_info['uid'] != $uid ) {
+	if ( empty($user) || empty($token_info) || empty($token_info['uid']) || $token_info['uid'] != $uid ) {
 		$op = 'Change';
 		$output['op'] = $op;
 		$errors[] = 'INVALID_TOKEN';
