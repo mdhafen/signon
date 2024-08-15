@@ -47,6 +47,7 @@ function labs_normalize_categories( $labs_cat = null, $fields_cat = null, $iot_c
         case 'Student' :
         case 'Phone' :
         case 'Camera' :
+        case 'CyberCorp' :
             break;
         default : $iot_cat = '';
     }

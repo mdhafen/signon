@@ -11,6 +11,7 @@ $updates = array(
   '0008-change_user_lock_to_uid',
   '0009-add_staff_to_mac_registry_labs_cat',
   '0010-increase_password_token_lifespan_in_message',
+  '0011-add_cybercorp_to_mac_registry_iot_cat',
 );
 $results = array();
 
