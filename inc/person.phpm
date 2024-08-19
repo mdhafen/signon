@@ -330,9 +330,9 @@ function check_google_sync( $ldap, $object ) {
 
     $emails = array();
     foreach ( $set as $obj ) {
+        $keys = array_merge( $keys, array_keys($obj) );
         $obj['_source'] = 'LDAP';
         $objects[] = $obj;
-        $keys = array_merge( $keys, array_keys($obj) );
         if ( !empty( $obj['mail'] ) ) {
             foreach ( $obj['mail'] as $email ) {
                 array_push( $emails, $email );
@@ -345,10 +345,10 @@ function check_google_sync( $ldap, $object ) {
         if ( !empty($user) ) {
             $hash = google_user_hash_for_ldap( $user );
             populate_static_user_attrs($hash);
+            $keys = array_merge( $keys, array_keys($hash) );
             $hash['_source'] = 'Google';
             $users[] = $hash;
             array_unshift( $objects, $hash );
-            $keys = array_merge( $keys, array_keys($hash) );
         }
     }
     if ( empty($users) ) {

@@ -8,7 +8,7 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 <div class="container">
 <div class="main-page">
 
-<h1><?= $data['object_dn'] ?></h1>
+<h1><?= (!empty($data['object_dn'])?$data['object_dn']:'') ?></h1>
 <h2>Search for SignOn object for the Google Sync Check</h2>
 
 <div class="panel panel-default panel-body">
