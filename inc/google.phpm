@@ -75,6 +75,8 @@ $DEFAULT_LOCATION =   array(
     'num'  => 950,
   );
 $LOCATIONS = array(
+    array('initials'=>'OFFBRD','num'=>950,'name'=>'Off Boarding'),
+    array('initials'=>'SUSP','num'=>950,'name'=>'Suspended'),
     array('initials'=>'AES','num'=>111,'name'=>'Arrowhead'),
     array('initials'=>'BES','num'=>102,'name'=>'Bloomington Elementary'),
     array('initials'=>'BHES','num'=>105,'name'=>'Bloomington Hills'),
@@ -343,16 +345,26 @@ function google_user_hash_for_ldap( $user ) {
   $entry = array();
 
   if ( !empty($user) ) {
-    if ( stripos($user['orgUnitPath'],'student') !== FALSE ) {
-      $entry['employeeType'] = 'Student';
+    if ( stripos($user['orgUnitPath'],'off boarding') !== FALSE ) {
+      $entry['employeeType'] = 'offboarding-';
+    }
+    else if ( stripos($user['orgUnitPath'],'suspended') !== FALSE ) {
+      $entry['employeeType'] = 'suspended-';
+    }
+
+    if ( stripos($user['orgUnitPath'],'staff') !== FALSE ) {
+      $entry['employeeType'] .= 'Staff';
+      $entry['businessCategory'] = 'Staff';
+    }
+    else if ( stripos($user['orgUnitPath'],'student') !== FALSE ) {
+      $entry['employeeType'] .= 'Student';
       $entry['businessCategory'] = 'Student';
     }
     else {
-      $entry['employeeType'] = 'Staff';
-      $entry['businessCategory'] = 'Staff';
+      $entry['employeeType'] .= 'Unknown';
     }
 
-    if ( !empty($entry['employeeType']) ) {
+    if ( !empty($entry['businessCategory']) ) {
       $entry['uid'] = strtolower(substr($user['primaryEmail'],0,strpos($user['primaryEmail'],'@')));
       $entry['sn'] = $user['name']['familyName'];
       $entry['givenName'] = $user['name']['givenName'];
@@ -417,12 +429,12 @@ function google_user_hash_for_ldap( $user ) {
           $entry['telephoneNumber'] = $ci['GradYear'];
         }
       }
-      if ( $entry['employeeType'] != 'Student' && ( empty($entry['title']) || in_array( strtolower($entry['title']), array_map('strtolower',$OTHER_TITLES) ) ) ) {
+      if ( $entry['businessCategory'] != 'Student' && ( empty($entry['title']) || in_array( strtolower($entry['title']), array_map('strtolower',$OTHER_TITLES) ) ) ) {
         $entry['employeeType'] = 'Other';
       }
       if ( empty($entry['o']) ) { $entry['o'] = guess_location($user,'initials'); }
       if ( empty($entry['departmentNumber']) ) { $entry['departmentNumber'] = guess_location($user,'num'); }
-      $entry['description'] = $entry['o'] ."-". $entry['employeeType'];
+      $entry['description'] = $entry['o'] ."-". $entry['businessCategory'];
       $ou = google_org_to_ou( $user['orgUnitPath'] );
       if ( !empty($ou) && !empty($entry['uid']) ) {
         $entry['dn'] = 'uid='. ldap_escape($entry['uid'],'',LDAP_ESCAPE_DN) .','. $ou;
