@@ -23,7 +23,7 @@ if ( !empty($argv[1]) ) {
   $users = $ldap->quick_search( "(|(mail=$email)(uid=$uid))" , array() );
 } else {
   // FIXME limit to students for now
-  $users = $ldap->quick_search( '(&(!(|(employeeType=Guest)(employeeType=Trusted)))(objectClass=inetOrgPerson)(employeeType=Student))' , array() );
+  $users = $ldap->quick_search( '(&(objectClass=inetOrgPerson)(employeeType=Student))' , array() );
 }
 
 $change_users = array();

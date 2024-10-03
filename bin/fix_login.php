@@ -40,6 +40,17 @@ foreach ( $users as $user ) {
 // Banned
         $mods['businessCategory'] = $user['employeeType'][0];
         break;
+      case 'offboarding-Staff':
+      case 'suspended-Staff':
+      case 'Transfer':
+      case 'Transfer-Staff':
+        $mods['businessCategory'] = 'Staff';
+        break;
+      case 'offboarding-Student':
+      case 'suspended-Student':
+      case 'Transfer-Student':
+        $mods['businessCategory'] = 'Student';
+        break;
       default:
         $mods['businessCategory'] = 'Other';
     }

@@ -49,7 +49,7 @@ if ( !empty($argv[1]) ) {
   $uid = substr($email,0,strpos($email,'@'));
   $users = $ldap->quick_search( "(&(|(mail=$email)(uid=$uid))(!(|(employeeType=Guest)(employeeType=Trusted))))" , array() );
 } else {
-  $users = $ldap->quick_search( '(&(!(|(employeeType=Guest)(employeeType=Trusted)))(objectClass=inetOrgPerson))' , array(), 2, 'ou=Students,dc=wcsd' );
+  $users = $ldap->quick_search( '(&(employeeType=Student)(objectClass=inetOrgPerson))' , array(), 2, 'ou=Students,dc=wcsd' );
 }
 $users_lookup = array();
 $users_cache = array();

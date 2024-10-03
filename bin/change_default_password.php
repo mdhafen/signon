@@ -22,7 +22,7 @@ if ( !empty($argv[1]) ) {
   $uid = substr($email,0,strpos($email,'@'));
   $users = $ldap->quick_search( "(|(mail=$email)(uid=$uid))" , array() );
 } else {
-  $users = $ldap->quick_search( '(&(!(|(employeeType=Guest)(employeeType=Trusted)))(objectClass=inetOrgPerson))' , array() );
+  $users = $ldap->quick_search( '(&(|(employeeType=Staff)(employeeType=Student)(employeeType=Other))(objectClass=inetOrgPerson))' , array() );
 }
 
 $change_users = array();
