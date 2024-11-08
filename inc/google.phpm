@@ -136,7 +136,7 @@ $LOCATIONS = array(
     array('initials'=>'TRANS','num'=>800,'name'=>'Transportation'),
     array('initials'=>'MAINT','num'=>810,'name'=>'Maintenance'),
     array('initials'=>'TECH','num'=>820,'name'=>'Technology'),
-    array('initials'=>'PRE','num'=>920,'name'=>'Early Childhood'),
+    array('initials'=>'ECP','num'=>220,'name'=>'Early Childhood - Preschool'),
     array('initials'=>'DO','num'=>950,'name'=>'District Office'),
     array('initials'=>'WOOD','num'=>950,'name'=>'Woodward'),
     array('initlals'=>'YIC','num'=>950,'name'=>'Youth In Custody'),
@@ -315,7 +315,7 @@ function google_org_to_loc( $path ) {
 
   foreach ( $ous as $ou ) {
     foreach ( $LOCATIONS as $location ) {
-      if ( stripos($location['ou'],$ou) == 3 ) {
+      if ( stripos($location['name'],$ou) == 3 ) {
         return $location;
       }
     }
