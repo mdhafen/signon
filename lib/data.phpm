@@ -135,7 +135,7 @@ class LDAP_Wrapper {
 			ldap_set_option( $this->ldap, LDAP_OPT_NETWORK_TIMEOUT, 30 );
 		}
 
-		$result = ldap_bind( $this->ldap, $userdn, $passwd );
+		$result = @ldap_bind( $this->ldap, $userdn, $passwd );
 		if ( $result) $ldap_cache[$module] = $this->ldap;
 
 		return $result;
