@@ -115,6 +115,7 @@ $LOCATIONS = array(
     array('initials'=>'DMS','num'=>404,'name'=>'Dixie Middle'),
     array('initials'=>'EHS','num'=>712,'name'=>'Enterprise High'),
     array('initials'=>'FRIS','num'=>320,'name'=>'Fossil Ridge'),
+    array('initials'=>'PVIS','num'=>320,'name'=>'Pine View'),
     array('initials'=>'HHS','num'=>716,'name'=>'Hurricane High'),
     array('initials'=>'HIS','num'=>308,'name'=>'Hurricane Intermediate'),
     array('initials'=>'HMS','num'=>408,'name'=>'Hurricane Middle'),
