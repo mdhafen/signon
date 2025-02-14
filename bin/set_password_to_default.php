@@ -32,20 +32,7 @@ foreach ( $users as $user ) {
   if ( empty($password) ) {
     print "default password not set for ". $user['uid'][0] ."\n";
 
-    if ( empty($user['givenName']) || empty($user['sn']) || empty($user['employeeNumber']) ) {
-      print "Could not compute old default password for ". $user['dn'] ."\n";
-      continue;
-    }
-
-    $password = mb_strtolower(mb_substr($user['givenName'][0],0,1))
-	 . mb_strtolower(mb_substr($user['sn'][0],0,1))
-	 . $user['employeeNumber'][0];
-
-/*
-    $password = create_password();
-    // turn the three-word passphrase into a two-word passphrase
-    $password = substr( $password, 0, strrpos($s,'-') );
- */
+    $password = generate_default_password($user);
 
     print "Setting default password for ". $user['dn'] ."\n";
     set_default_password( $user['uid'][0], $password );
@@ -70,7 +57,7 @@ foreach ( $change_users as $user ) {
   $password = get_default_password($user['uid'][0]);
 
   print "Setting password for ". $user['dn'] ."\n";
-  if ( !empty($user['employeeType'][0]) && strtolower(strstr($email,'@')) == '@'.$GOOGLE_DOMAIN ) {
+  if ( !empty($user['employeeType'][0]) && strtolower(strstr($user['mail'][0],'@')) == '@'.$GOOGLE_DOMAIN ) {
     $result = google_set_password( $user['mail'][0], $password );
   }
   $result = set_password( $ldap, $user['dn'], $password );

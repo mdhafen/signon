@@ -264,7 +264,7 @@ function authen_db( $module, $username, $password ) {
 			// dont need these anymore
 			unset( $user['salt'], $user['password'] );
 			if ( !empty($mode['old']) && !empty($config['password_modes']['upgrade_from_old']) ) {
-				list($new_pass,$new_salt,$new_mode) = new_password($password);
+				list($new_pass,$new_salt,$new_mode) = encode_password($password);
 				$updated['salt'] = $new_salt;
 				$updated['password'] = $new_pass;
 				$updated['password_mode'] = $new_mode;
@@ -278,25 +278,10 @@ function authen_db( $module, $username, $password ) {
 
 function check_password( $password, $mode, $user ) {
 	global $config;
-	$user_password = $user['password'];
-	$key = base64_decode( $user['salt'] ) . $config['secure_phrase'];
-	$iv = '';
-	$options = 0;
 
-	if ( !empty($mode['cipher']) ) {
-		if ( empty($mode['noiv']) ) {
-			$iv = substr( $key, 0, openssl_cipher_iv_length($mode['cipher']) );
-		}
-		if ( !empty($mode['mcrypt']) ) {
-			$user_password = base64_decode($user_password);
-			$key = substr($key,0,56); // mcrypt_enc_get_key_size('bf-ecb') = 56
-			$iv = '';
-			$options = OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING;
-		}
+	$key = base64_decode($user['salt']) . $config['secure_phrase'];
+	$user_password = decode_password( $user['password'], $key, $mode );
 
-		$user_password = openssl_decrypt( $user_password, $mode['cipher'], $key, $options, $iv );
-		$user_password = rtrim($user_password, "\0" );
-	}
 	if ( !empty($mode['hash']) ) {
 		switch ( $mode['hash'] ) {
 			case 'ssha512': $password = hash( 'sha512', $password . $key ); break;
@@ -312,8 +297,29 @@ function check_password( $password, $mode, $user ) {
 	}
 }
 
-function authen_ldap( $module, $username, $password ) {
+function decode_password( $password, $key, $mode ) {
 	global $config;
+	$iv = '';
+	$options = 0;
+
+	if ( !empty($mode['cipher']) ) {
+		if ( empty($mode['noiv']) ) {
+			$iv = substr( $key, 0, openssl_cipher_iv_length($mode['cipher']) );
+		}
+		if ( !empty($mode['mcrypt']) ) {
+			$password = base64_decode($password);
+			$key = substr($key,0,56); // mcrypt_enc_get_key_size('bf-ecb') = 56
+			$iv = '';
+			$options = OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING;
+		}
+
+		$password = openssl_decrypt( $password, $mode['cipher'], $key, $options, $iv );
+		$password = rtrim($password, "\0" );
+	}
+	return $password;
+}
+
+function authen_ldap( $module, $username, $password ) {
 	$user = 0;
 	$userdn = 0;
 	$name = '';
@@ -381,8 +387,24 @@ function authenticate_api_client() {
 	global $config;
 
 	$check_token = '';
-	$username = input( '_client_id', INPUT_STR );
-	$password = input( '_client_secret', INPUT_STR );
+	$username = '';
+	$password = '';
+
+	if ( !empty($_SERVER['REMOTE_USER']) ) {
+		list($scheme,$basic) = explode( ' ', $_SERVER['REMOTE_USER'], 2 );
+		$basic = base64_decode($basic);
+		if ( !emtpy($basic) && str_contains($basic,':') ) {
+			list($username,$password) = explode(':',$basic);
+		}
+	}
+	if ( empty($username) && !empty($_SERVER['PHP_AUTH_USER']) ) {
+		$username = $_SERVER['PHP_AUTH_USER'];
+		$password = $_SERVER['PHP_AUTH_PW'];
+	}
+	if ( empty($username) ) {
+		$username = input( '_client_id', INPUT_STR );
+		$password = input( '_client_secret', INPUT_STR );
+	}
 
 	if ( isset($_SESSION['loggedin_user']) && $_SESSION['loggedin_user']['userid'] != -1 ) {
 		// client api call on top of user session - return false.
@@ -448,14 +470,21 @@ function roles() {
 	return $role;
 }
 
-function new_password( $new_password ) {
+function encode_password( $new_password, $mode = array() ) {
 	global $config;
 
-	$mode = $config['password_modes'][ $config['password_modes']['prefered'] ];
-	$key_size = 72;
+	if ( empty($mode) ) {
+		$mode = $config['password_modes'][ $config['password_modes']['prefered'] ];
+	}
+	if ( !empty($mode['cipher']) ) {
+		$key_size = openssl_cipher_iv_length($mode['cipher']);
+	}
+	else {
+		$key_size = 72;
+	}
 	$phrase_size = min( strlen($config['secure_phrase']), 8 );
 
-	$rand_length = rand( $key_size - $phrase_size, $key_size );
+	$rand_length = random_int( $key_size - $phrase_size, $key_size );
 	$salt = openssl_random_pseudo_bytes($rand_length);
 
 	$key = $salt . $config['secure_phrase'];
@@ -494,68 +523,101 @@ function new_password( $new_password ) {
 /*
   creates a variant of the XKCD style password if a dictionary is available
    as in 'correct horse battery staple'
-  if no dictionary is available then is a random 16 character password
+  if no dictionary is available then is a random 15 character password
  */
-function create_password() {
+function create_password(
+	$mode = 'words', // or random
+	$list = 'strong', // or sight or frequent or ... up to sight_frequent_strong
+	$separator = '-',
+	$char_set = 'numeric', // or ... up to symbol_numeric_alpha_ualpha
+	$min_length = 15,
+	$sections = 3,
+	$section_min_length = 3,
+) {
 	global $config;
 	$symbol_set = '!@#$%&*()-_+\'";:/?.,'; // reduced for mobile keyboards
 	$numeric_set = '0123456789';
 	$alpha_set = 'abcdefghijklmnopqrstuvwxyz';
 	$ualpha_set = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-	#$dict_str = $symbol_set . $numeric_set . $alpha_set . $ualpha_set;
-	$dict_str = $alpha_set;
+	$char_set_str = '';
+	if ( strpos($char_set,'symbol') !== false ) {
+		$char_set_str .= $symbol_set;
+	}
+	if ( strpos($char_set,'numeric') !== false ) {
+		$char_set_str .= $numeric_set;
+	}
+	if ( strpos($char_set,'alpha') !== false ) {
+		$char_set_str .= $alpha_set;
+	}
+	if ( strpos($char_set,'ualpha') !== false ) {
+		$char_set_str .= $ualpha_set;
+	}
 	$dict_file = $config['base_dir'] .'/lib/word_dictionary'; # /usr/share/dict/words
 	$dictionary = array();
-	$iterations = 0;
 	$password = '';
 
-	if ( is_readable( $dict_file ) ) {
-		$dictionary = file( $dict_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
-		if ( !empty($dictionary) ) {
-			$dict_str = "-";
+	if ( $mode == 'words' ) {
+		if ( strpos($list,'strong') !== false ) {
+			$file = $config['base_dir'] .'/lib/word_dictionary';
+			if ( is_readable( $file ) ) {
+				$temp_dict = file( $file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
+				if ( !empty($temp_dict) ) {
+					$dictionary = array_merge($dictionary,$temp_dict);
+				}
+			}
 		}
+		if ( strpos($list,'sight') !== false ) {
+			$file = $config['base_dir'] .'/lib/site_words';
+			if ( is_readable( $file ) ) {
+				$temp_dict = file( $file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
+				if ( !empty($temp_dict) ) {
+					$dictionary = array_merge($dictionary,$temp_dict);
+				}
+			}
+		}
+		if ( strpos($list,'frequent') !== false ) {
+			$file = $config['base_dir'] .'/lib/frequent_words';
+			if ( is_readable( $file ) ) {
+				$temp_dict = file( $file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
+				if ( !empty($temp_dict) ) {
+					$dictionary = array_merge($dictionary,$temp_dict);
+				}
+			}
+		}
+		$dictionary = array_unique($dictionary);
 	}
 
 	$dict_size = count($dictionary) - 1;
-	$dict_str_size = strlen($dict_str) - 1;
-	#while ( $iterations < 4 || strlen($password) < 16 ) {
-	while ( $iterations < 3 || strlen($password) < 15 ) {
-		$iterations++;
-		if ( !empty($dictionary) ) {
-			$password .= $dictionary[ rand(0,$dict_size) ];
-		}
-		if ( !empty($dict_str) ) {
-			$password .= $dict_str[ rand(0,$dict_str_size) ];
-		}
+	$char_set_size = strlen($char_set_str) - 1;
+	if ( $dict_size < 1 ) {
+		$mode = 'random';
 	}
-	$password = substr($password,0,-1);  // chop last '-' off
+	$iterations = 0;
+	while ( $iterations < $sections || strlen($password) < $min_length ) {
+		$iterations++;
+		if ( $mode == 'words' ) {
+			if ( !empty($dictionary) ) {
+				$word = $dictionary[ random_int(0,$dict_size) ];
+				while ( strlen($word) < $section_min_length ) {
+					$word = $dictionary[ random_int(0,$dict_size) ];
+				}
+				$password .= $word;
+			}
+		}
+		else {
+			if ( !empty($char_set_str) ) {
+				$section_str = '';
+				while ( strlen($section_str) < $section_min_length ) {
+					$section_str .= $char_set_str[ random_int(0,$char_set_size) ];
+				}
+				$password .= $section_str;
+			}
+		}
+		$password .= $separator;
+	}
+	$password = substr($password,0,-1);	 // chop last separator off
 
 	return $password;
-}
-
-// Just in case I care that php random number generator isn't random enough
-function _rand( $min = 0, $max = 255 ) {
-	$range = $max - $min;
-
-	$num = $range;
-	$bytes = 0;
-	do {
-		$bytes++;
-		$num = $num >> 8;
-	} while ( $num > 0 );
-
-	$num = 0;
-	$iterations = 255;
-	do {
-		$iterations--;
-		$raw = mcrypt_create_iv( $bytes, MCRYPT_RAND );
-		for ( $s = 0; $s < $bytes; $s++ ) {
-			$num = ( $num << 8 ) | ( ord( $raw[$s] ) );
-		}
-		$num = $num & PHP_INT_MAX; // make sure there's no overflow
-	} while ( $num > $range && $interations );
-	if ( $num > $range ) { $num = $num % $range; } // less safe fallback
-	return $num + $min;
 }
 
 ?>
