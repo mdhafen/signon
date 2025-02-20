@@ -12,6 +12,8 @@ $updates = array(
   '0009-add_staff_to_mac_registry_labs_cat',
   '0010-increase_password_token_lifespan_in_message',
   '0011-add_cybercorp_to_mac_registry_iot_cat',
+  '0012-encrypt_lock_and_default',
+  '0013-add_token_purpose_and_log',
 );
 $results = array();
 

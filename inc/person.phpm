@@ -12,6 +12,7 @@ use Twilio\Rest\Client;
 
 global $config;
 include_once( $config['base_dir'] .'/lib/data.phpm' );
+include_once( $config['base_dir'] .'/lib/security.phpm' );
 register_data_callback('ldap','rename','fix_dn_in_logs');
 
 function fix_dn_in_logs( $old_dn, $new_dn ) {
@@ -70,33 +71,80 @@ function is_person( $o=array() ) {
 }
 
 function get_default_password( $uid ) {
+	global $config;
 	$dbh = db_connect('core');
 	$sth = $dbh->prepare('SELECT * FROM user_default_password WHERE uid = :uid');
 	$sth->bindValue( ':uid', $uid );
 	$sth->execute();
 	$pass = '';
+	$salt = '';
+	$mode = '';
 
 	while ( $row = $sth->fetch() ) {
 		$row = stripslashes_array( $row );
 		$pass = $row['default_password'];
+		$salt = $row['salt'];
+		$mode = $row['password_mode'];
+	}
+	if ( !empty($mode) ) {
+		$mode = $config['password_modes'][ $mode ];
+	}
+	else {
+		$mode = array();
+	}
+
+	if ( !empty($salt) ) {
+		$key = base64_decode($salt) . $config['secure_phrase'];
+	}
+	else {
+		$key = '';
+	}
+
+	if ( !empty($pass) ) {
+		$pass = decode_password( $pass, $key, $mode );
+	}
+	else {
+		$pass = '';
 	}
 
 	return $pass;
 }
 
 function set_default_password( $uid, $password ) {
+	global $config;
+	$mode = $config['password_modes'][ $config['password_modes']['prefered'] ];
+	unset($mode['hash']);
+	list($enc_password, $salt, $mode) = encode_password( $password, $mode );
+
 	$dbh = db_connect('core');
-	$sth = $dbh->prepare('REPLACE INTO user_default_password (uid,default_password,timestamp) VALUES (:uid,:passwd,NOW())');
+	$sth = $dbh->prepare('REPLACE INTO user_default_password (uid,default_password,salt,password_mode,timestamp) VALUES (:uid,:passwd,:salt,:mode,NOW())');
 	$sth->bindValue( ':uid', $uid );
-	$sth->bindValue( ':passwd', $password );
+	$sth->bindValue( ':passwd', $enc_password );
+	$sth->bindValue( ':salt', $salt );
+	$sth->bindValue( ':mode', $mode );
 	$sth->execute();
 }
 
 function generate_default_password($entry) {
-	$password = mb_strtolower(mb_substr($entry['givenName'][0],0,1))
-	. mb_strtolower(mb_substr($entry['sn'][0],0,1))
-	. $entry['employeeNumber'][0];
-
+	$list = 'strong';
+	$min_len = 16;
+	if ( !empty($entry['employeeType']) && $entry['employeeType'][0] == 'Student' ) {
+		$list = 'sight';
+		$min_len = 11;
+		if ( stripos($entry['dn'],',ou=elementary schools,') === false
+			 || (
+			 stripos($entry['dn'],',ou=Pre-K') === false
+			 && stripos($entry['dn'],',ou=kindergarten,') === false
+			 && stripos($entry['dn'],',ou=grade 1,') === false
+			 && stripos($entry['dn'],',ou=grade 2,') === false
+			 && stripos($entry['dn'],',ou=grade 3,') === false
+			 )
+		) {
+			$list = 'sight_frequent';
+			$min_len = 12;
+		}
+	}
+	$password = create_password(mode:'words',list:$list,min_length:$min_len);
 	return $password;
 }
 
@@ -107,9 +155,15 @@ function create_password_reset_token($uid) {
 	$user = !empty($_SESSION['loggedin_user']['username']) ? $_SESSION['loggedin_user']['username'] : $user;
 
 	$dbh = db_connect('core');
-	$sth = $dbh->prepare('REPLACE INTO password_reset_tokens (uid,token,user,ip,timestamp) VALUES (:uid,:token,:user,:ip,NOW())');
+	$sth = $dbh->prepare('REPLACE INTO tokens (uid,token,user,ip,purpose) VALUES (:uid,:token,:user,:ip,"pass_reset")');
 	$sth->bindValue( ':uid', $uid );
 	$sth->bindValue( ':token', $token );
+	$sth->bindValue( ':user', $user );
+	$sth->bindValue( ':ip', $ip );
+	$sth->execute();
+
+	$sth = $dbh->prepare('INSERT INTO token_log (uid,user,ip,purpose) VALUES (:uid,:user,:ip,"pass_reset")');
+	$sth->bindValue( ':uid', $uid );
 	$sth->bindValue( ':user', $user );
 	$sth->bindValue( ':ip', $ip );
 	$sth->execute();
@@ -121,7 +175,7 @@ function get_password_reset_token( $token = null, $userid = null ) {
 	clean_password_reset_tokens();
 
 	$dbh = db_connect('core');
-	$query = 'SELECT * FROM password_reset_tokens WHERE ';
+	$query = 'SELECT * FROM tokens WHERE purpose = "pass_reset" AND ';
 	if ( !empty($token) ) {
 		$query .= 'token = :token';
 		$sth = $dbh->prepare($query);
@@ -148,10 +202,10 @@ function get_password_reset_token( $token = null, $userid = null ) {
 function clean_password_reset_tokens($token = null) {
 	$dbh = db_connect('core');
     // token expires after 12 hours
-	$dbh->exec('DELETE FROM password_reset_tokens WHERE timestamp < DATE_SUB(NOW(), INTERVAL 12 HOUR)');
+	$dbh->exec('DELETE FROM tokens WHERE timestamp < DATE_SUB(NOW(), INTERVAL 12 HOUR)');
 
 	if ( !empty($token) ) {
-		$sth = $dbh->prepare('DELETE FROM password_reset_tokens WHERE token = :token');
+		$sth = $dbh->prepare('DELETE FROM tokens WHERE token = :token');
 		$sth->bindValue( ':token', $token );
 		$sth->execute();
 	}
@@ -172,9 +226,7 @@ function set_password( $ldap, $userdn, $password ) {
 
 		$salt = "";
 		$len = mt_rand( 40-strlen($password), 50 );
-		for ( $i = 0; $i < $len; $i++ ) {
-			$salt .= chr( (int) mt_rand(1,255) );
-		}
+		$salt = openssl_random_pseudo_bytes($len);
 		$hash_pass = '{SSHA}' . base64_encode( sha1($password.$salt,TRUE) . $salt );
 		$smb_pass = strtoupper(bin2hex(mhash(MHASH_MD4, iconv("UTF-8","UTF-16LE",$password))));
 
@@ -680,7 +732,8 @@ function is_pwned_password( $password ) {
 }
 
 function get_lock_status( $username ) {
-    $locked = array();
+	global $config;
+	$locked = array();
 	$dbh = db_connect('core');
 	$sth = $dbh->prepare('SELECT * FROM user_locks WHERE uid = :uid');
 	$sth->bindValue( ':uid', $username );
@@ -690,23 +743,47 @@ function get_lock_status( $username ) {
 		$row = stripslashes_array( $row );
 		$locked = $row;
 	}
+	if ( !empty($locked['password_mode']) ) {
+		$mode = $config['password_modes'][ $locked['password_mode'] ];
+	}
+	else {
+		$mode = array();
+	}
+
+	if ( !empty($locked['salt']) ) {
+		$key = base64_decode($locked['salt']) . $config['secure_phrase'];
+	}
+	else {
+		$key = '';
+	}
+
+	if ( !empty($locked['passwd']) ) {
+		$locked['passwd'] = decode_password( $locked['passwd'], $key, $mode );
+	}
 
 	return $locked;
 }
 
 function lock_user( $ldap, $userdn, $password ) {
+	global $config;
 	$set = $ldap->quick_search( '(objectClass=*)', array(), 0, $userdn );
 	$object = $set[0];
 	$objectdn = $object['dn'];
 	unset( $object['dn'] );
 	$username = $object['uid'][0];
 
+	$mode = $config['password_modes'][ $config['password_modes']['prefered'] ];
+	unset($mode['hash']);
+	list($enc_password, $salt, $mode) = encode_password( $password, $mode );
+
 	$user = !empty($_SESSION['loggedin_user']['username']) ? $_SESSION['loggedin_user']['username'] : $username;
 
 	$dbh = db_connect('core');
-	$sth = $dbh->prepare('REPLACE INTO user_locks (uid,passwd,user) VALUES (:uid,:passwd,:user)');
+	$sth = $dbh->prepare('REPLACE INTO user_locks (uid,passwd,salt,password_mode,user) VALUES (:uid,:passwd,:salt,:mode,:user)');
 	$sth->bindValue( ':uid', $username );
-	$sth->bindValue( ':passwd', $password );
+	$sth->bindValue( ':passwd', $enc_password );
+	$sth->bindValue( ':salt', $salt );
+	$sth->bindValue( ':mode', $mode );
 	$sth->bindValue( ':user', $user );
 	$result = $sth->execute();
 

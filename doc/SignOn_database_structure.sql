@@ -71,7 +71,9 @@ CREATE TABLE `attribute_changes` (
 DROP TABLE IF EXISTS `user_locks`;
 CREATE TABLE `user_locks` (
   `uid` varchar(40) NOT NULL,
-  `passwd` mediumtext NULL,
+  `passwd` BLOB NULL,
+  `salt` BLOB NULL,
+  `password_mode` VARCHAR(32) NOT NULL DEFAULT '',
   `user` mediumtext,
   `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`uid`)
@@ -92,16 +94,29 @@ CREATE TABLE `guest_signatures` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Table structure for table `password_reset_tokens`
+-- Table structure for table `tokens`
 --
 
-DROP TABLE IF EXISTS `password_reset_tokens`;
-CREATE TABLE `password_reset_tokens` (
+DROP TABLE IF EXISTS `tokens`;
+CREATE TABLE `tokens` (
   `uid` varchar(40) NOT NULL,
   `token` varchar(40) NOT NULL,
   `user` mediumtext,
   `ip` varchar(40) NOT NULL DEFAULT '0.0.0.0',
-  `timestamp` datetime DEFAULT NULL,
+  `purpose` enum('pass_reset','authen') NOT NULL,
+  `timestamp` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`uid`),
+  UNIQUE KEY (`uid`,`purpose`),
+  UNIQUE KEY (`token`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `token_log`;
+CREATE TABLE `token_log` (
+  `uid` varchar(40) NOT NULL,
+  `user` mediumtext,
+  `ip` varchar(40) NOT NULL DEFAULT '0.0.0.0',
+  `purpose` enum('pass_reset','authen') NOT NULL,
+  `timestamp` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -112,7 +127,9 @@ CREATE TABLE `password_reset_tokens` (
 DROP TABLE IF EXISTS `user_default_password`;
 CREATE TABLE `user_default_password` (
   `uid` varchar(40) NOT NULL,
-  `default_password` varchar(39) DEFAULT NULL,
+  `default_password` BLOB DEFAULT NULL,
+  `salt` BLOB NULL,
+  `password_mode` VARCHAR(32) NOT NULL DEFAULT '',
   `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
