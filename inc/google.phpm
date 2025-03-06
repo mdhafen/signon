@@ -346,6 +346,7 @@ function google_user_hash_for_ldap( $user ) {
   $entry = array();
 
   if ( !empty($user) ) {
+    $entry['employeeType'] = '';
     if ( stripos($user['orgUnitPath'],'off boarding') !== FALSE ) {
       $entry['employeeType'] = 'offboarding-';
     }
