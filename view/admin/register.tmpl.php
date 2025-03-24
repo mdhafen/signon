@@ -100,6 +100,7 @@ There was an error! <?= $data['err_msg'] ?>
       <option value="Phone"<?= !empty($data['iot_cat']) && $data['iot_cat'] == 'Phone' ? " selected":""?>>Staff Phone</option>
       <option value="Camera"<?= !empty($data['iot_cat']) && $data['iot_cat'] == 'Camera' ? " selected":""?>>Camera</option>
       <option value="CyberCorp"<?= !empty($data['iot_cat']) && $data['iot_cat'] == 'CyberCorp' ? " selected":""?>>CyberCorp device</option>
+      <option value="PLC"<?= !empty($data['iot_cat']) && $data['iot_cat'] == 'PLC' ? " selected":""?>>PLC only device</option>
   </select>
   <span class="help-block">This field effects device access to the WCSDiot network.  Only change this if you have been told to by Technology Department staff.</span>
   </div>

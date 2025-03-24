@@ -15,6 +15,7 @@ $updates = array(
   '0012-encrypt_lock_and_default',
   '0013-add_token_purpose_and_log',
   '0014-add_printer_to_mac_registry_iot_cat',
+  '0015-add_plc_to_mac_registry_iot_cat',
 );
 $results = array();
 
