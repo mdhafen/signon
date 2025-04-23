@@ -128,23 +128,12 @@ function set_default_password( $uid, $password ) {
 function generate_default_password($entry) {
 	$list = 'strong';
 	$min_len = 16;
-	if ( !empty($entry['employeeType']) && $entry['employeeType'][0] == 'Student' ) {
+	if ( !empty($entry['employeeType']) && $entry['employeeType'][0] == 'Student'
+			&& stripos($entry['dn'],',ou=elementary schools,') !== false ) {
 		$list = 'sight';
-		$min_len = 11;
-		if ( stripos($entry['dn'],',ou=elementary schools,') === false
-			 || (
-			 stripos($entry['dn'],',ou=Pre-K') === false
-			 && stripos($entry['dn'],',ou=kindergarten,') === false
-			 && stripos($entry['dn'],',ou=grade 1,') === false
-			 && stripos($entry['dn'],',ou=grade 2,') === false
-			 && stripos($entry['dn'],',ou=grade 3,') === false
-			 )
-		) {
-			$list = 'sight_frequent';
-			$min_len = 12;
-		}
+		$min_len = 12;
 	}
-	$password = create_password(mode:'words',list:$list,min_length:$min_len);
+	$password = create_password( mode:'words', list:$list, min_length:$min_len );
 	return $password;
 }
 
