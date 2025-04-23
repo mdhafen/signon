@@ -416,13 +416,19 @@ function authenticate_api_client() {
 			// $output[ 'BADLOGIN' ] = 1;
 		}
 		else {
-			$client_name = $config['api_clients'][$username]['name'];
-			$client_pass = $config['api_clients'][$username]['secret'];
-			$no_session	 = $config['api_clients'][$username]['no_session'];
+			if ( empty( $config['api_clients'][$username] ) ) {
+				return 0;
+			}
+			$this_conf = $config['api_clients'][$username];
+			$client_name = $this_conf['name'];
+			$client_pass = $this_conf['secret'];
+			$no_session  = empty($this_conf['no_session']) ? 0 : $this_conf['no_session'];
 			if ( !empty($client_pass) && $password === $client_pass ) {
 				$user = array();
 				$user[ 'userid' ] = -1;
 				$user[ 'username' ] = $client_name;
+				$user[ 'password' ] = '';
+				$user[ 'role' ] = 0;
 
 				unset( $_SESSION[ 'NOSESSION' ] );
 				$token = hash(
