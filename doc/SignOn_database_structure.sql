@@ -117,7 +117,7 @@ CREATE TABLE `token_log` (
   `ip` varchar(40) NOT NULL DEFAULT '0.0.0.0',
   `purpose` enum('pass_reset','authen') NOT NULL,
   `timestamp` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`uid`)
+  KEY (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
