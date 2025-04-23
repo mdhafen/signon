@@ -6,14 +6,14 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 ?>
 
 <div class="container">
-<h1>Create account</h1>
+<h1>Update / Create account</h1>
 <div class="mainpage">
 <?php
 if ( !empty($data['result']) ) {
   if ( empty($data['error']) ) { ?>
 <div class="alert alert-info alert-dismissible" role="alert">
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-Your account has been created.  Please switch to the WCSDaccess network and use your email username <span class="text-info small">(Your usename is the part of your email address before the '@')</span> and password to login.
+Your account has been updated / created.  You can now access the WCSDaccess wireless network using your district email address and password to login.
 </div>
 <?php
   } else { /* error */ ?>
@@ -28,7 +28,7 @@ There was an error! <?= $data['result'] ?>
 <?php if ( !empty($data['username']) ) { ?>
   <h2>Welcome <?= $data['username'] ?></h2>
 <?php } ?>
-  Please enter your Washington County School District EMail password below.
+  Please enter your new Washington County School District EMail password below.
 </div>
 
 <div class="panel panel-default panel-body">
@@ -49,7 +49,7 @@ There was an error! <?= $data['result'] ?>
     </div>
     <div class="row form-group">
       <input type="hidden" name="op" value="<?= $data['op'] ?>">
-      <input class="btn btn-primary" type="submit" name="submit" value="Register">
+      <input class="btn btn-primary" type="submit" name="submit" value="Submit">
     </div>
     </form>
   </div>
