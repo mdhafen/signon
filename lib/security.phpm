@@ -424,9 +424,13 @@ function authenticate_api_client() {
 			$client_pass = $this_conf['secret'];
 			$no_session  = empty($this_conf['no_session']) ? 0 : $this_conf['no_session'];
 			if ( !empty($client_pass) && $password === $client_pass ) {
+				$remote_user = input( '_loggedin_user', INPUT_STR );
+				if ( !empty($remote_user) ) {
+					$remote_user = $client_name .':'. $remote_user;
+				}
 				$user = array();
 				$user[ 'userid' ] = -1;
-				$user[ 'username' ] = $client_name;
+				$user[ 'username' ] = empty($remote_user) ? $client_name : $remote_user;
 				$user[ 'password' ] = '';
 				$user[ 'role' ] = 0;
 
