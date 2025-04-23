@@ -14,12 +14,10 @@ include( 'doc-header.php' );
 
 <div class="container">
 <div class="mainpage">
-<h2>Need an WCSDsignon account?</h2>
+<h2>Need to create a WCSD account or change your password?</h2>
 <div class="row">
-<a href="create/create.php" class="btn btn-primary btn-lg">WCSD Employee / Student Registration</a>
+<a href="create/create.php" class="btn btn-primary btn-lg">WCSD Employee / Student Profile</a>
 </div>
-<br>
-<img src='img/WCSDsignon.jpg'>
 
 </div>
 

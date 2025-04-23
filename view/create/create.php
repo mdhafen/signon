@@ -6,7 +6,7 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 ?>
 
 <div class="container">
-<h1>Update / Create account</h1>
+<h1>Create account / Change password</h1>
 <div class="mainpage">
 <?php
 if ( !empty($data['result']) ) {
@@ -28,7 +28,7 @@ There was an error! <?= $data['result'] ?>
 <?php if ( !empty($data['username']) ) { ?>
   <h2>Welcome <?= $data['username'] ?></h2>
 <?php } ?>
-  Please enter your new Washington County School District EMail password below.
+  Please enter your new Washington County School District Email password below.
 </div>
 
 <div class="panel panel-default panel-body">
