@@ -50,11 +50,11 @@ foreach ( $users as $user ) {
 	 . $user['employeeNumber'][0];
 
   $def_password = get_default_password($user['uid'][0]);
-  if ( ! empty($def_password) && ( ! $override || $def_password != $old_password ) ) {
+  if ( ! empty($def_password) && ! $override && $def_password != $old_password )  {
     output( '<?xml version ="1.0"?><result><state>error</state><flag>ALREADY_SET</flag><message>'. htmlspecialchars($user['dn'],ENT_QUOTES|ENT_XML1|ENT_SUBSTITUTE) .'</message></result>', '', $xml=1 );
     exit;
   }
-  if ( ! @$ldap->do_connect('core',$user['dn'],$old_password) ) {
+  if ( ! $override && ! @$ldap->do_connect('core',$user['dn'],$old_password) ) {
     output( '<?xml version ="1.0"?><result><state>error</state><flag>ALREADY_CHANGED</flag><message>'. htmlspecialchars($user['dn'],ENT_QUOTES|ENT_XML1|ENT_SUBSTITUTE) .'</message></result>', '', $xml=1 );
     exit;
   }
