@@ -567,7 +567,7 @@ function create_password(
 			}
 		}
 		if ( strpos($list,'sight') !== false ) {
-			$file = $config['base_dir'] .'/lib/site_words';
+			$file = $config['base_dir'] .'/lib/sight_words';
 			if ( is_readable( $file ) ) {
 				$temp_dict = file( $file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
 				if ( !empty($temp_dict) ) {

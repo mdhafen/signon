@@ -131,7 +131,7 @@ function generate_default_password($entry) {
 	if ( !empty($entry['employeeType']) && $entry['employeeType'][0] == 'Student'
 			&& stripos($entry['dn'],',ou=elementary schools,') !== false ) {
 		$list = 'sight';
-		$min_len = 12;
+		$min_len = 11;
 	}
 	$password = create_password( mode:'words', list:$list, min_length:$min_len );
 	return $password;
