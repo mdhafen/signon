@@ -9,7 +9,7 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 <div class="main-page">
 
 <h1><?= $data['object_dn'] ?></h1>
-<h2>Set WCSDaccess and Google Password</h2>
+<h2>Set WCSD SignOn and Google Password</h2>
 
 <?php if ( ! empty($data['success']) ) { ?>
 <div class="alert alert-info alert-dismissible" role="alert">
@@ -21,7 +21,8 @@ Success!
 <a class="btn" href="object.php?dn=<?= urlencode($data['object_dn']) ?>">Back</a>
  <?php } ?>
 </div>
-<?php } else if ( ! empty($data['error']) ) { ?>
+<?php } else { ?>
+<?php   if ( ! empty($data['error']) ) { ?>
 <div class="alert alert-danger" role="alert">
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 <?= $data['error'] ?>
@@ -67,6 +68,7 @@ Success!
     <li>OverDrive</li>
   </ul>
 </div>
+<?php } ?>
 <script>
   Math.log2 = Math.log2 || function(x){ Math.log(x)*Math.LOG2E; };
   function CheckEntropy(value,report_el_id) {
