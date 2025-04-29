@@ -129,9 +129,16 @@ function generate_default_password($entry) {
 	$list = 'strong';
 	$min_len = 16;
 	if ( !empty($entry['employeeType']) && $entry['employeeType'][0] == 'Student'
-			&& stripos($entry['dn'],',ou=elementary schools,') !== false ) {
+//			&& stripos($entry['dn'],',ou=elementary schools,') !== false ) {
+			&& stripos($entry['dn'],',ou=Students,') !== false ) {
 		$list = 'sight';
 		$min_len = 11;
+
+		// FIXME temporarily set old-style default for students
+		$password = mb_strtolower(mb_substr($entry['givenName'][0],0,1))
+			. mb_strtolower(mb_substr($entry['sn'][0],0,1))
+			. $entry['employeeNumber'][0];
+		return $password;
 	}
 	$password = create_password( mode:'words', list:$list, min_length:$min_len );
 	return $password;
