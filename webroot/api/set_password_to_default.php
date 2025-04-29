@@ -18,6 +18,7 @@ $output = '<?xml version ="1.0"?><result>';
 $warnings = array();
 $dn = input( 'dn', INPUT_STR );
 $uid = input( 'uid', INPUT_STR );
+$new_passwd = input( 'password', INPUT_STR );
 if ( !empty($dn) ) {
 	$users = $ldap->quick_search( '(objectClass=*)', array(), 0, $dn );
 } else if ( !empty($uid) ) {
@@ -49,8 +50,13 @@ foreach ( $users as $user ) {
 		. $user['employeeNumber'][0];
 
 	$def_password = get_default_password($user['uid'][0]);
-	if ( empty($def_password) ) {
-        $def_password = generate_default_password($user);
+	if ( empty($def_password) || !empty($new_passwd) ) {
+        if ( empty($new_passwd) ) {
+            $def_password = generate_default_password($user);
+        }
+        else {
+            $def_password = $new_passwd;
+        }
         set_default_password( $user['uid'][0], $def_password );
 		$warnings[] = '<warning><flag>CREATED_DEFAULT</flag><message>'. htmlspecialchars($user['uid'][0],ENT_QUOTES|ENT_XML1|ENT_SUBSTITUTE) .'</message></warning>';
 	}
