@@ -422,7 +422,7 @@ function google_user_hash_for_ldap( $user ) {
             $entry['homePhone'] = $ci['Phone_Number'];
         }
         if ( !empty($ci['Phone_Number_2']) ) {
-            $entry['telephoneNumber'] = $ci['Phone_Number_2'];
+            $entry['mobile'] = $ci['Phone_Number_2'];
         }
         if ( !empty($ci['Home_Room']) ) {
           $entry['pager'] = $ci['Home_Room'];
