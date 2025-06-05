@@ -95,6 +95,7 @@ There was an error! <?= $data['err_msg'] ?>
       <option value="Lan"<?= !empty($data['iot_cat']) && $data['iot_cat'] == 'Lan' ? " selected":""?>>Staff device</option>
       <option value="Staff"<?= !empty($data['iot_cat']) && $data['iot_cat'] == 'Staff' ? " selected":""?>>Staff device</option>
       <option value="Facilities"<?= !empty($data['iot_cat']) && $data['iot_cat'] == 'Facilities' ? " selected":""?>>Facilities device</option>
+      <option value="AV"<?= !empty($data['iot_cat']) && $data['iot_cat'] == 'AV' ? " selected":""?>>AV Devices</option>
       <option value="Printer"<?= !empty($data['iot_cat']) && $data['iot_cat'] == 'Printer' ? " selected":""?>>Printer</option>
       <option value="Student"<?= !empty($data['iot_cat']) && $data['iot_cat'] == 'Student' ? " selected":"" ?>>Student device</option>
       <option value="Phone"<?= !empty($data['iot_cat']) && $data['iot_cat'] == 'Phone' ? " selected":""?>>Staff Phone</option>

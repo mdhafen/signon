@@ -28,7 +28,7 @@ CREATE TABLE `authorized_macs` (
   `device_home` varchar(4) DEFAULT '000',
   `labs_category` enum('','Lan','Labs','Staff','Facilities','AV','Phone','TechOffice','Guest') NOT NULL DEFAULT 'Labs',
   `fields_category` enum('','Facilities') NOT NULL DEFAULT '',
-  `iot_category` enum('','Lan','Staff','Facilities','Printer','Student','Phone','Camera','CyberCorp','PLC') NOT NULL DEFAULT '',
+  `iot_category` enum('','Lan','Staff','Facilities','AV','Printer','Student','Phone','Camera','CyberCorp','PLC') NOT NULL DEFAULT '',
   PRIMARY KEY `uk_macaddress` (`macaddress`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
