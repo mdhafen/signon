@@ -24,15 +24,17 @@ function load_session() {
     global $config;
     if ( isset( $config[ 'session_store_db' ] ) && $config[ 'session_store_db' ] == 1 ) {
         $dbh = db_connect();
-	$query = "SELECT session_data FROM sessions WHERE session_id = :sid";
-	$sth = $dbh->prepare( $query );
-	$sth->bindParam( ':sid', session_id() );
-	$sth->execute();
+        $query = "SELECT session_data FROM sessions WHERE session_id = :sid";
+        $sth = $dbh->prepare( $query );
+        $sth->bindParam( ':sid', session_id() );
+        $sth->execute();
 
-	$row = $sth->fetch();
-	$str = $row['session_data'];
+        $row = $sth->fetch();
+        $str = $row['session_data'];
 
-	$_SESSION = unserialize( base64_decode( $str ) );
+        if ( !empty($str) ) {
+            $_SESSION = unserialize( base64_decode( $str ) );
+        }
     }
 }
 
