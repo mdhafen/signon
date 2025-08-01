@@ -4,6 +4,8 @@ include_once( '../lib/input.phpm' );
 include_once( '../inc/person.phpm' );
 include_once( '../inc/google.phpm' );
 
+$_SESSION['loggedin_user'] = array('username' => 'CLI' );
+
 global $GOOGLE_DOMAIN;
 $email = "";
 if ( !empty($argv[1]) ) {
@@ -81,6 +83,7 @@ foreach ( $change_users as $user ) {
     $result = google_set_password( $user['mail'][0], $password );
   }
   $result = set_password( $ldap, $user['dn'], $password );
+  log_attr_change( $user['dn'], array('userPassword'=>'') );
 }
 
 ?>
