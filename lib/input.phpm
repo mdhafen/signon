@@ -172,12 +172,21 @@ function input_validation( $output, $type ) {
 function get_remote_ip() {
 	global $config;
 	$ip = '';
-	if ( !empty($config['trusted_proxies']) && array_search($_SERVER['REMOTE_ADDR'],$config['trusted_proxies']) !== false && !empty($_SERVER['HTTP_X_FORWARDED_FOR']) ) {
+	if ( !empty($_SERVER['REMOTE_ADDR'])
+		 && !empty($config['trusted_proxies'])
+		 && array_search($_SERVER['REMOTE_ADDR'],$config['trusted_proxies']) !== false
+		 && !empty($_SERVER['HTTP_X_FORWARDED_FOR']) ) {
 		$remotes = array_values(array_filter(explode(',',$_SERVER['HTTP_X_FORWARDED_FOR'])));
 		$ip = end($remotes);
 	}
-	else {
+	elseif ( !empty($_SERVER['REMOTE_ADDR']) ) {
 		$ip = $_SERVER['REMOTE_ADDR'];
+	}
+	elseif ( !empty($_SERVER['SERVER_ADDR']) ) {
+		$ip = $_SERVER['SERVER_ADDR'];
+	}
+	else {
+		$ip = gethostbyname(gethostname());
 	}
 	return $ip;
 }
