@@ -4,7 +4,7 @@ include_once( '../lib/input.phpm' );
 include_once( '../inc/person.phpm' );
 include_once( '../inc/google.phpm' );
 
-$_SESSION['loggedin_user'] = array('username' => 'CLI' );
+$_SESSION['api_user'] = array('username' => 'CLI' ); // Set for attr log
 
 global $GOOGLE_DOMAIN;
 $email = "";
