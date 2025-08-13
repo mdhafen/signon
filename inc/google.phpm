@@ -355,19 +355,26 @@ function google_user_hash_for_ldap( $user ) {
       $entry['employeeType'] = 'suspended-';
     }
 
-    if ( stripos($user['orgUnitPath'],'staff') !== FALSE ) {
+    if ( stripos($user['orgUnitPath'],'/staff/') !== FALSE ) {
       $entry['employeeType'] .= 'Staff';
       $entry['businessCategory'] = 'Staff';
     }
-    else if ( stripos($user['orgUnitPath'],'student') !== FALSE ) {
+    else if ( stripos($user['orgUnitPath'],'/students/') !== FALSE ) {
       $entry['employeeType'] .= 'Student';
       $entry['businessCategory'] = 'Student';
+    }
+    else if ( stripos($user['orgUnitPath'],'/school board') !== FALSE ) {
+      $entry['employeeType'] .= 'SB';
+      $entry['businessCategory'] = 'SB';
     }
     else {
       $entry['employeeType'] .= 'Unknown';
     }
 
-    if ( !empty($entry['businessCategory']) ) {
+    if ( empty($entry['businessCategory']) ) {
+      $entry = array();
+    }
+    else {
       $entry['uid'] = strtolower(substr($user['primaryEmail'],0,strpos($user['primaryEmail'],'@')));
       $entry['sn'] = $user['name']['familyName'];
       $entry['givenName'] = $user['name']['givenName'];
