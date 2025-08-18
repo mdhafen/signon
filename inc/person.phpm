@@ -72,42 +72,13 @@ function is_person( $o=array() ) {
 
 function get_default_password( $uid ) {
 	global $config;
-	$dbh = db_connect('core');
-	$sth = $dbh->prepare('SELECT * FROM user_default_password WHERE uid = :uid');
-	$sth->bindValue( ':uid', $uid );
-	$sth->execute();
-	$pass = '';
-	$salt = '';
-	$mode = '';
 
-	while ( $row = $sth->fetch() ) {
-		$row = stripslashes_array( $row );
-		$pass = $row['default_password'];
-		$salt = $row['salt'];
-		$mode = $row['password_mode'];
-	}
-	if ( !empty($mode) ) {
-		$mode = $config['password_modes'][ $mode ];
-	}
-	else {
-		$mode = array();
-	}
-
-	if ( !empty($salt) ) {
-		$key = base64_decode($salt) . $config['secure_phrase'];
-	}
-	else {
-		$key = '';
-	}
-
-	if ( !empty($pass) ) {
-		$pass = decode_password( $pass, $key, $mode );
-	}
-	else {
-		$pass = '';
-	}
-
-	return $pass;
+    include_once( $config['base_dir'] .'/lib/PS.phpm' );
+    $ps = new PS_Access();
+    $u_id = $ps->student_username_to_id($uid);
+    $user = $ps->get_student_user($u_id);
+    $pass = $user['default_password'];
+    return $pass;
 }
 
 function set_default_password( $uid, $password ) {
@@ -438,7 +409,7 @@ function check_google_sync( $ldap, $object ) {
     return array($errors,$objects,$keys,$diff_keys);
 }
 
-function do_google_sync( $ldap, $object, $entry ) {
+function do_google_sync( $ldap, $object, $entry, $set_password = true ) {
     $mods = array();
     $move = 0;
     $add = 0;
@@ -451,6 +422,11 @@ function do_google_sync( $ldap, $object, $entry ) {
         $rdn_attr = substr( $dn, 0, strpos($dn,'=') );
         $ignored_fields = array($rdn_attr,'dn','objectClass','userPassword','sambaNTPassword','shadowLastChange','sambaPwdLastSet');
         $dynamic_fields = array('sambaSID','uidNumber');
+
+	if ( !empty($object['businessCategory']) && array_search($object['businessCategory'][0],array('Confinement','Banned')) !== false ) {
+            $ignored_fields[] = 'businessCategory';
+        }
+
         $mod_add = array();
         $mod_del = array();
         $mod_rep = array();
@@ -506,7 +482,7 @@ function do_google_sync( $ldap, $object, $entry ) {
         $result = $ldap->do_add( $dn, $entry );
         $add = 1;
 
-        if ( $entry['employeeType'] == 'Student' ) {
+        if ( $entry['employeeType'] == 'Student' && $set_password ) {
             $passwd = get_default_password( $entry['uid'] );
             if ( empty($passwd) ) {
                 $passwd = generate_default_password($entry);

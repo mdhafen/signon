@@ -26,7 +26,8 @@ $can_send_token = false;
 $reset_token = '';
 if ( $is_person ) {
     $user_lock = get_lock_status( $object['uid'][0] );
-    $default_passwd = get_default_password( $object['uid'][0] );
+    // Converted to ajax to save calls to PowerSchool API
+    // $default_passwd = get_default_password( $object['uid'][0] );
     $can_edit = ( $can_edit ?: ldap_can_edit( $ldap, $objectdn ) );
     $can_send_token = ( !empty($object['labeledURI'][0]) && !empty($object['mail']) && strripos($object['mail'][0],'@'.$GOOGLE_DOMAIN) !== false && !empty($object['employeeType']) && in_array($object['employeeType'][0], array('Staff','Other')) );
     $reset_token = get_password_reset_token(userid:$object['uid'][0]);

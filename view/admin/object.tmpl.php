@@ -64,12 +64,7 @@ Add:
 <?php
 if ( ! empty($data['can_edit']) && ! empty($data['is_person']) ) {
 ?>
-<?php
-    if ( !empty($data['default_passwd']) ) { ?>
 <a class="btn btn-default" href="password.php?default=1&amp;dn=<?= urlencode($data['object_dn']) ?>">Set Password to Default</a>
-<?php
-    }
-?>
 <a class="btn btn-default" href="password.php?dn=<?= urlencode($data['object_dn']) ?>">Reset Password</a>
 <?php } ?>
 <?php
@@ -98,11 +93,11 @@ if ( ! empty($data['can_edit']) && ! empty($data['is_person']) ) {
 </div> <!-- modal -->
 </div></div>
 <?php } ?>
-<?php if ( !empty($data['can_see_password']) && !empty($data['default_passwd']) ) { ?>
+<?php if ( !empty($data['can_see_password']) ) { ?>
 <div class="form-group">
-<button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#default_passwd_details">Show/Hide Default Password</button>
-<div class="collapse" id="default_passwd_details"><div class="well">
-Password: <?= $data['default_passwd'] ?><br>
+<button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#default_passwd_block">Show/Hide Default Password</button>
+<div class="collapse" id="default_passwd_block"><div class="well">
+Password: <span id="default_passwd_details"><?= $data['default_passwd'] ?></span><br>
 </div></div>
 </div>
 <?php } ?>
@@ -168,8 +163,33 @@ Locked on: <?= $data['user_lock']['timestamp'] ?><br>
   $(document).ready(function(){
     var el = document.getElementById('nav-manage');
     $(el).addClass('active');
-
+    $('#default_passwd_block').on('show.bs.collapse', function () {
+        get_default_password();
+    });
+    $('#default_passwd_block').on('hidden.bs.collapse', function () { $('#default_passwd_details:contains("Error: ")').empty();});
   });
+
+  function get_default_password() {
+      var el = $('#default_passwd_details:empty');
+      if ( el.length ) {
+          var data = {'uid':<?= json_encode($data['object']['uid'][0]) ?>};
+          $.post('<?= $data['_config']['base_url'] ?>api/get_default_password.php', data, function(xml_result) { show_default_password(xml_result) }, "xml" );
+      }
+  }
+
+  function show_default_password(xml_result) {
+      var el = $('#default_passwd_details');
+      var xml_doc = xml_result;
+      var state = $(xml_doc).find('state').text();
+      if ( state == 'success' ) {
+        var def = $(xml_doc).find('message').text();
+        el.append(document.createTextNode( def ));
+      }
+      else {
+        el.empty();
+        el.append(document.createTextNode("Error: "+ $(xml_doc).find('message').text()));
+      }
+  }
 
   function send_password_reset() {
     if ( ! $('#reset_verify').prop('checked') ) {

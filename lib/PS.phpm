@@ -189,10 +189,8 @@ class PS_Access {
     $teacher = $this->get_data('/ws/v1/staff/'. $userid .'?expansions=addresses,emails,phones,school_affiliations&extensions=u_schoolstaffuserfields');
     $affiliations = array();
     $locations = array();
-    if ( count($teacher->staff->school_affiliations->school_affiliation) > 1 ) {
-      foreach ( $teacher->staff->school_affiliations->school_affiliation as $aff ) {
-	$affiliations[] = $aff;
-      }
+    if ( is_countable($teacher->staff->school_affiliations->school_affiliation) ) {
+      $affiliations = $teacher->staff->school_affiliations->school_affiliation;
     }
     else if ( !empty($teacher->staff->school_affiliations->school_affiliation->school_id) ) {
       $affiliations[] = $teacher->staff->school_affiliations->school_affiliation;
@@ -211,7 +209,7 @@ class PS_Access {
   public function get_student_user( $studentid ) {
     $user = null;
 
-    $entry = $this->get_data('/ws/v1/student/'. $studentid .'?expansions=addresses,contact,contact_info,demographics,school_enrollment');
+    $entry = $this->get_data('/ws/v1/student/'. $studentid .'?expansions=addresses,phones,contact_info,demographics,school_enrollment,schedule_setup&extensions=u_students_extension');
     $student = $entry->student;
     if ( !empty($student->id) ) {
         $user = $this->student_to_user($student);
@@ -276,10 +274,33 @@ class PS_Access {
   public function student_number_to_id( $number ) {
     $userid = null;
     if ( !empty($number) ) {
-      $entry = $this->get_data('/ws/v1/district/student?q=school_enrollment.enroll_status==(A,P);local_id=='.$number);
+        $entry = $this->get_data('/ws/v1/district/student?q=school_enrollment.enroll_status==(A,P);local_id=='.$number);
       if ( !empty($entry->students->student) ) {
         foreach ( $entry->students->student as $std ) {
-          $student = $std->id;
+          $userid = $std->student->id;
+        }
+      }
+    }
+
+    return $userid;
+  }
+
+  public function student_username_to_id( $uid ) {
+    $userid = null;
+    if ( !empty($uid) ) {
+      $entry = $this->get_data('/ws/v1/district/student?q=school_enrollment.enroll_status==(A,P);student_username=='.$uid);
+      if ( !empty($entry->students->student) ) {
+        if ( is_countable($entry->students->student) ) {
+          foreach ( $entry->students->student as $std ) {
+            if ( !empty($std->id) ) {
+              $userid = $std->id;
+            }
+          }
+        }
+        else {
+          if ( !empty($entry->students->student->id) ) {
+            $userid = $entry->students->student->id;
+          }
         }
       }
     }
@@ -324,11 +345,8 @@ class PS_Access {
 
     $affiliations = array();
     if ( !empty($staff->school_affiliations->school_affiliation) ) {
-
-        if ( count($staff->school_affiliations->school_affiliation) > 1 ) {
-            foreach ( $staff->school_affiliations->school_affiliation as $aff ) {
-                $affiliations[] = $aff;
-            }
+        if ( is_countable($staff->school_affiliations->school_affiliation) ) {
+            $affiliations = $staff->school_affiliations->school_affiliation;
         }
         else {
             $affiliations[] = $staff->school_affiliations->school_affiliation;
@@ -402,10 +420,8 @@ class PS_Access {
 
     $schools = array();
     $affiliations = array();
-    if ( count($teacher->staff->school_affiliations->school_affiliation) > 1 ) {
-      foreach ( $teacher->staff->school_affiliations->school_affiliation as $aff ) {
-	$affiliations[] = $aff;
-      }
+    if ( is_countable($teacher->staff->school_affiliations->school_affiliation) ) {
+      $affiliations = $teacher->staff->school_affiliations->school_affiliation;
     }
     else if ( !empty($teacher->staff->school_affiliations->school_affiliation->school_id) ) {
       $affiliations[] = $teacher->staff->school_affiliations->school_affiliation;
@@ -480,15 +496,15 @@ class PS_Access {
 
   private function student_to_user( $student ) {
     $user = null;
-    if ( empty($student->addresses) || empty($student->contact) || empty($student->contact_info) || empty($student->demographics) ) {
-      $entry = $this->get_data('/ws/v1/student/'. $student->id .'?expansions=addresses,contact,contact_info,demographics,school_enrollment');
+    if ( empty($student->addresses) || empty($student->contact_info) || empty($student->demographics) || empty($student->school_enrollment) ) {
+      $entry = $this->get_data('/ws/v1/student/'. $student->id .'?expansions=addresses,phones,contact_info,demographics,school_enrollment,schedule_setup&extensions=u_students_extension');
       $student = $entry->student;
     }
     $username = $student->student_username;
     $fullname = $this->get_student_fullname( $student->id, $student );
-    $email = empty($student->contact_info->email) ? "" : $student->contact_info->email;
-    $alt_email = empty($student->contact->guardian_email) ? "" : $student->contact->guardian_email;
-    $role = 0; // FIXME hard coded to no role
+    $email = $student->contact_info->email ?? "";
+    $alt_email = '';
+    $default_passwd = '';
     $externalid = $student->id;
     $street = $student->addresses->physical->street;
     $city = $student->addresses->physical->city;
@@ -496,24 +512,55 @@ class PS_Access {
     $postalcode = $student->addresses->physical->postal_code;
     $gender = $student->demographics->gender;
     $dob = $student->demographics->birth_date;
+    if ( is_countable($student->_extension_data->_table_extension) ) {
+        $extensions = $student->_extension_data->_table_extension;
+    }
+    else {
+        $extensions = array($student->_extension_data->_table_extension);
+    }
+    foreach ( $extensions as $ext ) {
+        if ( $ext->name == 'u_students_extension' ) {
+            if ( is_countable($ext->_field) ) {
+                $fields = $ext->_field;
+            }
+            else {
+                $fields = array($ext->_field);
+            }
+            foreach ( $fields as $field ) {
+                if ( $field->name == 'guardianemails' ) {
+                    $alt_email = $field->value;
+                }
+                if ( $field->name == 'default_password' ) {
+                    $default_passwd = $field->value;
+                }
+            }
+        }
+    }
+    $role = 0; // FIXME hard coded to no role
     if ( $student->school_enrollment->enroll_status_code <= 0 ) {
       $user = array(
-        'username' => $username,
-        'fullname' => $fullname,
-        'email' => $email,
-        'role' => $role,
-        'password' => '',
-        'salt' => '',
-        'externalid' => $externalid,
-        /* FIXME there are here in case I need them later
+        'employeeType' => 'Student',
+        'businessCategory' => 'Student',
+        'uid' => $username,
+        'sn' => ( $student->name->last_name ?? '' ),
+        'givenName' => ( $student->name->first_name ?? '' ),
+        'cn' => $fullname,
+        'mail' => $email,
+        'employeeNumber' => $student->local_id,
         'street' => $street,
-        'city' => $city,
-        'state' => $state,
         'postalcode' => $postalcode,
-        'alt_email' => $alt_email,
-        'gender' => $gender,
-        'dob' => $dob,
-        */
+        'destinationIndicator' => $dob,
+        'departmentNumber' => $student->school_enrollment->school_number,
+        'o' => '',
+        'labeledURI' => $alt_email,
+        'l' => $city,
+        'st' => $state,
+        'homePhone' => ( $student->phones->main->number ?? '' ),
+        'mobile' => '',
+        'pager' => ( $student->schedule_setup->home_room ?? '' ),
+        'telephoneNumber' => ( $student->demographics->projected_graduation_year ?? '' ),
+        'role' => $role,
+        'default_password' => $default_passwd,
       );
     }
     return $user;
