@@ -78,6 +78,9 @@ foreach ( $google_cache as $g_user ) {
       unset( $users_cache[ $thisDN ] );
     }
 
+// begin replaced section
+  }
+/*
     populate_static_user_attrs($entry);
 
     $dn = $thisUser['dn'];
@@ -130,11 +133,24 @@ foreach ( $google_cache as $g_user ) {
       $ldap->do_rename( $dn, "$rdn_attr=". ldap_escape($entry[$rdn_attr],'',LDAP_ESCAPE_DN), $ldap->dn_get_parent($entry['dn']) );
       $output .= "move ";
     }
-
+ */
+  list( $mods, $move, $add ) = do_google_sync( $ldap, $thisUser, $entry, set_password:false );
+  if ( empty($add) ) {
+    $output .= "mod (". implode(',',$mods) .") ";
+    if ( !empty($move) ) {
+      $output .= "move ";
+    }
+// replaced section moved
     if ( $entry['employeeType'] == 'Student' && empty($thisUser['userPassword']) && !empty($st_passwds[ $entry['mail'] ]) ) {
       set_password( $ldap, $entry['dn'], $st_passwds[ $entry['mail'] ] );
       $output .= "And set Password ";
     }
+// replaced section end moved
+  }
+  else {
+    $output .= "add ";
+
+/* replaced section cut out
   }
   else {
     $dn = $entry['dn'];
@@ -148,6 +164,7 @@ foreach ( $google_cache as $g_user ) {
     $output .= "Add ";
 
     if ( $result ) {
+ */
       $def_passwd = get_default_password( $entry['uid'] ) ?? generate_default_password($entry);
       if ( $entry['employeeType'] == 'Student' && ( !empty($st_passwds[ $entry['mail'] ]) || !empty($def_passwd) ) ) {
         $passwd = $st_passwds[ $entry['mail'] ] ?? $def_passwd;
@@ -155,10 +172,12 @@ foreach ( $google_cache as $g_user ) {
         $output .= "And set Password ";
       }
     }
+/* replaced section cut out
     else {
       error_log( $ldap->get_error() );
     }
   }
+ */
   if ( !empty($output) ) {
     print "Update ". $entry['mail'] ." : ". $output ."\n";
   }
