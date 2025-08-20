@@ -101,7 +101,26 @@ function generate_default_password($entry) {
 	$min_len = 16;
 	if ( !empty($entry['employeeType']) && $entry['employeeType'][0] == 'Student'
 			&& stripos($entry['dn'],',ou=Students,') !== false ) {
-		$list = 'sight';
+		if ( stripos($entry['dn'],',ou=pre-k') !== false
+			 || stripos($entry['dn'],',ou=kindergarten') !== false
+			 || stripos($entry['dn'],',ou=grade 1') !== false ) {
+			$list = 'sight1';
+		}
+		else if ( stripos($entry['dn'],',ou=grade 2') !== false ) {
+			$list = 'sight2';
+		}
+		else if ( stripos($entry['dn'],',ou=grade 3') !== false ) {
+			$list = 'sight3';
+		}
+		else if ( stripos($entry['dn'],',ou=grade 4') !== false ) {
+			$list = 'sight4';
+		}
+		else if ( stripos($entry['dn'],',ou=grade 5') !== false ) {
+			$list = 'sight5';
+		}
+		else {
+			$list = 'sight6';
+		}
 		$min_len = 11;
 	}
 	$password = create_password( mode:'words', list:$list, min_length:$min_len );

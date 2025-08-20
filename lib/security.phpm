@@ -536,7 +536,7 @@ function encode_password( $new_password, $mode = array() ) {
  */
 function create_password(
 	$mode = 'words', // or random
-	$list = 'strong', // or sight
+	$list = 'strong', // or sight1 | sight2 | sight3 | sight4 | sight5 | sight6
 	$separator = '-',
 	$char_set = 'numeric', // or ... up to symbol_numeric_alpha_ualpha
 	$min_length = 15,
@@ -566,17 +566,29 @@ function create_password(
 	$password = '';
 
 	if ( $mode == 'words' ) {
+		$files = array();
 		if ( strpos($list,'strong') !== false ) {
-			$file = $config['base_dir'] .'/lib/word_dictionary';
-			if ( is_readable( $file ) ) {
-				$temp_dict = file( $file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
-				if ( !empty($temp_dict) ) {
-					$dictionary = array_merge($dictionary,$temp_dict);
-				}
-			}
+			$files[] = $config['base_dir'] .'/lib/word_dictionary';
 		}
-		if ( strpos($list,'sight') !== false ) {
-			$file = $config['base_dir'] .'/lib/sight_words';
+		if ( strpos($list,'sight1') !== false ) {
+			$files[] = $config['base_dir'] .'/lib/sight_words_1st';
+		}
+		if ( strpos($list,'sight2') !== false ) {
+			$files[] = $config['base_dir'] .'/lib/sight_words_2nd';
+		}
+		if ( strpos($list,'sight3') !== false ) {
+			$files[] = $config['base_dir'] .'/lib/sight_words_3rd';
+		}
+		if ( strpos($list,'sight4') !== false ) {
+			$files[] = $config['base_dir'] .'/lib/sight_words_4th';
+		}
+		if ( strpos($list,'sight5') !== false ) {
+			$files[] = $config['base_dir'] .'/lib/sight_words_5th';
+		}
+		if ( strpos($list,'sight6') !== false ) {
+			$files[] = $config['base_dir'] .'/lib/sight_words_6th';
+		}
+		foreach ( $files as $file ) {
 			if ( is_readable( $file ) ) {
 				$temp_dict = file( $file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
 				if ( !empty($temp_dict) ) {
