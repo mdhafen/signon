@@ -354,6 +354,9 @@ function google_user_hash_for_ldap( $user ) {
     else if ( stripos($user['orgUnitPath'],'suspended') !== FALSE ) {
       $entry['employeeType'] = 'suspended-';
     }
+    else if ( stripos($user['orgUnitPath'],'transfer pending') !== FALSE ) {
+      $entry['employeeType'] = 'transfer-';
+    }
 
     if ( stripos($user['orgUnitPath'],'/staff/') !== FALSE ) {
       $entry['employeeType'] .= 'Staff';
