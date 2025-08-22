@@ -1,5 +1,12 @@
 <?php include( $data['_config']['base_dir'] .'/view/doc-open.php' ); ?>
 <title><?= $data['_config']['site_title'] ?> - Details</title>
+<style>
+  .anim-spin {
+    animation: spin 1s infinite linear;
+    transform-origin: 50% 50%;
+  }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform:rotate(360deg); } }
+</style>
 <?php
 include( $data['_config']['base_dir'] .'/view/doc-head-close.php' );
 include( $data['_config']['base_dir'] .'/view/doc-header.php' );
@@ -97,7 +104,7 @@ if ( ! empty($data['can_edit']) && ! empty($data['is_person']) ) {
 <div class="form-group">
 <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#default_passwd_block">Show/Hide Default Password</button>
 <div class="collapse" id="default_passwd_block"><div class="well">
-Password: <span id="default_passwd_details"><?= $data['default_passwd'] ?></span><br>
+Password: <span id="default_passwd_details"><?= $data['default_passwd'] ?><span class="glyphicon glyphicon-hourglass anim-spin" aria-hidden="true"></span></span><br>
 </div></div>
 </div>
 <?php } ?>
@@ -166,12 +173,13 @@ Locked on: <?= $data['user_lock']['timestamp'] ?><br>
     $('#default_passwd_block').on('show.bs.collapse', function () {
         get_default_password();
     });
-    $('#default_passwd_block').on('hidden.bs.collapse', function () { $('#default_passwd_details:contains("Error: ")').empty();});
+    $('#default_passwd_block').on('hidden.bs.collapse', function () { $('#default_passwd_details:contains("Error: ")').empty().append('<span class="glyphicon glyphicon-hourglass anim-spin" aria-hidden="true"></span>');});
   });
 
   function get_default_password() {
-      var el = $('#default_passwd_details:empty');
-      if ( el.length ) {
+      var el = $('#default_passwd_details');
+      var cont = el.text();
+      if ( !cont.length || cont.includes('Error: ') ) {
           var data = {'uid':<?= json_encode($data['object']['uid'][0]) ?>};
           $.post('<?= $data['_config']['base_url'] ?>api/get_default_password.php', data, function(xml_result) { show_default_password(xml_result) }, "xml" );
       }
@@ -181,12 +189,12 @@ Locked on: <?= $data['user_lock']['timestamp'] ?><br>
       var el = $('#default_passwd_details');
       var xml_doc = xml_result;
       var state = $(xml_doc).find('state').text();
+      el.empty();
       if ( state == 'success' ) {
         var def = $(xml_doc).find('message').text();
         el.append(document.createTextNode( def ));
       }
       else {
-        el.empty();
         el.append(document.createTextNode("Error: "+ $(xml_doc).find('message').text()));
       }
   }
