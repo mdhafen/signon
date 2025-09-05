@@ -77,107 +77,33 @@ foreach ( $google_cache as $g_user ) {
       $thisUser = $users_cache[ $thisDN ];
       unset( $users_cache[ $thisDN ] );
     }
-
-// begin replaced section
   }
-/*
-    populate_static_user_attrs($entry);
 
-    $dn = $thisUser['dn'];
-    $rdn_attr = substr( $dn, 0, strpos($dn,'=') );
-    $ignored_fields = array($rdn_attr,'dn','objectClass','userPassword','sambaNTPassword');
-    $dynamic_fields = array('sambaSID','sambaPwdLastSet','uidNumber');
-    $mod_add = array();
-    $mod_del = array();
-    $mod_rep = array();
-    foreach ( $entry as $field => $value ) {
-        if ( array_search($field,$ignored_fields) !== false ) { continue; }
-        if ( array_search($field,$dynamic_fields) !== false ) { continue; }
-        if ( empty($thisUser[$field]) && !empty($value) ) {
-            $mod_add[$field] = $value;
-        }
-        else if ( !empty($value) && $thisUser[$field][0] != $value ) {
-            $mod_rep[$field] = $value;
-        }
-    }
-    $dynamic_generated = false;
-    foreach ( $dynamic_fields as $field ) {
-        if ( empty($thisUser[$field]) ) {
-            if ( empty($dynamic_generated) ) {
-                populate_dynacic_user_attrs($ldap,$entry);
-                $dynamic_generated = 1;
-            }
-            if ( !empty($entry[$field]) ) {
-                $mod_add[$field] = $entry[$field];
-            }
-        }
-    }
-    foreach ( $thisUser as $field => $values ) {
-        if ( array_search($field,$ignored_fields) !== false ) { continue; }
-        if ( array_search($field,$dynamic_fields) !== false ) { continue; }
-        if ( empty($entry[$field]) ) {
-            $mod_del[$field] = array();
-        }
-    }
-
-    if ( !empty($mod_add) || !empty($mod_del) || !empty($mod_rep) ) {
-      $ldap->do_attr_del( $dn, $mod_del );
-      $ldap->do_modify( $dn, $mod_add );
-      $ldap->do_attr_replace( $dn, $mod_rep );
-      $mods = array_keys(array_merge($mod_del,$mod_add,$mod_rep));
-      sort($mods);
-      $output .= "mod (". implode(',',$mods) .") ";
-    }
-
-    if ( strcasecmp( $dn, $entry['dn'] ) != 0 ) {
-      $ldap->do_rename( $dn, "$rdn_attr=". ldap_escape($entry[$rdn_attr],'',LDAP_ESCAPE_DN), $ldap->dn_get_parent($entry['dn']) );
-      $output .= "move ";
-    }
- */
   list( $mods, $move, $add ) = do_google_sync( $ldap, $thisUser, $entry, set_password:false );
   if ( empty($add) ) {
     $output .= "mod (". implode(',',$mods) .") ";
     if ( !empty($move) ) {
       $output .= "move ";
     }
-// replaced section moved
     if ( $entry['employeeType'] == 'Student' && empty($thisUser['userPassword']) && !empty($st_passwds[ $entry['mail'] ]) ) {
       set_password( $ldap, $entry['dn'], $st_passwds[ $entry['mail'] ] );
       $output .= "And set Password ";
     }
-// replaced section end moved
   }
   else {
     $output .= "add ";
 
-/* replaced section cut out
-  }
-  else {
-    $dn = $entry['dn'];
-    unset( $entry['dn'] );
+    $results = $ldap->quick_search( "(&(|(mail=".$entry['mail'].")(uid=".$entry['uid']."))(!(|(employeeType=Guest)(employeeType=Trusted))))" , array() );
+    $thisUser = $results[0];
+    $dn = $thisUser['dn'];
 
-    populate_static_user_attrs($entry);
-    populate_dynamic_user_attrs($ldap,$entry);
-
-    $result = $ldap->do_add( $dn, $entry );
-    $entry['dn'] = $dn;
-    $output .= "Add ";
-
-    if ( $result ) {
- */
-      $def_passwd = get_default_password( $entry['uid'] ) ?? generate_default_password($entry);
-      if ( $entry['employeeType'] == 'Student' && ( !empty($st_passwds[ $entry['mail'] ]) || !empty($def_passwd) ) ) {
-        $passwd = $st_passwds[ $entry['mail'] ] ?? $def_passwd;
-        set_password( $ldap, $dn, $passwd );
-        $output .= "And set Password ";
-      }
-    }
-/* replaced section cut out
-    else {
-      error_log( $ldap->get_error() );
+    $def_passwd = get_default_password( $entry['uid'] ) ?? generate_default_password($thisUser);
+    if ( $entry['employeeType'] == 'Student' && ( !empty($st_passwds[ $entry['mail'] ]) || !empty($def_passwd) ) ) {
+      $passwd = $st_passwds[ $entry['mail'] ] ?? $def_passwd;
+      set_password( $ldap, $dn, $passwd );
+      $output .= "And set Password ";
     }
   }
- */
   if ( !empty($output) ) {
     print "Update ". $entry['mail'] ." : ". $output ."\n";
   }
