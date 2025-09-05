@@ -357,6 +357,9 @@ function google_user_hash_for_ldap( $user ) {
     else if ( stripos($user['orgUnitPath'],'transfer pending') !== FALSE ) {
       $entry['employeeType'] = 'transfer-';
     }
+    else if ( stripos($user['orgUnitPath'],'homeschool') !== FALSE ) {
+      $entry['employeeType'] = 'homeschool-';
+    }
 
     if ( stripos($user['orgUnitPath'],'/staff/') !== FALSE ) {
       $entry['employeeType'] .= 'Staff';
