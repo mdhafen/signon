@@ -7,7 +7,7 @@ $db_settings = $config['database']['core']['write'];
 $schema = $db_settings['schema'];
 
 $dbh = db_connect('core');
-$query = "SELECT COUNT(*) AS count FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '$schema' AND TABLE_NAME = 'password_reset_tokens' AND COLUMN_NAME = 'purpose'";
+$query = "SELECT COUNT(*) AS count FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '$schema' AND TABLE_NAME = 'tokens' AND COLUMN_NAME = 'purpose'";
 $sth = $dbh->query( $query );
 $row = $sth->fetch();
 if ( $row['count'] == 0 ) {
