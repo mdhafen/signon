@@ -74,6 +74,7 @@ if ( ! empty($password) ) {
 
 	if ( !empty($object['employeeType'][0]) && strripos($object['mail'][0],'@'.$GOOGLE_DOMAIN) !== False ) {
 		$result = google_set_password( $object['mail'][0], $password );
+		$output['google_result'] = $result;
 	}
 	$result = set_password( $ldap, $objectdn, $password );
 	if ( $result ) {

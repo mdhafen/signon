@@ -11,6 +11,13 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 <h1><?= $data['object_dn'] ?></h1>
 <h2>Set WCSD SignOn and Google Password</h2>
 
+<?php if ( ! empty($data['google_result']) ) { ?>
+    <button type="button" class="btn btn-primary" data-tobble="collapse" data-target="#google_result_block">Show Google response</button>
+    <div class="collapse" id="google_result_block"><div class="well">
+        Google response:
+        <pre><?= print_r($data['google_result'],true); ?></pre>
+    </div></div>
+<?php } ?>
 <?php if ( ! empty($data['success']) ) { ?>
 <div class="alert alert-info alert-dismissible" role="alert">
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
