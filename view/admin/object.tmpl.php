@@ -182,8 +182,11 @@ Locked on: <?= $data['user_lock']['timestamp'] ?><br>
       var el = $('#default_passwd_details');
       var cont = el.text();
       if ( !cont.length || cont.includes('Error: ') ) {
-          var data = {'uid':<?= json_encode($data['object']['uid'][0]) ?>};
-          $.post('<?= $data['_config']['base_url'] ?>api/get_default_password.php', data, function(xml_result) { show_default_password(xml_result) }, "xml" );
+          var uid = '<?= json_encode($data['object']['uid'][0] ?? '') ?>';
+          if ( uid ) {
+              var data = {'uid':uid};
+              $.post('<?= $data['_config']['base_url'] ?>api/get_default_password.php', data, function(xml_result) { show_default_password(xml_result) }, "xml" );
+          }
       }
   }
 
