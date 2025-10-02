@@ -66,6 +66,7 @@ Add:
 <?php }
   } ?>
 
+<?php if ( ! empty($data['is_person']) ) { ?>
 <div class="form-group">
 <h4>Password</h4>
 <?php
@@ -109,6 +110,7 @@ Password: <span id="default_passwd_details"><?= $data['default_passwd'] ?><span 
 </div>
 <?php } ?>
 </div>
+<?php } ?>
 <?php if ( ! empty($data['can_edit']) && ! empty($data['is_person']) ) { ?>
 <div class="form-group">
 <h4>Security</h4>

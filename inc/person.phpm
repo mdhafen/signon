@@ -53,7 +53,10 @@ function is_person( $o=array() ) {
 	$person = 0;
 	if ( ! empty( $o['objectClass'] ) ) {
 		if ( in_array('inetOrgPerson',$o['objectClass']) ||
-		     in_array('posixAccount',$o['objectClass']) ) {
+		     in_array('posixAccount',$o['objectClass']) ||
+		     in_array('shadowAccount',$o['objectClass']) ||
+		     in_array('person',$o['objectClass']) ||
+		     in_array('simpleSecurityObject',$o['objectClass']) ) {
 			$person = 1;
 		}
 
@@ -212,6 +215,8 @@ function set_password( $ldap, $userdn, $password ) {
 		$entry = array();
 		if (
 		  in_array( 'inetOrgPerson', $object['objectClass'] ) ||
+		  in_array( 'posixAccount', $object['objectClass']) ||
+		  in_array( 'shadowAccount' ,$object['objectClass']) ||
 		  in_array( 'person', $object['objectClass'] ) ||
 		  in_array( 'simpleSecurityObject', $object['objectClass'] )
 		  ) {
@@ -384,7 +389,7 @@ function check_google_sync( $ldap, $object ) {
     }
     if ( empty($users) ) {
         $errors[] = 'CHECK_OBJECT_NO_GOOGLE';
-        return array($errors);
+        return array($errors,undef,undef,undef);
     }
     if ( count($users) > 1 ) {
         $errors[] = 'CHECK_OBJECT_GOOGLE_DUPLICATES';
