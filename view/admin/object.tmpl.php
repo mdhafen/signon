@@ -182,7 +182,7 @@ Locked on: <?= $data['user_lock']['timestamp'] ?><br>
       var el = $('#default_passwd_details');
       var cont = el.text();
       if ( !cont.length || cont.includes('Error: ') ) {
-          var uid = '<?= json_encode($data['object']['uid'][0] ?? '') ?>';
+          var uid = <?= json_encode($data['object']['uid'][0] ?? '') ?>;
           if ( uid ) {
               var data = {'uid':uid};
               $.post('<?= $data['_config']['base_url'] ?>api/get_default_password.php', data, function(xml_result) { show_default_password(xml_result) }, "xml" );
@@ -200,7 +200,7 @@ Locked on: <?= $data['user_lock']['timestamp'] ?><br>
         el.append(document.createTextNode( def ));
       }
       else {
-        el.append(document.createTextNode("Error: "+ $(xml_doc).find('message').text()));
+        el.append(document.createTextNode("Error: "+ $(xml_doc).find('message').text() +' ('+ $(xml_doc).find('flag').text() +')' ));
       }
   }
 
