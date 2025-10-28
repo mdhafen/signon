@@ -361,7 +361,7 @@ function check_google_sync( $ldap, $object ) {
     }
     else {
         $errors[] = 'CHECK_OBJECT_NO_UID_EMPLOYEENUMBER';
-        return array($errors);
+        return array($errors,null,null,null);
     }
 
     $emails = array();
@@ -389,7 +389,7 @@ function check_google_sync( $ldap, $object ) {
     }
     if ( empty($users) ) {
         $errors[] = 'CHECK_OBJECT_NO_GOOGLE';
-        return array($errors,undef,undef,undef);
+        return array($errors,null,null,null);
     }
     if ( count($users) > 1 ) {
         $errors[] = 'CHECK_OBJECT_GOOGLE_DUPLICATES';
