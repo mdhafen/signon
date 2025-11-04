@@ -12,7 +12,7 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 <h2>Set WCSD SignOn and Google Password</h2>
 
 <?php if ( ! empty($data['google_result']) ) { ?>
-    <button type="button" class="btn btn-primary" data-tobble="collapse" data-target="#google_result_block">Show Google response</button>
+    <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#google_result_block">Show Google response</button>
     <div class="collapse" id="google_result_block"><div class="well">
         Google response:
         <pre><?= print_r($data['google_result'],true); ?></pre>
