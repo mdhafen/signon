@@ -100,6 +100,7 @@ if ( ! empty($data['can_edit']) ) {
 </div> <!-- modal -->
 </div></div>
 <?php } ?>
+</div>
 <?php if ( !empty($data['can_see_password']) ) { ?>
 <div class="form-group">
 <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#default_passwd_block">Show/Hide Default Password</button>
@@ -108,7 +109,6 @@ Password: <span id="default_passwd_details"><?= $data['default_passwd'] ?><span 
 </div></div>
 </div>
 <?php } ?>
-</div>
 <?php } ?>
 <?php if ( ! empty($data['can_edit']) && ! empty($data['is_person']) ) { ?>
 <div class="form-group">
