@@ -22,6 +22,7 @@ $default_passwd = '';
 $can_edit = authorized('manage_objects');
 
 $is_person = is_person( $object );
+$has_pass = has_password( $object );
 $can_send_token = false;
 $reset_token = '';
 if ( $is_person ) {
@@ -63,6 +64,7 @@ $output = array(
 	'object_dn' => $objectdn,
 	'object' => $object,
 	'is_person' => $is_person,
+	'has_pass' => $has_pass,
 	'is_guest' => $is_guest,
 	'is_guest_expired' => $is_guest_expired,
 	'is_guest_send_notice' => $is_guest_send_notice,
@@ -76,7 +78,7 @@ $output = array(
 	'can_send_token' => $can_send_token,
 	'can_lock' => ( !empty($object['employeeType']) && ( ( $object['employeeType'][0] == 'Student' && authorized('lock_student') ) || ( $object['employeeType'][0] == 'Staff' && authorized('lock_staff') ) ) ),
 	'can_set_password' => authorized('set_password') || ($objectdn == $_SESSION['userid']),
-	'can_see_password' => authorized('reset_password') || ($objectdn == $_SESSION['userid']),
+	'can_see_password' => $is_person && ( authorized('reset_password') || ($objectdn == $_SESSION['userid']) ),
 );
 
 output( $output, 'admin/object.tmpl' );

@@ -73,6 +73,22 @@ function is_person( $o=array() ) {
 	return $person;
 }
 
+function has_password( $o=array() ) {
+	// like is_person() but only checks objectClass
+	$has_pass = 0;
+	if ( ! empty( $o['objectClass'] ) ) {
+		if ( in_array('inetOrgPerson',$o['objectClass']) ||
+		     in_array('posixAccount',$o['objectClass']) ||
+		     in_array('shadowAccount',$o['objectClass']) ||
+		     in_array('person',$o['objectClass']) ||
+		     in_array('simpleSecurityObject',$o['objectClass']) ) {
+			$has_pass = 1;
+		}
+	}
+
+	return $has_pass;
+}
+
 function get_default_password( $uid ) {
 	global $config;
 

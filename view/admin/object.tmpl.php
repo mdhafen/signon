@@ -66,13 +66,17 @@ Add:
 <?php }
   } ?>
 
-<?php if ( ! empty($data['is_person']) ) { ?>
+<?php if ( ! empty($data['can_set_password']) && ( ! empty($data['is_person']) || ! empty($data['has_pass']) ) ) { ?>
 <div class="form-group">
 <h4>Password</h4>
 <?php
-if ( ! empty($data['can_edit']) && ! empty($data['is_person']) ) {
+if ( ! empty($data['can_edit']) ) {
+  if ( ! empty($data['is_person']) ) {
 ?>
 <a class="btn btn-default" href="password.php?default=1&amp;dn=<?= urlencode($data['object_dn']) ?>">Set Password to Default</a>
+<?php
+  }
+?>
 <a class="btn btn-default" href="password.php?dn=<?= urlencode($data['object_dn']) ?>">Reset Password</a>
 <?php } ?>
 <?php
