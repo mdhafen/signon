@@ -96,7 +96,8 @@ if ( !empty($submitted) ) {
         unset( $entry['dn'] );
 
         $entry['sambaSID'] = $ldap->get_next_num('sambaSID');
-        if ( $ldap->do_add( $dn, $entry ) ) {
+        $result = $ldap->do_add( $dn, $entry );
+        if ( ! $result ) {
           set_password( $ldap, $dn, $password );
           $result = sms_send_password( $entry['uid'], $password );
           if ( $result == 'blacklist' ) {

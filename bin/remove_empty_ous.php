@@ -22,8 +22,8 @@ foreach ( $ous as $ou ) {
 foreach ( $dns as $dn ) {
     print "$dn";
     $result = $ldap->do_delete( $dn );
-    if ( ! $result ) {
-        print $ldap->get_error();
+    if ( $result ) {
+        print $result;
     }
     print "\n";
 }

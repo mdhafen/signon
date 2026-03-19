@@ -347,7 +347,7 @@ function authen_ldap( $module, $username, $password ) {
 	}
 
 	if ( $userdn ) {
-		if ( $ldap->do_connect( $module, $userdn, $password ) ) {
+		if ( $ldap->do_connect( $userdn, $password ) ) {
 			if ( ! empty($ldap->config['roles']) ) {
 				foreach ( $ldap->config['roles'] as $group_dn => $role_id ) {
 					$group = $ldap->quick_search( '(objectClass=groupOfNames)', array(), 0, $group_dn );
@@ -371,12 +371,14 @@ function authen_ldap( $module, $username, $password ) {
 				'role' => $role,
 				'password' => $password,
 			);
+			$_SESSION['auth_ldap'][$module]['userid'] = $userdn;
+			$_SESSION['auth_ldap'][$module]['password'] = $password;
 		}
 		else {
 			// re-bind as root
 			$userdn = $ldap->config['userdn'];
 			$password = $ldap->config['passwd'];
-			$ldap->do_connect( $module, $userdn, $password );
+			$ldap->do_connect( $userdn, $password );
 		}
 	}
 

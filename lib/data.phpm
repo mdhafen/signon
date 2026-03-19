@@ -91,23 +91,25 @@ function stripslashes_array( $array ) {
 class LDAP_Wrapper {
 	private $ldap = null;
 	public $config = [];
+	private $module = 'core';
 
 	function __construct( $module = 'core', $userdn = '', $passwd = '' ) {
-		$this->do_connect( $module, $userdn, $passwd );
+		$this->module = $module;
+		$this->do_connect( $userdn, $passwd );
 	}
 
-	public function do_connect( $module = 'core', $userdn = '', $passwd = '' ) {
+	public function do_connect( $userdn = '', $passwd = '' ) {
 		global $ldap_cache, $config;
 
-		if ( empty($config['ldap'][$module]['server']) ) {
+		if ( empty($config['ldap'][$this->module]['server']) ) {
 			error( array('CONF'=>"No ldap connection configured") );
 		}
-                $this->config = $config['ldap'][$module];
+		$this->config = $config['ldap'][$this->module];
 
 		if ( empty( $userdn ) ) {
-			if ( ! empty($_SESSION['loggedin_user']) ) {
-				$userdn = $_SESSION['loggedin_user']['userid'];
-				$passwd = $_SESSION['loggedin_user']['password'];
+			if ( ! empty($_SESSION['auth_ldap'][$this->module]) ) {
+				$userdn = $_SESSION['auth_ldap'][$this->module]['userid'];
+				$passwd = $_SESSION['auth_ldap'][$this->module]['password'];
 			}
 			else {
 				$userdn = $this->config['userdn'];
@@ -115,8 +117,8 @@ class LDAP_Wrapper {
 			}
 
 
-			if ( ! empty( $ldap_cache[$module] ) ) {
-				$this->ldap = $ldap_cache[$module];
+			if ( ! empty( $ldap_cache[$this->module] ) ) {
+				$this->ldap = $ldap_cache[$this->module];
 				$search = @ldap_read( $this->ldap, $this->config['userdn'], '(objectClass=*)' );
 				if ( $search ) {
 					return 1;
@@ -124,26 +126,73 @@ class LDAP_Wrapper {
 			}
 		}
 
-		if ( !empty($ldap_cache[$module]) ) {
-			$this->ldap = $ldap_cache[$module];
+		if ( !empty($ldap_cache[$this->module]) ) {
+			$this->ldap = $ldap_cache[$this->module];
 		}
 		else {
+			$old_cacert = $old_reqcert = null;
+			if ( stripos($this->config['server'],'ldaps://') !== false || !empty($this->config['starttls']) ) {
+				// FIXME php 8.5 changes ldap_get_option()
+				$tmp = ldap_connect( $this->config['server'] );
+				ldap_get_option( $tmp, LDAP_OPT_X_TLS_CACERTFILE, $old_cacert );
+				ldap_get_option( $tmp, LDAP_OPT_X_TLS_REQUIRE_CERT, $old_reqcert );
+				// or putenv( 'LDAPTLS_CACERT='. $config['base_dir'] . $this->config['CACert'] );
+				// and putenv('LDAPTLS_REQCERT=require');
+				if ( !empty($this->config['CACert']) ) {
+					ldap_set_option( null, LDAP_OPT_X_TLS_CACERTFILE, $config['base_dir'] . $this->config['CACert'] );
+				}
+				ldap_set_option( null, LDAP_OPT_X_TLS_REQUIRE_CERT, LDAP_OPT_X_TLS_DEMAND );
+				ldap_set_option( null, LDAP_OPT_X_TLS_CACERTDIR, '/etc/ssl/certs/' );
+			}
+
 			$this->ldap = ldap_connect( $this->config['server'] );
 			ldap_set_option( $this->ldap, LDAP_OPT_PROTOCOL_VERSION, 3 );
 			ldap_set_option( $this->ldap, LDAP_OPT_REFERRALS, false );
 			ldap_set_option( $this->ldap, LDAP_OPT_RESTART, true );
 			ldap_set_option( $this->ldap, LDAP_OPT_NETWORK_TIMEOUT, 30 );
+			if ( !empty($this->config['starttls']) ) {
+				if ( !empty($this->config['CACert']) ) {
+					$filename = $config['base_dir'] . $this->config['CACert'];
+					// putenv( 'LDAPTLS_CACERT='. $filename );
+					ldap_set_option( $this->ldap, LDAP_OPT_X_TLS_CACERTFILE, $filename );
+				}
+				// putenv('LDAPTLS_REQCERT=require');
+				ldap_set_option( $this->ldap, LDAP_OPT_X_TLS_REQUIRE_CERT, LDAP_OPT_X_TLS_DEMAND );
+			}
+		}
+		if ( !empty($this->config['starttls']) ) {
+			ldap_start_tls($this->ldap);
 		}
 
-		$result = @ldap_bind( $this->ldap, $userdn, $passwd );
-		if ( $result) $ldap_cache[$module] = $this->ldap;
+		$result = ldap_bind( $this->ldap, $userdn, $passwd );
+		if ( $result) $ldap_cache[$this->module] = $this->ldap;
+
+		if ( isset($old_cacert) || isset($old_reqcert) ) {
+			ldap_set_option( NULL, LDAP_OPT_X_TLS_CACERTFILE, $old_cacert );
+			ldap_set_option( NULL, LDAP_OPT_X_TLS_REQUIRE_CERT, $old_reqcert );
+		}
 
 		return $result;
 	}
 
-    public function get_error() {
-        return ldap_error( $this->ldap );
-    }
+	public function close() {
+		global $ldap_cache;
+		if ( $this->ldap ) {
+			ldap_unbind( $this->ldap );
+			unset( $ldap_cache[$this->module] );
+		}
+	}
+
+	public function get_error() {
+		$code = ldap_errno($this->ldap);
+		$err = ldap_error($this->ldap);
+		ldap_get_option( $this->ldap, LDAP_OPT_DIAGNOSTIC_MESSAGE, $ex_err );
+		if ( empty($code) ) { return ""; }
+		$message = $code;
+		if ( !empty($err) ) { $message .= ':'. $err; }
+		if ( !empty($ex_err) ) { $message .= ' ('. $ex_err .')'; }
+		return $message;
+	}
 
 	public function quick_search( $filter = '(objectclass=*)', $attrs = array('cn'), $scope = 2, $base = '' ) {
 		$results = array();
@@ -223,7 +272,8 @@ class LDAP_Wrapper {
 			return 0;
 		}
 
-		$result = @ldap_modify( $this->ldap, $userdn, $attrs );
+		$result = ! @ldap_modify( $this->ldap, $userdn, $attrs );
+		if ( $result ) { $result = $this->get_error(); }
 
 		return $result;
 	}
@@ -237,7 +287,8 @@ class LDAP_Wrapper {
 		}
 
 		if ( $this->ensure_ous( $this->dn_get_parent( $userdn ) ) ) {
-			$result = ldap_add( $this->ldap, $userdn, $attrs );
+			$result = ! ldap_add( $this->ldap, $userdn, $attrs );
+			if ( $result ) { $result = $this->get_error(); }
 		}
 
 		return $result;
@@ -250,7 +301,8 @@ class LDAP_Wrapper {
 			return $result;
 		}
 
-		$result = ldap_delete( $this->ldap, $userdn );
+		$result = ! ldap_delete( $this->ldap, $userdn );
+		if ( $result ) { $result = $this->get_error(); }
 
 		return $result;
 	}
@@ -260,7 +312,8 @@ class LDAP_Wrapper {
 		if ( empty($dn) || empty($attrs) || !is_array($attrs) ) {
 			return 0;
 		}
-		$result = @ldap_mod_add( $this->ldap, $dn, $attrs );
+		$result = ! @ldap_mod_add( $this->ldap, $dn, $attrs );
+		if ( $result ) { $result = $ldap->get_error(); }
 		return $result;
 	}
 
@@ -269,7 +322,8 @@ class LDAP_Wrapper {
 		if ( empty($dn) || empty($attrs) || !is_array($attrs) ) {
 			return 0;
 		}
-		$result = @ldap_mod_replace( $this->ldap, $dn, $attrs );
+		$result = ! @ldap_mod_replace( $this->ldap, $dn, $attrs );
+		if ( $result ) { $result = $ldap->get_error(); }
 		return $result;
 	}
 
@@ -278,7 +332,8 @@ class LDAP_Wrapper {
 		if ( empty($dn) || empty($attrs) || !is_array($attrs) ) {
 			return 0;
 		}
-		$result = @ldap_mod_del( $this->ldap, $dn, $attrs );
+		$result = ! @ldap_mod_del( $this->ldap, $dn, $attrs );
+		if ( $result ) { $result = $ldap->get_error(); }
 		return $result;
 	}
 
@@ -288,7 +343,8 @@ class LDAP_Wrapper {
 			return 0;
 		}
 		if ( $this->ensure_ous($new_parent) ) {
-			$result = @ldap_rename( $this->ldap, $dn, $attr, $new_parent, true );
+			$result = ! @ldap_rename( $this->ldap, $dn, $attr, $new_parent, true );
+			if ( $result ) { $result = $ldap->get_error(); }
 		}
 		$this->fix_group_memberships( $dn, $attr .','. $new_parent );
 
@@ -338,7 +394,8 @@ class LDAP_Wrapper {
 				'ou' => $ou,
 			);
 
-			$result = ldap_add( $this->ldap, $dn, $work );
+			$result = ! ldap_add( $this->ldap, $dn, $work );
+			if ( $result ) { $result = $this->get_error(); }
 		}
 
 		return $result;
@@ -401,7 +458,7 @@ class LDAP_Wrapper {
 
 		$objects = array();
 		foreach ( $schema as $entry ) {
-            $count = ( !empty($entry['objectclasses']['count']) ? $entry['objectclasses']['count'] : 0 );
+			$count = ( !empty($entry['objectclasses']['count']) ? $entry['objectclasses']['count'] : 0 );
 			for ( $i = 0; $i < $count; $i++ ) {
 				$oC_str = $entry['objectclasses'][$i];
 				$o = $this->parse_asn_schema( $oC_str );
@@ -422,7 +479,7 @@ class LDAP_Wrapper {
 
 		$attrs = array();
 		foreach ( $schema as $entry ) {
-            $count = ( !empty($entry['attributetypes']['count']) ? $entry['attributetypes']['count'] : 0 );
+			$count = ( !empty($entry['attributetypes']['count']) ? $entry['attributetypes']['count'] : 0 );
 			for ( $i = 0; $i < $count; $i++ ) {
 				$attr_str = $entry['attributetypes'][$i];
 				$a = $this->parse_asn_schema( $attr_str );

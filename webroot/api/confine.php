@@ -19,6 +19,8 @@ if ( ! authorized('reset_password') ) {
 	exit;
 }
 
+//  AD ldap connection MUST be first or CACertFile option will not take effect
+$ad = new LDAP_Wrapper('AD');
 $ldap = new LDAP_Wrapper();
 global $GOOGLE_DOMAIN;
 
@@ -75,25 +77,26 @@ if ( ! empty($input) ) {
         }
 
         if ( $input == 'off' ) {
-            $results = unlock_user($ldap,$objectdn);
+            $results = ! unlock_user($ldap,$objectdn);
         }
         else {
             $password = create_password();
             lock_user( $ldap, $objectdn, $password );
             if ( !empty($object['employeeType'][0]) && strripos($object['mail'][0],'@'.$GOOGLE_DOMAIN) !== False ) {
                 google_set_password( $object['mail'][0], $password );
+                $results = set_ad_password( $ad, $object['uid'][0], $password );
             }
             $results = set_password( $ldap, $objectdn, $password );
         }
         break;
     }
 
-    if ( $results ) {
+    if ( ! $results ) {
         $output .= "\n<result>Success</result>";
     }
     else {
         if ( empty($return) ) {
-            output( '<?xml version ="1.0"?><result><state>error</state><message>'. $ldap->get_error() .'</message></result>', '', $xml=1 );
+            output( '<?xml version ="1.0"?><result><state>error</state><message>'. $results .'</message></result>', '', $xml=1 );
         } else {
             error(array('LDAP_MODIFY_FAILED'));
         }

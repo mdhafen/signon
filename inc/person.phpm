@@ -13,6 +13,7 @@ use Twilio\Rest\Client;
 global $config;
 include_once( $config['base_dir'] .'/lib/data.phpm' );
 include_once( $config['base_dir'] .'/lib/security.phpm' );
+include_once( $config['base_dir'] .'/lib/output.phpm' );
 register_data_callback('ldap','rename','fix_dn_in_logs');
 
 function fix_dn_in_logs( $old_dn, $new_dn ) {
@@ -285,6 +286,42 @@ function get_entropy( $password ) {
 	}
 
 	return $entropy;
+}
+
+function set_ad_password( $ldap, $uid, $password ) {
+	if ( !empty($ldap->config['upn']) ) {
+		$set = $ldap->quick_search( '(userPrincipalName='. $uid . $ldap->config['upn'] .')' );
+	}
+	else {
+		$set = $ldap->quick_search( '(sAMAccountName='. $uid .')' );
+	}
+	if ( count($set) ) {
+		$user = $set[0];
+		$userdn = $user['dn'];
+	}
+	else {
+		$message = 'set AD password: user not found';
+		$err = $ldap->get_error();
+		if ($err) { $message .= " ($err)"; }
+		error(array('AD_SETPASSWORD_NOTFOUND'=>$message));
+	}
+
+	$nt_pass = iconv( "UTF-8", "UTF-16LE", '"'. $password .'"' );
+	$nt_time = ( time() + 11644473600 ) . '0000000';
+	$entry = array(
+		'unicodePwd' => $nt_pass,
+	);
+	$result = $ldap->do_modify( $userdn, $entry );
+	if ( empty($result) ) {
+		$mod = array(
+            // Trying to set pwdLastSet causes an error
+			//'pwdLastSet' => $nt_time,
+			'userAccountControl' => 0x010200,
+		);
+		$result = $ldap->do_modify( $userdn, $mod );
+	}
+
+	return $result;
 }
 
 function populate_static_user_attrs( &$object ) {

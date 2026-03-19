@@ -88,7 +88,8 @@ foreach ( $accounts as $locid => $locname ) {
         unset( $entry['dn'] );
 
         $entry['sambaSID'] = $ldap->get_next_num('sambaSID');
-        if ( $ldap->do_add( $dn, $entry ) ) {
+        $result = $ldap->do_add( $dn, $entry ) ) {
+        if ( ! $result ) {
           set_password( $ldap, $dn, $password );
           print $dn ." Account created with password: $password\n";
           $output_csv .= "'". $entry['uid'] ."','$password','$locname'\n";

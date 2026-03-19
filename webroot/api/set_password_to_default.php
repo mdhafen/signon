@@ -12,6 +12,8 @@ if ( ! authorized('reset_password') && ! authenticate_api_client() ) {
 }
 
 global $GOOGLE_DOMAIN;
+//  AD ldap connection MUST be first or CACertFile option will not take effect
+$ad = new LDAP_Wrapper('AD');
 $ldap = new LDAP_Wrapper();
 $users = array();
 $output = '<?xml version ="1.0"?><result>';
@@ -76,9 +78,10 @@ foreach ( $change_users as $user ) {
 	$def_password = get_default_password($user['uid'][0]);
 	if ( !empty($user['employeeType'][0]) && strripos($user['mail'][0],'@'.$GOOGLE_DOMAIN) !== False ) {
 		$result = google_set_password( $user['mail'][0], $def_password );
+		$result = set_ad_password( $ad, $user['uid'][0], $password );
 	}
 	$result = set_password( $ldap, $user['dn'], $def_password );
-	if ( $result ) {
+	if ( ! $result ) {
 		log_attr_change( $user['dn'], array('userPassword'=>'') );
 
 		$output .= '<message><uid>'. htmlspecialchars($user['uid'][0],ENT_QUOTES|ENT_XML1|ENT_SUBSTITUTE) .'</uid><password>'. htmlspecialchars($def_password,ENT_QUOTES|ENT_XML1|ENT_SUBSTITUTE) .'</password></message>';

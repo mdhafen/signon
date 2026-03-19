@@ -19,6 +19,8 @@ if ( empty($op) ) {
 }
 
 global $GOOGLE_DOMAIN,$GOOGLE_A_CLIENT;
+//  AD ldap connection MUST be first or CACertFile option will not take effect
+$ad = new LDAP_Wrapper('AD');
 $ldap = new LDAP_Wrapper();
 $errors = array();
 $output = array( 'op' => $op );
@@ -100,6 +102,7 @@ if ( !empty($password) && !empty($password2) ) {
 					$errors[] = 'USER_LOCKED';
 				} else {
 					$result = google_set_password( $email, $password );
+					$result = set_ad_password( $ad, $object['uid'][0], $password );
 					set_password( $ldap, $dn, $password );
 					log_attr_change( $dn, array('userPassword'=>'') );
 					$output['success'] = true;

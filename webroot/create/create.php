@@ -82,11 +82,14 @@ if ( !empty($submitted) && ! $error ) {
   }
 
   if ( !empty($entry['dn']) && !empty($password) && ! $error ) {
+    //  AD ldap connection MUST be first or CACertFile option will not take effect
+    $ad = new LDAP_Wrapper('AD');
     $ldap = new LDAP_Wrapper();
     $dups = $ldap->quick_search( array( 'uid' => $entry['uid'] ), array() );
 
     if ( count($dups) == 1 ) {
       google_set_password( $entry['mail'], $password );
+      set_ad_password( $ad, $entry['uid'], $password );
       set_password( $ldap, $dups[0]['dn'], $password );
       log_attr_change( $dups[0]['dn'], array('userPassword'=>'') );
       $result = 'Password updated';
@@ -97,14 +100,15 @@ if ( !empty($submitted) && ! $error ) {
         populate_dynamic_user_attrs($ldap,$entry);
         $dn = $entry['dn'];
         unset( $entry['dn'] );
-        if ( $ldap->do_add( $dn, $entry ) ) {
+        $result = $ldap->do_add( $dn, $entry );
+        if ( ! $result ) {
           google_set_password( $entry['mail'], $password );
           set_password( $ldap, $dn, $password );
           $result = 'Account created';
         }
         else {
           $error = 1;
-          $result = 'There was an Error creating an account account for '. $entry['uid'];
+          $result = 'There was an Error creating an account account for '. $entry['uid'] . ' : '. $result;
         }
       }
     }

@@ -11,6 +11,8 @@ authorize( 'login' );
 $errors = array();
 $object = array();
 
+//  AD ldap connection MUST be first or CACertFile option will not take effect
+$ad = new LDAP_Wrapper('AD');
 $ldap = new LDAP_Wrapper();
 $dn = $_SESSION['userid'];
 $set = $ldap->quick_search( '(objectClass=*)', array(), 0, $dn );
@@ -52,6 +54,7 @@ else {
 		else if ( $password === $password2 ) {
             if ( !empty($object['employeeType'][0]) && $object['employeeType'][0] != 'Guest' ) {
 				google_set_password( $object['mail'][0], $password );
+				$result = set_ad_password( $ad, $object['uid'][0], $password );
 			}
 			set_password( $ldap, $dn, $password );
 			log_attr_change( $dn, array('userPassword'=>'') );

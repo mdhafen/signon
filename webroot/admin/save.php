@@ -108,14 +108,15 @@ if ( !empty($adds) || !empty($dels) || !empty($reps) ) {
 			$new_uid = explode('-',$adds['sambaSID']);
 			$adds['uidNumber'] = end($new_uid);
 		}
-		if ( $ldap->do_add( $objectdn, $adds ) ) {
+		$result = $ldap->do_add( $objectdn, $adds );
+		if ( ! $result ) {
 			if ( !empty($password) ) {
 				if ( strlen($password) < 8 ) {
 					$errors[] = "The password is too short";
 				}
-                else if ( $times = is_pwned_password($password) ) {
+				else if ( $times = is_pwned_password($password) ) {
 					$errors[] = "Password compromised, you can not use this password.  This password has been seen $times times before.  This password has previously appeared in a data breach and should never be used.  If you've ever used it anywhere before, you should change it as soon as possible.";
-                }
+				}
 				else {
 					set_password( $ldap, $objectdn, $password );
 				}

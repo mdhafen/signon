@@ -18,6 +18,13 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
         <pre><?= print_r($data['google_result'],true); ?></pre>
     </div></div>
 <?php } ?>
+<?php if ( ! empty($data['ad_result']) ) { ?>
+    <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#ad_result_block">Show AD result</button>
+    <div class="collapse" id="ad_result_block"><div class="well">
+        Active Directory result:
+        <pre><?= print_r($data['ad_result'],true); ?></pre>
+    </div></div>
+<?php } ?>
 <?php if ( ! empty($data['success']) ) { ?>
 <div class="alert alert-info alert-dismissible" role="alert">
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>

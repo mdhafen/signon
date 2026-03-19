@@ -19,6 +19,8 @@ if ( !empty($argv[1]) ) {
   }
 }
 
+//  AD ldap connection MUST be first or CACertFile option will not take effect
+$ad = new LDAP_Wrapper('AD');
 $ldap = new LDAP_Wrapper();
 $users = array();
 if ( !empty($argv[1]) ) {
@@ -81,6 +83,7 @@ foreach ( $change_users as $user ) {
 
   if ( strtolower(strstr($user['mail'][0],'@')) == '@'.$GOOGLE_DOMAIN ) {
     $result = google_set_password( $user['mail'][0], $password );
+    $result = set_ad_password( $ad, $user['uid'][0], $password );
   }
   $result = set_password( $ldap, $user['dn'], $password );
   log_attr_change( $user['dn'], array('userPassword'=>'') );
