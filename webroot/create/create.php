@@ -89,7 +89,7 @@ if ( !empty($submitted) && ! $error ) {
 
     if ( count($dups) == 1 ) {
       google_set_password( $entry['mail'], $password );
-      set_ad_password( $ad, $entry['uid'], $password );
+      // set_ad_password( $ad, $entry['uid'], $password ); // AD object probably doesn't exist yet
       set_password( $ldap, $dups[0]['dn'], $password );
       log_attr_change( $dups[0]['dn'], array('userPassword'=>'') );
       $result = 'Password updated';
