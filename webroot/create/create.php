@@ -89,7 +89,7 @@ if ( !empty($submitted) && ! $error ) {
 
     if ( count($dups) == 1 ) {
       google_set_password( $entry['mail'], $password );
-      // set_ad_password( $ad, $entry['uid'], $password ); // AD object probably doesn't exist yet
+      set_ad_password( $ad, $entry['uid'], $password );
       set_password( $ldap, $dups[0]['dn'], $password );
       log_attr_change( $dups[0]['dn'], array('userPassword'=>'') );
       $result = 'Password updated';
@@ -102,6 +102,16 @@ if ( !empty($submitted) && ! $error ) {
         unset( $entry['dn'] );
         $result = $ldap->do_add( $dn, $entry );
         if ( ! $result ) {
+          $ad_entry = google_user_hash_for_ad( $user, $ad );
+          if ( !empty($ad_entry['dn']) ) {
+            $ad_dn = $ad_entry['dn'];
+            unset( $ad_entry['dn'] );
+            $result = $ad->add( $ad_dn, $ad_entry );
+            if ( ! $result ) {
+              $result = set_ad_password( $ad, $entry['uid'], $password );
+            }
+          }
+
           google_set_password( $entry['mail'], $password );
           set_password( $ldap, $dn, $password );
           $result = 'Account created';

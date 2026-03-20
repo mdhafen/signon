@@ -12,9 +12,12 @@ if ( ! authorized('set_password') && ! authenticate_api_client() ) {
 }
 
 global $GOOGLE_DOMAIN;
+//  AD ldap connection MUST be first or CACertFile option will not take effect
+$ad = new LDAP_Wrapper('AD');
 $ldap = new LDAP_Wrapper();
 $output = '<?xml version ="1.0"?><result>';
 $object = array();
+$g_source = array();
 $source = array();
 $query = input( 'query', INPUT_STR );
 
@@ -30,12 +33,12 @@ if ( empty($set) ) {
     else {
         $query .= '@'.$GOOGLE_DOMAIN;
     }
-    $source = get_user_google( $query );
+    $g_source = get_user_google( $query );
     if ( empty($source) ) {
         output( '<?xml version ="1.0"?><result><state>error</state><flag>NOT_FOUND</flag></result>', '', $xml=1 );
         exit;
     }
-    $source = google_user_hash_for_ldap( $source );
+    $source = google_user_hash_for_ldap( $g_source );
 }
 if ( count($set) > 1 ) {
     output( '<?xml version ="1.0"?><result><state>error</state><flag>LDAP_DUPLICATES</flag></result>', '', $xml=1 );
@@ -100,6 +103,13 @@ if ( $move ) {
     $results .= '<flag>MOVED</flag>';
 }
 if ( $add ) {
+    $ad_entry = google_user_hash_for_ad( $g_source, $ad );
+    if ( !empty($ad_entry['dn']) ) {
+      $ad_dn = $ad_entry['dn'];
+      unset( $ad_entry['dn'] );
+      $ad->add( $ad_dn, $ad_entry );
+    }
+
     $results .= '<flag>CREATED</flag>';
 }
 if ( $passwd ) {

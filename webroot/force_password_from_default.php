@@ -52,6 +52,14 @@ if ( !empty($user) ) {
           if ( ! $ldap->do_add( $dn, $entry ) ) {
             $errors[] = 'There was an error creating the account';
           }
+          else {
+            $ad_entry = google_user_hash_for_ad( $user, $ad );
+            if ( !empty($ad_entry['dn']) ) {
+              $ad_dn = $ad_entry['dn'];
+              unset( $ad_entry['dn'] );
+              $ad->add( $ad_dn, $ad_entry );
+            }
+          }
         }
       }
     }

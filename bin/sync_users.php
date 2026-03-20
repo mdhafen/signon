@@ -43,6 +43,8 @@ if ( !empty($argv[2]) ) {
   $st_passwds = array_filter($st_passwds);
 }
 
+//  AD ldap connection MUST be first or CACertFile option will not take effect
+$ad = new LDAP_Wrapper('AD');
 $ldap = new LDAP_Wrapper();
 $users = array();
 if ( !empty($argv[1]) ) {
@@ -97,9 +99,17 @@ foreach ( $google_cache as $g_user ) {
     $thisUser = $results[0];
     $dn = $thisUser['dn'];
 
+    $ad_entry = google_user_hash_for_ad( $g_user, $ad );
+    if ( !empty($ad_entry['dn']) ) {
+      $ad_dn = $ad_entry['dn'];
+      unset( $ad_entry['dn'] );
+      $ad->add( $ad_dn, $ad_entry );
+    }
+
     $def_passwd = get_default_password( $entry['uid'] ) ?? generate_default_password($thisUser);
     if ( $entry['employeeType'] == 'Student' && ( !empty($st_passwds[ $entry['mail'] ]) || !empty($def_passwd) ) ) {
       $passwd = $st_passwds[ $entry['mail'] ] ?? $def_passwd;
+      $result = set_ad_password( $ad, $entry['uid'], $password );
       set_password( $ldap, $dn, $passwd );
       $output .= "And set Password ";
     }

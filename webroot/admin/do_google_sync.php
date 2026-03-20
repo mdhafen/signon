@@ -10,6 +10,8 @@ $output = array();
 $dn = input( 'dn', INPUT_STR );
 $mail = input( 'mail', INPUT_EMAIL );
 
+//  AD ldap connection MUST be first or CACertFile option will not take effect
+$ad = new LDAP_Wrapper('AD');
 $ldap = new LDAP_Wrapper();
 authorize( 'set_password' );
 $can_edit = authorized('manage_objects');
@@ -50,7 +52,8 @@ if ( empty($set) ) {
     if ( empty($mail) ) {
         error(['SYNC_OBJECT_LDAP_NOT_FOUND']);
     }
-    $source = google_user_hash_for_ldap( get_user_google( $mail ) );
+    $g_source = get_user_google( $mail );
+    $source = google_user_hash_for_ldap( $g_source );
     if ( empty($source) ) {
         error(['SYNC_OBJECT_NO_GOOGLE']);
     }
@@ -74,7 +77,8 @@ else {
     if ( empty($object['mail']) ) {
         error(['SYNC_OBJECT_NO_MAIL']);
     }
-    $source = google_user_hash_for_ldap( get_user_google( $object['mail'][0] ) );
+    $g_source = get_user_google( $object['mail'][0] );
+    $source = google_user_hash_for_ldap( $g_source );
     if ( empty($source) ) {
         error(['SYNC_OBJECT_NO_GOOGLE']);
     }
@@ -86,6 +90,15 @@ if ( $parentdn == $ldap->config['base'] ) {
 }
 
 list( $mods, $move, $add, $passwd ) = do_google_sync( $ldap, $object, $source );
+
+if ( $add ) {
+    $ad_entry = google_user_hash_for_ad( $g_source, $ad );
+    if ( !empty($ad_entry['dn']) ) {
+        $ad_dn = $ad_entry['dn'];
+        unset( $ad_entry['dn'] );
+        $ad->add( $ad_dn, $ad_entry );
+    }
+}
 
 $output = array_merge( $output, array(
     'errors' => $errors,

@@ -460,6 +460,68 @@ function google_user_hash_for_ldap( $user ) {
   return $entry;
 }
 
+function google_user_hash_for_ad( $user, $ldap ) {
+  global $LDAP_BASE;
+  $entry = array();
+
+  if ( !empty($user) ) {
+    $entry['objectClass'] = ['top','person','user','organizationalPerson'];
+    $entry['userAccountControl'] = 0x010202;
+    $entry['pwdLastSet'] = '0';
+    $uid = strtolower(substr($user['primaryEmail'],0,strpos($user['primaryEmail'],'@')));
+    $entry['sAMAccountName'] = substr($uid,0,19);
+    $entry['userPrincipalName'] = $uid . $ldap->config['upn'];
+    $entry['sn'] = $user['name']['familyName'];
+    $entry['givenName'] = $user['name']['givenName'];
+    preg_match( '/^\s*(\w)/', $user['name']['givenName'], $initials );
+    $entry['initials'] = $initials[1];
+    preg_match( '/\s*(\w)[\w-\.\']+$/', $user['name']['familyName'], $initials );
+    if ( !empty($initials[1]) ) { $entry['initials'] .= $initials[1]; }
+    $entry['cn'] = $user['name']['fullName'];
+    $entry['displayName'] = $user['name']['fullName'];
+    $entry['name'] = $user['name']['fullName'];
+    $entry['mail'] = strtolower($user['primaryEmail']);
+    if ( !empty($user['organizations']) ) {
+      foreach ( $user['organizations'] as $org ) {
+        if ( !empty($org['title']) ) {
+          $entry['title'] = $org['title'];
+        }
+      }
+    }
+    if ( !empty($user['externalIds']) ) {
+      foreach ( $user['externalIds'] as $xid ) {
+        if ( $xid['type'] == 'organization' ) {
+          $entry['employeeID'] = $xid['value'];
+        }
+      }
+    }
+    if ( !empty($user['customSchemas']['Contact_Information']) ) {
+      $ci=$user['customSchemas']['Contact_Information'];
+      if ( !empty($ci['Street_Address']) ) {
+        $entry['streetAddress'] = $ci['Street_Address'];
+      }
+      if ( !empty($ci['Zipcode']) ) {
+        $entry['postalCode'] = $ci['Zipcode'];
+      }
+      if ( !empty($ci['School_Number']) ) {
+        $entry['department'] = $ci['School_Number'];
+      }
+      if ( !empty($ci['City']) ) {
+        $entry['l'] = $ci['City'];
+      }
+      if ( !empty($ci['State']) ) {
+        $entry['st'] = $ci['State'];
+      }
+    }
+    $ou = google_org_to_ou( $user['orgUnitPath'] );
+    $ou = str_replace( $LDAP_BASE, $ldap->config['base'], $ou );
+    if ( !empty($ou) && !empty($entry['cn']) ) {
+      $entry['dn'] = 'cn='. ldap_escape($entry['cn'],'',LDAP_ESCAPE_DN) .','. $ou;
+    }
+  }
+  return $entry;
+}
+
 function google_set_password( $email, $password ) {
   global $GOOGLE_S_CLIENT,$GOOGLE_A_CLIENT;
   $result = 0;
