@@ -22,6 +22,7 @@ $attrs = array(
     'givenName' => 'First Name',
     'phoneNumber' => 'Phone Number',
     'o' => 'Building Abbreviation',
+    'filter' => 'LDAP Filter',
 );
 
 if ( !empty($attr) ) {
@@ -43,6 +44,9 @@ if ( !empty($attr) ) {
         $filter = "";
       }
       break;
+
+    case 'filter':
+      $filter = $query; break;
 
     default: error( array('BAD_ATTRIBUTE') );
   }
