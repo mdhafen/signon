@@ -78,7 +78,7 @@ foreach ( $change_users as $user ) {
 	$def_password = get_default_password($user['uid'][0]);
 	if ( !empty($user['employeeType'][0]) && strripos($user['mail'][0],'@'.$GOOGLE_DOMAIN) !== False ) {
 		$result = google_set_password( $user['mail'][0], $def_password );
-		$result = set_ad_password( $ad, $user['uid'][0], $password );
+		$result = set_ad_password( $ad, $user['uid'][0], $def_password );
 	}
 	$result = set_password( $ldap, $user['dn'], $def_password );
 	if ( ! $result ) {
