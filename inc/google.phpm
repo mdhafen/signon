@@ -384,7 +384,12 @@ function google_user_hash_for_ldap( $user ) {
       $entry['uid'] = strtolower(substr($user['primaryEmail'],0,strpos($user['primaryEmail'],'@')));
       $entry['sn'] = $user['name']['familyName'];
       $entry['givenName'] = $user['name']['givenName'];
+      $initials = preg_split( '/\s+/', $user['name']['givenName'], 0, PREG_SPLIT_NO_EMPTY );
+      array_shift($initials);
+      $initials = array_map( fn($n): string => mb_strtoupper(mb_substr($n,0,1)), $initials );
+      if ( count($initials) ) { $entry['initials'] = implode($initials); }
       $entry['cn'] = $user['name']['fullName'];
+      // $entry['cn'] = implode(' ',array_filter( array($entry['givenName'],$entry['initials'],$entry['sn']) ) );
       $entry['mail'] = strtolower($user['primaryEmail']);
       if ( !empty($user['organizations']) ) {
         foreach ( $user['organizations'] as $org ) {
@@ -473,10 +478,10 @@ function google_user_hash_for_ad( $user, $ldap ) {
     $entry['userPrincipalName'] = $uid . $ldap->config['upn'];
     $entry['sn'] = $user['name']['familyName'];
     $entry['givenName'] = $user['name']['givenName'];
-    preg_match( '/^\s*(\w)/', $user['name']['givenName'], $initials );
-    $entry['initials'] = $initials[1];
-    preg_match( '/\s*(\w)[\w-\.\']+$/', $user['name']['familyName'], $initials );
-    if ( !empty($initials[1]) ) { $entry['initials'] .= $initials[1]; }
+    $initials = preg_split( '/\s+/', $user['name']['givenName'], 0, PREG_SPLIT_NO_EMPTY );
+    array_shift($initials);
+    $initials = array_map( fn($n): string => mb_strtoupper(mb_substr($n,0,1)), $initials );
+    if ( count($initials) ) { $entry['initials'] = implode($initials); }
     $entry['cn'] = $user['name']['fullName'];
     $entry['displayName'] = $user['name']['fullName'];
     $entry['name'] = $user['name']['fullName'];
