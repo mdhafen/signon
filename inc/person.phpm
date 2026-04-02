@@ -223,8 +223,7 @@ function set_password( $ldap, $userdn, $password ) {
 			return 0;
 		}
 
-		$salt = "";
-		$len = mt_rand( 40-strlen($password), 50 );
+		$len = mt_rand( 40, 50 );
 		$salt = openssl_random_pseudo_bytes($len);
 		$hash_pass = '{SSHA}' . base64_encode( sha1($password.$salt,TRUE) . $salt );
 		$smb_pass = strtoupper(bin2hex(mhash(MHASH_MD4, iconv("UTF-8","UTF-16LE",$password))));

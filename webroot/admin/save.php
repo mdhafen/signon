@@ -152,7 +152,7 @@ if ( !empty($adds) || !empty($dels) || !empty($reps) ) {
 		$mods = array_keys(array_merge($dels,$adds,$reps));
 		$changes = array();
 		foreach ( $mods as $attr ) {
-			$changes[$attr] = $object[$attr][0];
+			$changes[$attr] = ( !empty($object[$attr]) ? $object[$attr][0] : '' );
 		}
 		log_attr_change( $objectdn, $changes );
 

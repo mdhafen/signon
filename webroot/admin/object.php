@@ -42,7 +42,7 @@ if ( strripos( $objectdn, ",ou=Guest,".$ldap->config['base'] ) !== false ) {
     $sig = get_guest_signature( $object['uid'][0] );
     if ( empty($sig) || $sig['aup_expire'] < $sig['now'] ) {
         $is_guest_expired = 1;
-        if ( $sig['send_notice'] < $sig['now'] && ( empty($sig['aup_sent']) || ( $sig['aup_signed'] && $sig['aup_sent'] < $row['aup_signed'] ) ) ) {
+        if ( ( empty($sig) || $sig['send_notice'] < $sig['now'] ) && ( empty($sig['aup_sent']) || ( !empty($sig['aup_signed']) && $sig['aup_sent'] < $row['aup_signed'] ) ) ) {
             $is_guest_send_notice = 1;
         }
     }
