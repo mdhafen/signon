@@ -11,6 +11,12 @@ include( 'doc-header.php' );
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
   Your password has been changed.
 </div>
+<?php   if ( !empty($data['google_result']) ) { ?>
+<div class="hidden"><h2>Google response</h2><pre><?= $data['google_result'] ?></pre></div>
+<?php   } ?>
+<?php   if ( !empty($data['ad_result']) ) { ?>
+<div class="hidden"></h2>AD response</h2><pre><?= $data['ad_result'] ?></pre></div>
+<?php   } ?>
 <?php } else { ?>
 <h1 class="modal-title" id="password_modal_label">Change Password</h1>
 <form action="<?= $data['op'] == 'ChangeFromDefault' ? 'force_password_from_default.php' : 'change_password.php' ?>" method="post" class="form-horizontal">

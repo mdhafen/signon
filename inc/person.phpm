@@ -302,7 +302,8 @@ function set_ad_password( $ldap, $uid, $password ) {
 		$message = 'set AD password: user not found';
 		$err = $ldap->get_error();
 		if ($err) { $message .= " ($err)"; }
-		error(array('AD_SETPASSWORD_NOTFOUND'=>$message));
+		$result = $message;
+		return $result;
 	}
 
 	$nt_pass = iconv( "UTF-8", "UTF-16LE", '"'. $password .'"' );

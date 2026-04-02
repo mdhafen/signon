@@ -110,7 +110,9 @@ if ( !empty($password) && !empty($password2) ) {
 					$errors[] = 'USER_LOCKED';
 				} else {
 					$result = google_set_password( $email, $password );
+					$output['google_result'] = $result;
 					$result = set_ad_password( $ad, $object['uid'][0], $password );
+					$output['ad_result'] = $result;
 					set_password( $ldap, $dn, $password );
 					log_attr_change( $dn, array('userPassword'=>'') );
 					$output['success'] = true;
