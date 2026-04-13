@@ -110,6 +110,17 @@ class LDAP_Wrapper {
 			if ( ! empty($_SESSION['auth_ldap'][$this->module]) ) {
 				$userdn = $_SESSION['auth_ldap'][$this->module]['userid'];
 				$passwd = $_SESSION['auth_ldap'][$this->module]['password'];
+				$salt = $_SESSION['auth_ldap'][$this->module]['salt'];
+				$mode_str = $_SESSION['auth_ldap'][$this->module]['mode'];
+				$mode = $config['password_modes'][ $mode_str ];
+				unset($mode['hash']);
+				if ( !empty($salt) ) {
+					$key = base64_decode($salt) . $config['secure_phrase'];
+				}
+				else {
+					$key = '';
+				}
+				$passwd = decode_password( $passwd, $key, $mode );
 			}
 			else {
 				$userdn = $this->config['userdn'];

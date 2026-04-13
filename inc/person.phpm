@@ -103,16 +103,17 @@ function get_default_password( $uid ) {
 
 function set_default_password( $uid, $password ) {
 	global $config;
-	$mode = $config['password_modes'][ $config['password_modes']['prefered'] ];
+	$mode_str = $config['password_modes']['prefered'];
+	$mode = $config['password_modes'][ $mode_str ];
 	unset($mode['hash']);
-	list($enc_password, $salt, $mode) = encode_password( $password, $mode );
+	list($enc_password, $salt) = encode_password( $password, $mode );
 
 	$dbh = db_connect('core');
 	$sth = $dbh->prepare('REPLACE INTO user_default_password (uid,default_password,salt,password_mode,timestamp) VALUES (:uid,:passwd,:salt,:mode,NOW())');
 	$sth->bindValue( ':uid', $uid );
 	$sth->bindValue( ':passwd', $enc_password );
 	$sth->bindValue( ':salt', $salt );
-	$sth->bindValue( ':mode', $mode );
+	$sth->bindValue( ':mode', $mode_str );
 	$sth->execute();
 }
 
@@ -314,9 +315,9 @@ function set_ad_password( $ldap, $uid, $password ) {
 	$result = $ldap->do_modify( $userdn, $entry );
 	if ( empty($result) ) {
 		$mod = array(
-            // Trying to set pwdLastSet causes an error
+			// Trying to set pwdLastSet causes an error
 			//'pwdLastSet' => $nt_time,
-			'userAccountControl' => 0x010200,
+			'userAccountControl' => 0x010240,
 		);
 		$result = $ldap->do_modify( $userdn, $mod );
 	}
@@ -786,7 +787,9 @@ function get_lock_status( $username ) {
 		$locked = $row;
 	}
 	if ( !empty($locked['password_mode']) ) {
-		$mode = $config['password_modes'][ $locked['password_mode'] ];
+		$mode_str = $locked['password_mode'];
+		$mode = $config['password_modes'][ $mode_str ];
+		unset($mode['hash']);
 	}
 	else {
 		$mode = array();
@@ -814,9 +817,10 @@ function lock_user( $ldap, $userdn, $password ) {
 	unset( $object['dn'] );
 	$username = $object['uid'][0];
 
-	$mode = $config['password_modes'][ $config['password_modes']['prefered'] ];
+	$mode_str = $config['password_modes']['prefered'];
+	$mode = $config['password_modes'][ $mode_str ];
 	unset($mode['hash']);
-	list($enc_password, $salt, $mode) = encode_password( $password, $mode );
+	list($enc_password, $salt) = encode_password( $password, $mode );
 
 	$user = $_SESSION['loggedin_user']['username'] ?? $_SESSION['api_user']['username'] ?? $username;
 
@@ -825,7 +829,7 @@ function lock_user( $ldap, $userdn, $password ) {
 	$sth->bindValue( ':uid', $username );
 	$sth->bindValue( ':passwd', $enc_password );
 	$sth->bindValue( ':salt', $salt );
-	$sth->bindValue( ':mode', $mode );
+	$sth->bindValue( ':mode', $mode_str );
 	$sth->bindValue( ':user', $user );
 	$result = $sth->execute();
 
