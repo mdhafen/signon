@@ -218,6 +218,25 @@ class PS_Access {
     return $user;
   }
 
+    public function get_all_student_user() {
+        $students = array();
+        $page = 1;
+        $count = $this->get_data('/ws/v1/district/student/count?q=school_enrollment.enroll_status==(A,P)');
+        $resources = $this->get_data('/ws/v1/district/student?page='.$page.'&q=school_enrollment.enroll_status==(A,P)');
+
+        while ( !empty($resources->students->student) ) {
+            foreach ( $resources->students->student as $entry ) {
+                $user = $this->student_to_user($entry);
+                if ( ! empty($user) ) {
+                    $students[] = $user;
+                }
+            }
+            $page++;
+            $resources = $this->get_data('/ws/v1/district/student?page='.$page.'&q=school_enrollment.enroll_status==(A,P)');
+        }
+        return $students;
+    }
+
   public function get_student_locations( $userid, $student ) {
     $locations = array();
     if ( empty($student->school_enrollment) ) {
@@ -496,11 +515,22 @@ class PS_Access {
 
   private function student_to_user( $student ) {
     $user = null;
+    if ( empty($student->id) ) {
+        error_log("Student with no id: ". print_r($student,true) );
+        return $user;
+    }
     if ( empty($student->addresses) || empty($student->contact_info) || empty($student->demographics) || empty($student->school_enrollment) ) {
       $entry = $this->get_data('/ws/v1/student/'. $student->id .'?expansions=addresses,phones,contact_info,demographics,school_enrollment,schedule_setup&extensions=u_students_extension');
       $student = $entry->student;
     }
-    $username = $student->student_username;
+    $username = '';
+    if ( empty($student->student_username) ) {
+        error_log("Student with no username: ". print_r($student,true) );
+        return $user;
+    }
+    else {
+        $username = $student->student_username;
+    }
     $fullname = $this->get_student_fullname( $student->id, $student );
     $email = $student->contact_info->email ?? "";
     $alt_email = '';
@@ -512,26 +542,28 @@ class PS_Access {
     $postalcode = $student->addresses->physical->postal_code;
     $gender = $student->demographics->gender;
     $dob = $student->demographics->birth_date;
-    if ( is_countable($student->_extension_data->_table_extension) ) {
-        $extensions = $student->_extension_data->_table_extension;
-    }
-    else {
-        $extensions = array($student->_extension_data->_table_extension);
-    }
-    foreach ( $extensions as $ext ) {
-        if ( $ext->name == 'u_students_extension' ) {
-            if ( is_countable($ext->_field) ) {
-                $fields = $ext->_field;
-            }
-            else {
-                $fields = array($ext->_field);
-            }
-            foreach ( $fields as $field ) {
-                if ( $field->name == 'guardianemails' ) {
-                    $alt_email = $field->value;
+    if ( !empty($student->_extension_data) ) {
+        if ( is_countable($student->_extension_data->_table_extension) ) {
+            $extensions = $student->_extension_data->_table_extension;
+        }
+        else {
+            $extensions = array($student->_extension_data->_table_extension);
+        }
+        foreach ( $extensions as $ext ) {
+            if ( $ext->name == 'u_students_extension' ) {
+                if ( is_countable($ext->_field) ) {
+                    $fields = $ext->_field;
                 }
-                if ( $field->name == 'default_password' ) {
-                    $default_passwd = $field->value;
+                else {
+                    $fields = array($ext->_field);
+                }
+                foreach ( $fields as $field ) {
+                    if ( $field->name == 'guardianemails' ) {
+                        $alt_email = $field->value;
+                    }
+                    if ( $field->name == 'default_password' ) {
+                        $default_passwd = $field->value;
+                    }
                 }
             }
         }
