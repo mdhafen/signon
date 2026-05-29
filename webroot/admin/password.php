@@ -6,8 +6,6 @@ include_once( '../../lib/output.phpm' );
 include_once( '../../inc/person.phpm' );
 include_once( '../../inc/google.phpm' );
 
-//  AD ldap connection MUST be first or CACertFile option will not take effect
-$ad = new LDAP_Wrapper('AD');
 $ldap = new LDAP_Wrapper();
 global $GOOGLE_DOMAIN;
 
@@ -75,10 +73,13 @@ if ( ! empty($password) ) {
 	}
 
 	if ( !empty($object['employeeType'][0]) && strripos($object['mail'][0],'@'.$GOOGLE_DOMAIN) !== False ) {
+		$result = call_set_ad_password( $object['uid'][0], $password );
+		$output['ad_result'] = $result;
+		if ( !empty($result) ) {
+			$output['error'] = 'AD_SETPASSWD: '. $result;
+		}
 		$result = google_set_password( $object['mail'][0], $password );
 		$output['google_result'] = $result;
-		$result = set_ad_password( $ad, $object['uid'][0], $password );
-		$output['ad_result'] = $result;
 	}
 	$result = set_password( $ldap, $objectdn, $password );
 	if ( ! $result ) {

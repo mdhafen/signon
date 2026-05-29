@@ -88,8 +88,20 @@ if ( !empty($submitted) && ! $error ) {
     $dups = $ldap->quick_search( array( 'uid' => $entry['uid'] ), array() );
 
     if ( count($dups) == 1 ) {
+      $result = call_set_ad_password( $entry['uid'], $password );
+      if ( $result ) {
+        $error = 1;
+        $result = 'AD_SETPASSWD:'. $result;
+
+        $output['op'] = $op;
+        $output['result'] = $result;
+        $output['error'] = $error;
+        $output['username'] = (empty($user_email))? "" : $user_email;
+
+        output( $output, 'create/create' );
+        exit;
+      }
       google_set_password( $entry['mail'], $password );
-      set_ad_password( $ad, $entry['uid'], $password );
       set_password( $ldap, $dups[0]['dn'], $password );
       log_attr_change( $dups[0]['dn'], array('userPassword'=>'') );
       $result = 'Password updated';

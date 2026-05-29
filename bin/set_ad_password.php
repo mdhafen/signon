@@ -1,26 +1,29 @@
 #!/usr/bin/env php
 <?php
-
 include_once('../lib/config.phpm');
 include_once('../lib/data.phpm');
 include_once('../inc/person.phpm');
 
 $uid = readline( "Username: " );
 
-print "New password: ";
+$tty = stream_isatty(STDIN);
 
-/* possible shell to stty solution
-shell_exec('/usr/bin/env stty -echo');
+if ( $tty ) { print "New password: "; }
+
+/* possible shell to stty solution */
+if ( $tty ) { shell_exec('/usr/bin/env stty -echo'); }
 $pass = rtrim( fgets(STDIN, 4096), PHP_EOL );
-shell_exec('/usr/bin/env stty echo');
- */
+if ( $tty ) { shell_exec('/usr/bin/env stty echo'); }
 
-/* possible pure-php solution */
+
+/* possible pure-php solution
 $stdin = fopen('php://stdin','r');
 stream_set_blocking($stdin,false);
 stream_set_timeout($stdin,1);
 $pass = stream_get_line($stdin,4096,PHP_EOL);
+ */
 
+//  AD ldap connection MUST be first or CACertFile option will not take effect
 $ad = new LDAP_Wrapper('AD');
 $result = set_ad_password($ad,$uid,$pass);
 if ( !empty($result) ) {

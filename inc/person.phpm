@@ -288,6 +288,104 @@ function get_entropy( $password ) {
 	return $entropy;
 }
 
+function call_set_ad_password( $uid, $password ) {
+    global $config;
+
+    $result = '';
+    $proc = proc_open(
+        $config['base_dir'] . '/bin/set_ad_password.php',
+        array( 0 => array('pipe','r'), 1 => array('pipe','w'), 2 => array('pipe','w') ),
+        $pipes,
+        $config['base_dir'] .'/bin',
+    );
+    if ( is_resource($proc) ) {
+        stream_set_blocking($pipes[0],true);
+        stream_set_blocking($pipes[1],false);
+        stream_set_blocking($pipes[2],false);
+
+        $w = null; $e = null;
+        $r = [ $pipes[1], $pipes[2] ];
+        if ( stream_select($r,$w,$e,1) ) {
+            foreach ( $r as $stream ) {
+                $line = fread($stream,1);
+                $info = stream_get_meta_data($stream);
+                while ( !empty($info['unread_bytes']) ) {
+                    $line .= stream_get_contents($stream,$info['unread_bytes'],-1);
+                    $info = stream_get_meta_data($stream);
+                }
+                if ( $stream === $pipes[1] ) {
+                    fwrite($pipes[0], "$uid\n" );
+                }
+                else if ( $stream === $pipes[2] ) {
+                    $result = "Error waiting for username prompt: $line\n";
+
+                    foreach ( $pipes as $pipe ) {
+                        fclose($pipe);
+                    }
+                    proc_close($proc);
+
+                    return $result;
+                }
+            }
+        }
+
+        $r = [ $pipes[1], $pipes[2] ];
+        if ( stream_select($r,$w,$e,1) ) {
+            foreach ( $r as $stream ) {
+                $line = fread($stream,1);
+                $info = stream_get_meta_data($stream);
+                while ( !empty($info['unread_bytes']) ) {
+                    $line .= stream_get_contents($stream,$info['unread_bytes'],-1);
+                    $info = stream_get_meta_data($stream);
+                }
+                if ( $stream === $pipes[1] ) {
+                    fwrite($pipes[0], "$password\n" );
+                }
+                else if ( $stream === $pipes[2] ) {
+                    $result = "Error waiting for password prompt: $line\n";
+
+                    foreach ( $pipes as $pipe ) {
+                        fclose($pipe);
+                    }
+                    proc_close($proc);
+
+                    return $result;
+                }
+            }
+        }
+
+        $r = [ $pipes[1], $pipes[2] ];
+        if ( stream_select($r,$w,$e,1) ) {
+            foreach ( $r as $stream ) {
+                $line = fread($stream,1);
+                $info = stream_get_meta_data($stream);
+                while ( !empty($info['unread_bytes']) ) {
+                    $line .= stream_get_contents($stream,$info['unread_bytes'],-1);
+                    $info = stream_get_meta_data($stream);
+                }
+
+                if ( $stream === $pipes[1] ) {
+                    $result = $line;
+                }
+                else if ( $stream === $pipes[2] ) {
+                    $mess = $line;
+                }
+            }
+        }
+        if ( ! empty($mess) ) { $result .= "Error setting password: $mess"; }
+
+        foreach ( $pipes as $pipe ) {
+            fclose($pipe);
+        }
+        proc_close($proc);
+
+        return $result;
+    }
+    else {
+        return 'Error executing set_ad_password';
+    }
+}
+
 function set_ad_password( $ldap, $uid, $password ) {
 	if ( !empty($ldap->config['upn']) ) {
 		$set = $ldap->quick_search( '(userPrincipalName='. $uid . $ldap->config['upn'] .')' );
