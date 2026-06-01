@@ -302,24 +302,26 @@ function call_set_ad_password( $uid, $password ) {
         stream_set_blocking($pipes[0],true);
         stream_set_blocking($pipes[1],false);
         stream_set_blocking($pipes[2],false);
+        foreach ( $pipes as &$pipe ) {
+            stream_set_read_buffer($pipe,0);
+            stream_set_write_buffer($pipe,0);
+        }
 
-        $w = null; $e = null;
-        $r = [ $pipes[1], $pipes[2] ];
-        if ( stream_select($r,$w,$e,1) ) {
-            foreach ( $r as $stream ) {
+        $r = null; $w = null; $e = null;
+        $ra = [ $pipes[1], $pipes[2] ];
+        $wa = [ $pipes[0] ];
+        if ( stream_select($ra,$w,$e,1) ) {
+            foreach ( $ra as &$stream ) {
                 $line = fread($stream,1);
                 $info = stream_get_meta_data($stream);
                 while ( !empty($info['unread_bytes']) ) {
                     $line .= stream_get_contents($stream,$info['unread_bytes'],-1);
                     $info = stream_get_meta_data($stream);
                 }
-                if ( $stream === $pipes[1] ) {
-                    fwrite($pipes[0], "$uid\n" );
-                }
-                else if ( $stream === $pipes[2] ) {
+                if ( $stream === $pipes[2] ) {
                     $result = "Error waiting for username prompt: $line\n";
 
-                    foreach ( $pipes as $pipe ) {
+                    foreach ( $pipes as &$pipe ) {
                         fclose($pipe);
                     }
                     proc_close($proc);
@@ -328,23 +330,24 @@ function call_set_ad_password( $uid, $password ) {
                 }
             }
         }
+        if ( stream_select($r,$wa,$e,1) ) {
+            fwrite($pipes[0], "$uid\n" );
+        }
 
-        $r = [ $pipes[1], $pipes[2] ];
-        if ( stream_select($r,$w,$e,1) ) {
-            foreach ( $r as $stream ) {
+        $ra = [ $pipes[1], $pipes[2] ];
+        $wa = [ $pipes[0] ];
+        if ( stream_select($ra,$w,$e,1) ) {
+            foreach ( $ra as &$stream ) {
                 $line = fread($stream,1);
                 $info = stream_get_meta_data($stream);
                 while ( !empty($info['unread_bytes']) ) {
                     $line .= stream_get_contents($stream,$info['unread_bytes'],-1);
                     $info = stream_get_meta_data($stream);
                 }
-                if ( $stream === $pipes[1] ) {
-                    fwrite($pipes[0], "$password\n" );
-                }
-                else if ( $stream === $pipes[2] ) {
+                if ( $stream === $pipes[2] ) {
                     $result = "Error waiting for password prompt: $line\n";
 
-                    foreach ( $pipes as $pipe ) {
+                    foreach ( $pipes as &$pipe ) {
                         fclose($pipe);
                     }
                     proc_close($proc);
@@ -353,10 +356,13 @@ function call_set_ad_password( $uid, $password ) {
                 }
             }
         }
+        if ( stream_select($r,$wa,$e,1) ) {
+            fwrite($pipes[0], "$password\n" );
+        }
 
-        $r = [ $pipes[1], $pipes[2] ];
-        if ( stream_select($r,$w,$e,1) ) {
-            foreach ( $r as $stream ) {
+        $ra = [ $pipes[1], $pipes[2] ];
+        if ( stream_select($ra,$w,$e,1) ) {
+            foreach ( $ra as &$stream ) {
                 $line = fread($stream,1);
                 $info = stream_get_meta_data($stream);
                 while ( !empty($info['unread_bytes']) ) {
@@ -374,7 +380,7 @@ function call_set_ad_password( $uid, $password ) {
         }
         if ( ! empty($mess) ) { $result .= "Error setting password: $mess"; }
 
-        foreach ( $pipes as $pipe ) {
+        foreach ( $pipes as &$pipe ) {
             fclose($pipe);
         }
         proc_close($proc);
@@ -387,6 +393,11 @@ function call_set_ad_password( $uid, $password ) {
 }
 
 function set_ad_password( $ldap, $uid, $password ) {
+    if ( empty($uid) || empty($password) ) {
+		$message = 'set AD password: no username and/or password input';
+		$result = $message;
+		return $result;
+    }
 	if ( !empty($ldap->config['upn']) ) {
 		$set = $ldap->quick_search( '(userPrincipalName='. $uid . $ldap->config['upn'] .')' );
 	}

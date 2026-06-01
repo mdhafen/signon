@@ -24,10 +24,15 @@ $pass = stream_get_line($stdin,4096,PHP_EOL);
  */
 
 //  AD ldap connection MUST be first or CACertFile option will not take effect
-$ad = new LDAP_Wrapper('AD');
-$result = set_ad_password($ad,$uid,$pass);
-if ( !empty($result) ) {
-    print "Error! $result\n";
+if ( !empty($uid) && !empty($pass) ) {
+    $ad = new LDAP_Wrapper('AD');
+    $result = set_ad_password($ad,$uid,$pass);
+    if ( !empty($result) ) {
+        print "Error! $result\n";
+    }
+}
+else {
+    print "Error! Missing username and/or password input\n";
 }
 
 ?>

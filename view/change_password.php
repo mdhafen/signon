@@ -18,6 +18,12 @@ include( 'doc-header.php' );
 <div class="hidden"></h2>AD response</h2><pre><?= $data['ad_result'] ?></pre></div>
 <?php   } ?>
 <?php } else { ?>
+<?php   if ( ! empty($data['error']) ) { ?>
+<div class="alert alert-danger" role="alert">
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+<?= $data['error'] ?>
+</div>
+<?php } ?>
 <h1 class="modal-title" id="password_modal_label">Change Password</h1>
 <form action="<?= $data['op'] == 'ChangeFromDefault' ? 'force_password_from_default.php' : 'change_password.php' ?>" method="post" class="form-horizontal">
 <?php if ( $data['op'] == 'Reset' ) { ?>

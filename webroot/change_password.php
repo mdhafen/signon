@@ -109,10 +109,16 @@ if ( !empty($password) && !empty($password2) ) {
 				} else if ( !empty($user_lock) ) {
 					$errors[] = 'USER_LOCKED';
 				} else {
+					$result = call_set_ad_password( $object['uid'][0], $password );
+					$output['ad_result'] = $result;
+					if ( $result ) {
+						$output['ad_result'] = $result;
+						$output['error'] = 'AD_SETPASSWD:'. $result;
+						output( $output, 'change_password' );
+						exit;
+					}
 					$result = google_set_password( $email, $password );
 					$output['google_result'] = $result;
-					$result = set_ad_password( $ad, $object['uid'][0], $password );
-					$output['ad_result'] = $result;
 					set_password( $ldap, $dn, $password );
 					log_attr_change( $dn, array('userPassword'=>'') );
 					$output['success'] = true;
