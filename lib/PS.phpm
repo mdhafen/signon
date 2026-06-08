@@ -525,7 +525,10 @@ class PS_Access {
     }
     $username = '';
     if ( empty($student->student_username) ) {
-        error_log("Student with no username: ". print_r($student,true) );
+        // $message = print_r($student,true);
+        $message = this->get_student_fullname( $student->id, $student );
+        $message .= " at ". $student->school_enrollment->school_number
+        error_log("Student with no username: $message" );
         return $user;
     }
     else {
@@ -593,6 +596,7 @@ class PS_Access {
         'telephoneNumber' => ( $student->demographics->projected_graduation_year ?? '' ),
         'role' => $role,
         'default_password' => $default_passwd,
+        'enroll_status' => $student->school_enrollment->enroll_status,
       );
     }
     return $user;
