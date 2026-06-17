@@ -61,8 +61,6 @@ $RECAPTCHA_SECRET='';
 $TITLE_MAP = array(
 'extra duty' => 'Other',
 'sro' => 'Other',
-'school board' => 'SB',
-'first aid/cpr instructor' => 'Other',
 'sweeper' => 'Other',
 );
 
