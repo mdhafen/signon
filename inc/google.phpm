@@ -58,15 +58,15 @@ global $RECAPTCHA_KEY, $RECAPTCHA_SECRET;
 $RECAPTCHA_KEY='';
 $RECAPTCHA_SECRET='';
 
-$OTHER_TITLES = array(
-'Extra Duty',
-'SRO',
-'school board',
-'FIRST AID/CPR INSTRUCTOR',
-'sweeper',
+$TITLE_MAP = array(
+'extra duty' => 'Other',
+'sro' => 'Other',
+'school board' => 'SB',
+'first aid/cpr instructor' => 'Other',
+'sweeper' => 'Other',
 );
 
-global $LDAP_BASE,$LOCATIONS,$OTHER_TITLES,$DEFAULT_LOCATION,$DEFAULT_OU;
+global $LDAP_BASE,$LOCATIONS,$TITLE_MAP,$DEFAULT_LOCATION,$DEFAULT_OU;
 $LDAP_BASE = 'dc=wcsd';
 $DEFAULT_OU = 'ou=zz find home,'.$LDAP_BASE;
 $DEFAULT_LOCATION =   array(
@@ -343,7 +343,7 @@ function google_org_to_ou( $path ) {
 }
 
 function google_user_hash_for_ldap( $user ) {
-  global $OTHER_TITLES;
+  global $TITLE_MAP;
   $entry = array();
 
   if ( !empty($user) ) {
@@ -361,17 +361,17 @@ function google_user_hash_for_ldap( $user ) {
       $entry['employeeType'] = 'homeschool-';
     }
 
-    if ( stripos($user['orgUnitPath'],'/staff/') !== FALSE ) {
+    if ( stripos($user['orgUnitPath'],'/school board') !== FALSE ) {
+      $entry['employeeType'] .= 'SB';
+      $entry['businessCategory'] = 'SB';
+    }
+    else if ( stripos($user['orgUnitPath'],'/staff/') !== FALSE ) {
       $entry['employeeType'] .= 'Staff';
       $entry['businessCategory'] = 'Staff';
     }
     else if ( stripos($user['orgUnitPath'],'/students/') !== FALSE ) {
       $entry['employeeType'] .= 'Student';
       $entry['businessCategory'] = 'Student';
-    }
-    else if ( stripos($user['orgUnitPath'],'/school board') !== FALSE ) {
-      $entry['employeeType'] .= 'SB';
-      $entry['businessCategory'] = 'SB';
     }
     else {
       $entry['employeeType'] .= 'Unknown';
@@ -448,8 +448,14 @@ function google_user_hash_for_ldap( $user ) {
           $entry['telephoneNumber'] = $ci['GradYear'];
         }
       }
-      if ( $entry['businessCategory'] != 'Student' && ( empty($entry['title']) || in_array( strtolower($entry['title']), array_map('strtolower',$OTHER_TITLES) ) ) ) {
-        $entry['employeeType'] = 'Other';
+      if ( $entry['businessCategory'] != 'Student' && ( empty($entry['title']) || !empty( $TITLE_MAP[strtolower($entry['title'])] ) ) ) {
+        if ( empty($entry['title']) ) {
+          $entry['employeeType'] = 'Other';
+        }
+        else {
+          $entry['employeeType'] = $TITLE_MAP[strtolower($entry['title'])];
+        }
+        $entry['businessCategory'] = $entry['employeeType'];
       }
       if ( empty($entry['o']) ) { $entry['o'] = guess_location($user,'initials'); }
       if ( empty($entry['departmentNumber']) ) { $entry['departmentNumber'] = guess_location($user,'num'); }
