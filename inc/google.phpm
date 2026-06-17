@@ -61,7 +61,12 @@ $RECAPTCHA_SECRET='';
 $TITLE_MAP = array(
 'extra duty' => 'Other',
 'sro' => 'Other',
-'sweeper' => 'Other',
+'school resource officer' => 'Other',
+'long term sub' => 'Other',
+'intern' => 'Other',
+'college access advisor' => 'Other',
+'volunteer' => 'Other',
+'student teacher' => 'Other',
 );
 
 global $LDAP_BASE,$LOCATIONS,$TITLE_MAP,$DEFAULT_LOCATION,$DEFAULT_OU;
@@ -446,12 +451,16 @@ function google_user_hash_for_ldap( $user ) {
           $entry['telephoneNumber'] = $ci['GradYear'];
         }
       }
-      if ( $entry['businessCategory'] != 'Student' && ( empty($entry['title']) || !empty( $TITLE_MAP[strtolower($entry['title'])] ) ) ) {
+      $in_array = false;
+      if ( !empty($entry['title']) ) {
+        foreach ( $TITLE_MAP as $k => $v ) { if ( stripos($entry['title'],$k) !== false ) { $in_array = $v; break; } };
+      }
+      if ( $entry['businessCategory'] != 'Student' && ( empty($entry['title']) || $in_array ) ) {
         if ( empty($entry['title']) ) {
           $entry['employeeType'] = 'Other';
         }
         else {
-          $entry['employeeType'] = $TITLE_MAP[strtolower($entry['title'])];
+          $entry['employeeType'] = $in_array;
         }
         $entry['businessCategory'] = $entry['employeeType'];
       }
