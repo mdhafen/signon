@@ -59,9 +59,9 @@ $RECAPTCHA_KEY='';
 $RECAPTCHA_SECRET='';
 
 $TITLE_MAP = array(
+'sro' => 'Trusted',
+'school resource officer' => 'Trusted',
 'extra duty' => 'Other',
-'sro' => 'Other',
-'school resource officer' => 'Other',
 'long term sub' => 'Other',
 'intern' => 'Other',
 'college access advisor' => 'Other',
