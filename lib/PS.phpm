@@ -527,7 +527,7 @@ class PS_Access {
     if ( empty($student->student_username) ) {
         // $message = print_r($student,true);
         $message = this->get_student_fullname( $student->id, $student );
-        $message .= " at ". $student->school_enrollment->school_number
+        $message .= " at ". $student->school_enrollment->school_number;
         error_log("Student with no username: $message" );
         return $user;
     }
