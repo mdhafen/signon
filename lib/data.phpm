@@ -326,7 +326,7 @@ class LDAP_Wrapper {
 			return 0;
 		}
 		$result = ! @ldap_mod_add( $this->ldap, $dn, $attrs );
-		if ( $result ) { $result = $ldap->get_error(); }
+		if ( $result ) { $result = $this->ldap->get_error(); }
 		return $result;
 	}
 
