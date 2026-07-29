@@ -57,7 +57,7 @@ if ( !empty($user) ) {
             if ( !empty($ad_entry['dn']) ) {
               $ad_dn = $ad_entry['dn'];
               unset( $ad_entry['dn'] );
-              $ad->add( $ad_dn, $ad_entry );
+              $ad->do_add( $ad_dn, $ad_entry );
             }
           }
         }

@@ -330,7 +330,7 @@ function google_org_to_loc( $path ) {
 }
 
 function google_org_to_ou( $path ) {
-  global $LDAP_BASE,$DEFAULT_OU;
+  global $DEFAULT_OU;
 
   $dn = '';
   $paths = explode( '/', $path );
@@ -340,13 +340,13 @@ function google_org_to_ou( $path ) {
     foreach ( $paths as $ou ) {
       $dn .= 'ou='. $ou .',';
     }
-    return $dn.$LDAP_BASE;
+    return $dn;
   }
   return $DEFAULT_OU;
 }
 
 function google_user_hash_for_ldap( $user ) {
-  global $TITLE_MAP;
+  global $TITLE_MAP, $LDAP_BASE;
   $entry = array();
 
   if ( !empty($user) ) {
@@ -469,7 +469,7 @@ function google_user_hash_for_ldap( $user ) {
       $entry['description'] = $entry['o'] ."-". $entry['businessCategory'];
       $ou = google_org_to_ou( $user['orgUnitPath'] );
       if ( !empty($ou) && !empty($entry['uid']) ) {
-        $entry['dn'] = 'uid='. ldap_escape($entry['uid'],'',LDAP_ESCAPE_DN) .','. $ou;
+        $entry['dn'] = 'uid='. ldap_escape($entry['uid'],'',LDAP_ESCAPE_DN) .','. $ou . $LDAP_BASE;
       }
     }
   }
@@ -477,7 +477,6 @@ function google_user_hash_for_ldap( $user ) {
 }
 
 function google_user_hash_for_ad( $user, $ldap ) {
-  global $LDAP_BASE;
   $entry = array();
 
   if ( !empty($user) ) {
@@ -491,6 +490,7 @@ function google_user_hash_for_ad( $user, $ldap ) {
     $entry['givenName'] = $user['name']['givenName'];
     $entry['name'] = $user['name']['fullName'];
     $entry['displayName'] = $user['name']['fullName'];
+    $entry['cn'] = $user['name']['fullName'];  // overwritten below
     $entry['mail'] = strtolower($user['primaryEmail']);
     if ( !empty($user['organizations']) ) {
       foreach ( $user['organizations'] as $org ) {
@@ -511,9 +511,6 @@ function google_user_hash_for_ad( $user, $ldap ) {
       if ( !empty($ci['FullName']) ) {
         $entry['cn'] = $ci['FullName'];
       }
-      else {
-        $entry['cn'] = $user['name']['fullName'];
-      }
       if ( !empty($ci['Street_Address']) ) {
         $entry['streetAddress'] = $ci['Street_Address'];
       }
@@ -530,8 +527,15 @@ function google_user_hash_for_ad( $user, $ldap ) {
         $entry['st'] = $ci['State'];
       }
     }
-    $ou = google_org_to_ou( $user['orgUnitPath'] );
-    $ou = str_replace( $LDAP_BASE, $ldap->config['base'], $ou );
+    if ( stripos($user['orgUnitPath'],'District Departments') !== false ) {
+      $ou = 'ou=Admin,'.$ldap->config['base'];
+    }
+    else if ( stripos($user['orgUnitPath'],'Staff') !== false ) {
+      $ou = 'ou=Staff,'.$ldap->config['base'];
+    }
+    else {
+      $ou = 'ou=Students,'.$ldap->config['base'];
+    }
     if ( !empty($ou) && !empty($entry['cn']) ) {
       $entry['dn'] = 'cn='. ldap_escape($entry['cn'],'',LDAP_ESCAPE_DN) .','. $ou;
     }

@@ -118,7 +118,7 @@ if ( !empty($submitted) && ! $error ) {
           if ( !empty($ad_entry['dn']) ) {
             $ad_dn = $ad_entry['dn'];
             unset( $ad_entry['dn'] );
-            $result = $ad->add( $ad_dn, $ad_entry );
+            $result = $ad->do_add( $ad_dn, $ad_entry );
             if ( ! $result ) {
               $result = set_ad_password( $ad, $entry['uid'], $password );
             }
