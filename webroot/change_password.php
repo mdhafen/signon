@@ -152,10 +152,6 @@ else {
 				exit;
 			}
 		}
-        else {
-		    redirect( $config['base_url'] );
-		    exit;
-        }
 	}
 	output( $output, 'change_password' );
 }

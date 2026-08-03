@@ -6,17 +6,27 @@ include( 'doc-header.php' );
 ?>
 <div class="container">
 <div class="mainpage">
+
+<?php if ( ! empty($data['google_result']) ) { ?>
+    <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#google_result_block">Show Google response</button>
+    <div class="collapse" id="google_result_block"><div class="well">
+        Google response:
+        <pre><?= print_r($data['google_result'],true); ?></pre>
+    </div></div>
+<?php } ?>
+<?php if ( ! empty($data['ad_result']) ) { ?>
+    <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#ad_result_block">Show AD result</button>
+    <div class="collapse" id="ad_result_block"><div class="well">
+        Active Directory result:
+        <pre><?= print_r($data['ad_result'],true); ?></pre>
+    </div></div>
+<?php } ?>
+
 <?php if ( !empty($data['success']) ) { ?>
 <div class="alert alert-info alert-dismissible" role="alert">
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
   Your password has been changed.
 </div>
-<?php   if ( !empty($data['google_result']) ) { ?>
-<div class="hidden"><h2>Google response</h2><pre><?= $data['google_result'] ?></pre></div>
-<?php   } ?>
-<?php   if ( !empty($data['ad_result']) ) { ?>
-<div class="hidden"></h2>AD response</h2><pre><?= $data['ad_result'] ?></pre></div>
-<?php   } ?>
 <?php } else { ?>
 <?php   if ( ! empty($data['error']) ) { ?>
 <div class="alert alert-danger" role="alert">

@@ -16,7 +16,7 @@ include( 'doc-header.php' );
 <div class="mainpage">
 <h2>Need to create a WCSD account or change your password?</h2>
 <div class="row">
-<a href="create/create.php" class="btn btn-primary btn-lg">WCSD Employee / Student Profile</a>
+<a href="create/create.php" class="btn btn-primary btn-lg">Click here to create or change your password</a>
 </div>
 
 </div>
