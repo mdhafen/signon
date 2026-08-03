@@ -78,8 +78,9 @@ if ( !empty($password) && !empty($password2) ) {
 						populate_dynamic_user_attrs($ldap,$entry);
 						$dn = $entry['dn'];
 						unset( $entry['dn'] );
-						if ( ! $ldap->do_add( $dn, $entry ) ) {
-							$errors[] = 'There was an error creating an account for '. $username;
+						$result =  $ldap->do_add( $dn, $entry );
+						if ( !empty($result) ) {
+							$errors[] = ['flag'=>'LDAP_CREATE','info'=>$username];
 						}
 						else {
 							$ad_entry = google_user_hash_for_ad( $user, $ad );
@@ -100,12 +101,12 @@ if ( !empty($password) && !empty($password2) ) {
 			if ( ! empty($dn) ) {
 				$user_lock = get_lock_status( $username );
 				if ( $password !== $password2 ) {
-					$errors[] = 'PASSWORDS_DONT_MATCH';
+					$output['error'] = 'PASSWORDS_DONT_MATCH';
 				} else if ( strlen($password) < 8 ) {
-					$errors[] = 'PASS_TOO_SHORT';
+					$output['error'] = 'PASS_TOO_SHORT';
 				} else if ( $times = is_pwned_password($password) ) {
-					$errors[] = 'PASS_TOO_COMMON';
-					$output['error_times'] = $times;
+					$output['error'] = 'PASS_TOO_COMMON';
+					$output['error_info'] = $times;
 				} else if ( !empty($user_lock) ) {
 					$errors[] = 'USER_LOCKED';
 				} else {
@@ -113,7 +114,8 @@ if ( !empty($password) && !empty($password2) ) {
 					$output['ad_result'] = $result;
 					if ( $result ) {
 						$output['ad_result'] = $result;
-						$output['error'] = 'AD_SETPASSWD:'. $result;
+						$output['error'] = 'AD_SETPASSWD'
+						$output['error_info'] = $result;
 						output( $output, 'change_password' );
 						exit;
 					}

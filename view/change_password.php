@@ -32,6 +32,19 @@ include( 'doc-header.php' );
 <div class="alert alert-danger" role="alert">
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 <?= $data['error'] ?>
+<?php if ( $data['error'] == 'PASSWORDS_DONT_MATCH' ) { ?>
+<p>The password and the verify don't match</p>
+<?php } ?>
+<?php if ( $data['error'] == 'PASS_TOO_SHORT' ) { ?>
+<p>Password must be at least 8 characters long.</p>
+<?php } ?>
+<?php if ( $data['error'] == 'PASS_TOO_COMMON' ) { ?>
+<p>That password has been compromised <?= $data['error_info'] ?> times before.  You can not use that password.</p>
+<p>This password has previously appeared in a data breach and should never be used.  If you've ever used it anywhere before, you should change it as soon as possible.</p>
+<?php } ?>
+<?php if ( $data['error'] == 'AD_SETPASSWD' ) { ?>
+<p>There was an error with Active Directory:  <?= $data['error_info'] ?></p>
+<?php } ?>
 </div>
 <?php } ?>
 <h1 class="modal-title" id="password_modal_label">Change Password</h1>
