@@ -114,7 +114,7 @@ if ( !empty($password) && !empty($password2) ) {
 					$output['ad_result'] = $result;
 					if ( $result ) {
 						$output['ad_result'] = $result;
-						$output['error'] = 'AD_SETPASSWD'
+						$output['error'] = 'AD_SETPASSWD';
 						$output['error_info'] = $result;
 						output( $output, 'change_password' );
 						exit;
