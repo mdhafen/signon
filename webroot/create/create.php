@@ -9,7 +9,7 @@ include_once( '../../inc/person.phpm' );
 global $GOOGLE_DOMAIN,$GOOGLE_A_CLIENT;
 
 $output = array();
-$result = '';
+$results = array();
 $error = 0;
 $user = '';
 $user_email = '';
@@ -31,7 +31,7 @@ $GOOGLE_A_CLIENT->setState( urlencode('{"op":"'. $op .'"}') );
 $user = auth_to_google( $redirect );
 if ( !empty($user) && strripos($user->email,'@'.$GOOGLE_DOMAIN) === False ) {
   $error = 1;
-  $result = 'Wrong Google Domain';
+  $results[] = 'Wrong Google Domain';
 }
 
 if ( !empty($submitted) && ! $error ) {
@@ -48,37 +48,35 @@ if ( !empty($submitted) && ! $error ) {
     if ( !empty($user) ) {
       if ( stripos($user['orgUnitPath'],'nonusers') !== FALSE ) {
         $error = 1;
-        $result = 'Trying to register service account';
+        $results[] = 'Trying to register service account';
       }
       else {
         $entry = google_user_hash_for_ldap( $user );
         $password = input( 'password', INPUT_STR );
         $password2 = input( 'password2', INPUT_STR );
         $user_lock = get_lock_status( $entry['uid'] );
-        if ( $password != $password2 ) {
-          unset($password);
-          $error = 1;
-          $result = 'Passwords do not match';
-        }
         if ( empty($password) || strlen($password) < 8 ) {
-          unset($password);
           $error = 1;
-          $result = 'Password too short';
+          $results[] = 'Password too short';
+        }
+        if ( !empty($password) && $password != $password2 ) {
+          $error = 1;
+          $results[] = 'Passwords do not match';
         }
         if ( !empty($password) && $times = is_pwned_password($password) ) {
           $error = 1;
-          $result = "Password compromised, you can not use this password.  This password has been seen $times times before.  This password has previously appeared in a data breach and should never be used.  If you've ever used it anywhere before, you should change it as soon as possible.";
+          $results[] = "Password compromised, you can not use this password.  This password has been seen $times times before.  This password has previously appeared in a data breach and should never be used.  If you've ever used it anywhere before, you should change it as soon as possible.";
         }
         if ( ! empty($user_lock) ) {
           $error = 1;
-          $result = 'Your Account is locked.';
+          $results[] = 'Your Account is locked.';
         }
       }
     }
   }
   else {
     $error = 1;
-    $result = 'User not signed in';
+    $results[] = 'User not signed in';
   }
 
   if ( !empty($entry['dn']) && !empty($password) && ! $error ) {
@@ -91,10 +89,10 @@ if ( !empty($submitted) && ! $error ) {
       $result = call_set_ad_password( $entry['uid'], $password );
       if ( $result ) {
         $error = 1;
-        $result = 'AD_SETPASSWD:'. $result;
+        $results[] = 'AD_SETPASSWD:'. $result;
 
         $output['op'] = $op;
-        $output['result'] = $result;
+        $output['results'] = $results;
         $output['error'] = $error;
         $output['username'] = (empty($user_email))? "" : $user_email;
 
@@ -104,7 +102,7 @@ if ( !empty($submitted) && ! $error ) {
       google_set_password( $entry['mail'], $password );
       set_password( $ldap, $dups[0]['dn'], $password );
       log_attr_change( $dups[0]['dn'], array('userPassword'=>'') );
-      $result = 'Password updated';
+      $results[] = 'Password updated';
     }
     else if ( count($dups) === 0 ) {
       if ( !empty($entry['dn']) ) {
@@ -126,28 +124,28 @@ if ( !empty($submitted) && ! $error ) {
 
           google_set_password( $entry['mail'], $password );
           set_password( $ldap, $dn, $password );
-          $result = 'Account created';
+          $results[] = 'Account created';
         }
         else {
           $error = 1;
-          $result = 'There was an Error creating an account account for '. $entry['uid'] . ' : '. $result;
+          $results[] = 'There was an Error creating an account account for '. $entry['uid'] . ' : '. $result;
         }
       }
     }
-    if ( $result == 'Account created' ) {
+    if ( empty($error) ) {
       google_oauth_signout();
     }
   }
   else {
     if ( empty($error) ) {
       $error = 1;
-      $result = "Couldn't find folder to create account";
+      $results[] = "Couldn't find folder to create account";
     }
   }
 }
 
 $output['op'] = $op;
-$output['result'] = $result;
+$output['results'] = $results;
 $output['error'] = $error;
 $output['username'] = (empty($user_email))? "" : $user_email;
 

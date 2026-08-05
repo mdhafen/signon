@@ -9,7 +9,7 @@ include( $data['_config']['base_dir'] .'/view/doc-header.php' );
 <h1>Create account / Change password</h1>
 <div class="mainpage">
 <?php
-if ( !empty($data['result']) ) {
+if ( count($data['results']) ) {
   if ( empty($data['error']) ) { ?>
 <div class="alert alert-info alert-dismissible" role="alert">
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -18,7 +18,10 @@ Your account has been updated / created.  You can now access the WCSDaccess wire
 <?php
   } else { /* error */ ?>
 <div class="alert alert-danger" role="alert">
-There was an error! <?= $data['result'] ?>
+There was an error!
+<?php foreach ( $data['results'] as $mess ) {
+          print "$mess <br>\n";
+      } ?>
 </div>
 <?php
   }
