@@ -111,7 +111,6 @@ if ( !empty($password) && !empty($password2) ) {
 					$errors[] = 'USER_LOCKED';
 				} else {
 					$result = call_set_ad_password( $object['uid'][0], $password );
-					$output['ad_result'] = $result;
 					if ( $result ) {
 						$output['ad_result'] = $result;
 						$output['error'] = 'AD_SETPASSWD';

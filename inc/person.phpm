@@ -312,7 +312,7 @@ function call_set_ad_password( $uid, $password ) {
         $wa = [ $pipes[0] ];
         if ( stream_select($ra,$w,$e,1) ) {
             foreach ( $ra as &$stream ) {
-                $line = fread($stream,1);
+                $line = fread($stream,8);
                 $info = stream_get_meta_data($stream);
                 while ( !empty($info['unread_bytes']) ) {
                     $line .= stream_get_contents($stream,$info['unread_bytes'],-1);
@@ -338,7 +338,7 @@ function call_set_ad_password( $uid, $password ) {
         $wa = [ $pipes[0] ];
         if ( stream_select($ra,$w,$e,1) ) {
             foreach ( $ra as &$stream ) {
-                $line = fread($stream,1);
+                $line = fread($stream,8);
                 $info = stream_get_meta_data($stream);
                 while ( !empty($info['unread_bytes']) ) {
                     $line .= stream_get_contents($stream,$info['unread_bytes'],-1);
@@ -363,7 +363,7 @@ function call_set_ad_password( $uid, $password ) {
         $ra = [ $pipes[1], $pipes[2] ];
         if ( stream_select($ra,$w,$e,1) ) {
             foreach ( $ra as &$stream ) {
-                $line = fread($stream,1);
+                $line = fread($stream,6);
                 $info = stream_get_meta_data($stream);
                 while ( !empty($info['unread_bytes']) ) {
                     $line .= stream_get_contents($stream,$info['unread_bytes'],-1);

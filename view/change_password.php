@@ -14,6 +14,7 @@ include( 'doc-header.php' );
         <pre><?= print_r($data['google_result'],true); ?></pre>
     </div></div>
 <?php } ?>
+<!--
 <?php if ( ! empty($data['ad_result']) ) { ?>
     <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#ad_result_block">Show AD result</button>
     <div class="collapse" id="ad_result_block"><div class="well">
@@ -21,12 +22,14 @@ include( 'doc-header.php' );
         <pre><?= print_r($data['ad_result'],true); ?></pre>
     </div></div>
 <?php } ?>
+-->
 
 <?php if ( !empty($data['success']) ) { ?>
 <div class="alert alert-info alert-dismissible" role="alert">
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-  Your password has been changed.
-</div>
+  <p>Your password has been changed.</p>
+  <p>It may take up to 15 minutes before your computer login (Active Directory) will work.</p>
+  </div>
 <?php } else { ?>
 <?php   if ( ! empty($data['error']) ) { ?>
 <div class="alert alert-danger" role="alert">
@@ -39,7 +42,7 @@ include( 'doc-header.php' );
 <p>Password must be at least 8 characters long.</p>
 <?php } ?>
 <?php if ( $data['error'] == 'PASS_TOO_COMMON' ) { ?>
-<p>That password has been compromised <?= $data['error_info'] ?> times before.  You can not use that password.</p>
+<p>That password has been compromised <?= !empty($data['error_info']) ? $data['error_info'] ." times" : '' ?> before.  You can not use that password.</p>
 <p>This password has previously appeared in a data breach and should never be used.  If you've ever used it anywhere before, you should change it as soon as possible.</p>
 <?php } ?>
 <?php if ( $data['error'] == 'AD_SETPASSWD' ) { ?>
