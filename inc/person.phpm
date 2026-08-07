@@ -90,6 +90,25 @@ function has_password( $o=array() ) {
 	return $has_pass;
 }
 
+function has_ad_account( $o = array(), $ldap = null ) {
+    $has_pass = 0;
+    $has_enabled = 0;
+    if ( empty($o['pwdLastSet']) && !empty($o['uid']) && !empty($ldap) ) {
+        $set = $ldap->quick_search( '(userPrincipalName='.$o['uid'][0].'@*)', array() );
+        if ( count($set) ) {
+            $o = $set[0];
+        }
+    }
+    if ( !empty($o['pwdLastSet']) && $o['pwdLastSet'][0] > 0 ) {
+        $has_pass = 1;
+    }
+    if ( !empty($o['userAccountControl']) && ( $o['userAccountControl'][0] & 2 ) === 0 ) {
+        $has_enabled = 1;
+    }
+
+    return array($has_pass,$has_enabled);
+}
+
 function get_default_password( $uid ) {
 	global $config;
 
