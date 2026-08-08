@@ -102,16 +102,20 @@ if ( ! empty($data['can_edit']) ) {
 <?php } ?>
 </div>
 <div class="form-group">
-  AD Status: 
-<?php if ( !empty($data['has_ad_enable']) ) { ?>
+  AD Status:
+<?php if ( !empty($data['has_ad_error']) ) { ?>
+    Error <!-- <?= $data['has_ad_error'] ?> -->
+<?php } else { ?>
+  <?php if ( !empty($data['has_ad_enable']) ) { ?>
     <span class="bg-success">AD account enabled</span>
-<?php } else { ?>
+  <?php } else { ?>
     <span class="bg-danger">AD account not enabled</span>
-<?php } ?>
-<?php if ( !empty($data['has_ad_pass']) ) { ?>
+  <?php } ?>
+  <?php if ( !empty($data['has_ad_pass']) ) { ?>
     <span class="bg-success">AD account has password</span>
-<?php } else { ?>
+  <?php } else { ?>
     <span class="bg-danger">AD account does not have a password</span>
+  <?php } ?>
 <?php } ?>
 </div>
 <?php if ( !empty($data['can_see_password']) ) { ?>
