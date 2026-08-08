@@ -101,6 +101,19 @@ if ( ! empty($data['can_edit']) ) {
 </div></div>
 <?php } ?>
 </div>
+<div class="form-group">
+  AD Status: 
+<?php if ( !empty($data['has_ad_enable']) ) { ?>
+    <span class="bg-success">AD account enabled</span>
+<?php } else { ?>
+    <span class="bg-danger">AD account not enabled</span>
+<?php } ?>
+<?php if ( !empty($data['has_ad_pass']) ) { ?>
+    <span class="bg-success">AD account has password</span>
+<?php } else { ?>
+    <span class="bg-danger">AD account does not have a password</span>
+<?php } ?>
+</div>
 <?php if ( !empty($data['can_see_password']) ) { ?>
 <div class="form-group">
 <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#default_passwd_block">Show/Hide Default Password</button>

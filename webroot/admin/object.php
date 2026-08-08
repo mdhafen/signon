@@ -7,6 +7,7 @@ include_once( '../../inc/person.phpm' );
 
 global $GOOGLE_DOMAIN;
 
+$ad = new LDAP_Wrapper('AD');
 $ldap = new LDAP_Wrapper();
 authorize( 'set_password' );
 
@@ -23,6 +24,7 @@ $can_edit = authorized('manage_objects');
 
 $is_person = is_person( $object );
 $has_pass = has_password( $object );
+list($has_ad_pass,$has_ad_enable) = has_ad_account($object,$ad);
 $can_send_token = false;
 $reset_token = '';
 if ( $is_person ) {
@@ -65,6 +67,8 @@ $output = array(
 	'object' => $object,
 	'is_person' => $is_person,
 	'has_pass' => $has_pass,
+    'has_ad_pass' => $has_ad_pass,
+    'has_ad_enable' => $has_ad_enable,
 	'is_guest' => $is_guest,
 	'is_guest_expired' => $is_guest_expired,
 	'is_guest_send_notice' => $is_guest_send_notice,
