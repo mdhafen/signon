@@ -368,11 +368,11 @@ function google_user_hash_for_ldap( $user ) {
       $entry['employeeType'] .= 'SB';
       $entry['businessCategory'] = 'SB';
     }
-    else if ( stripos($user['orgUnitPath'],'/staff/') !== FALSE ) {
+    else if ( stripos($user['orgUnitPath'],'/staff') !== FALSE ) {
       $entry['employeeType'] .= 'Staff';
       $entry['businessCategory'] = 'Staff';
     }
-    else if ( stripos($user['orgUnitPath'],'/students/') !== FALSE ) {
+    else if ( stripos($user['orgUnitPath'],'/students') !== FALSE ) {
       $entry['employeeType'] .= 'Student';
       $entry['businessCategory'] = 'Student';
     }
