@@ -382,7 +382,7 @@ function call_set_ad_password( $uid, $password ) {
         $ra = [ $pipes[1], $pipes[2] ];
         if ( stream_select($ra,$w,$e,1) ) {
             foreach ( $ra as &$stream ) {
-                $line = fread($stream,6);
+                $line = fgets($stream);
                 $info = stream_get_meta_data($stream);
                 while ( !empty($info['unread_bytes']) ) {
                     $line .= stream_get_contents($stream,$info['unread_bytes'],-1);
@@ -412,11 +412,12 @@ function call_set_ad_password( $uid, $password ) {
 }
 
 function set_ad_password( $ldap, $uid, $password ) {
-    if ( empty($uid) || empty($password) ) {
+	if ( empty($uid) || empty($password) ) {
 		$message = 'set AD password: no username and/or password input';
 		$result = $message;
+		error_log($result);  // AD error logging
 		return $result;
-    }
+	}
 	if ( !empty($ldap->config['upn']) ) {
 		$set = $ldap->quick_search( '(userPrincipalName='. $uid . $ldap->config['upn'] .')' );
 	}
@@ -432,6 +433,7 @@ function set_ad_password( $ldap, $uid, $password ) {
 		$err = $ldap->get_error();
 		if ($err) { $message .= " ($err)"; }
 		$result = $message;
+		error_log($result .' ('. $uid .')');  // AD error logging
 		return $result;
 	}
 
@@ -448,6 +450,13 @@ function set_ad_password( $ldap, $uid, $password ) {
 			'userAccountControl' => 0x010240,
 		);
 		$result = $ldap->do_modify( $userdn, $mod );
+	}
+	else {
+		$message = 'set AD password: LDAP error ('. $uid .')';
+		$err = $ldap->get_error();
+		if ($err) { $message .= " ($err)"; }
+		$result = $message;
+		error_log($result);  // AD error logging
 	}
 
 	return $result;
