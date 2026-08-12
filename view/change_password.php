@@ -28,7 +28,7 @@ include( 'doc-header.php' );
 <div class="alert alert-info alert-dismissible" role="alert">
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
   <p>Your password has been changed.</p>
-  <p>It may take up to 15 minutes before your computer login (Active Directory) will work.</p>
+  <p>It may take up to 15 minutes before your Windows computer login (Active Directory) will work.</p>
   </div>
 <?php } else { ?>
 <?php   if ( ! empty($data['error']) ) { ?>

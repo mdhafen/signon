@@ -13,7 +13,8 @@ if ( count($data['results']) ) {
   if ( empty($data['error']) ) { ?>
 <div class="alert alert-info alert-dismissible" role="alert">
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-Your account has been updated / created.  You can now access the WCSDaccess wireless network using your district email address and password to login.
+<p>Your account has been updated / created.  You can now access the WCSDaccess wireless network using your district email address and password to login.</p>
+<p>It may take up to 15 minutes before your Windows computer login (Active Directory) will work.</p>
 </div>
 <?php
   } else { /* error */ ?>
